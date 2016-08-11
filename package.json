@@ -1,0 +1,34 @@
+{
+  "name": "rise-cache-v2",
+  "version": "1.0.0",
+  "description": "Rise Cache for Rise Player",
+  "main": "server.js",
+  "scripts": {
+    "start": "babel-node server.js --presets es2015",
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rise-Vision/rise-cache-v2.git"
+  },
+  "author": "Rise Vision",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Rise-Vision/rise-cache-v2/issues"
+  },
+  "homepage": "https://github.com/Rise-Vision/rise-cache-v2#readme",
+  "dependencies": {
+    "express": "^4.14.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-preset-es2015": "^6.13.2",
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-jshint": "^2.0.1",
+    "gulp-mocha": "^3.0.0",
+    "jshint": "^2.9.2",
+    "jshint-stylish": "^2.2.0"
+  }
+}
