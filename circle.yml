@@ -4,5 +4,9 @@ machine:
 deployment:
   staging:
     branch: /(feature|fix|chore).*/
+    commands:
+      - gulp test
   production:
     branch: master
+    commands:
+      - gulp test
