@@ -6,22 +6,22 @@ import config from "../config/config";
 
 // Download file and save to disk.
 export function download(url, cb) {
-  let fileName = getFileName(url);
-
-  if (fileName) {
-    let encryptedFileName = getEncryptedFileName(fileName),
-      file = fs.createWriteStream(config.downloadPath + path.sep + encryptedFileName);
+  if (url) {
+    let fileName = config.downloadPath + path.sep + getFileName(url),
+      file = fs.createWriteStream(fileName);
 
     file.on("finish", () => {
       file.close(cb);
     }).on("error", (err) => {
-      handleError(encryptedFileName, err, cb);
+      handleError(fileName, err, cb);
     });
 
     // Download the file.
     request.get(url)
       .on("response", (res) => {
         if (res.statusCode !== 200) {
+          fs.unlink(fileName);
+
           if (cb) {
             cb(new Error("Invalid url parameter"), res.statusCode);
           }
@@ -31,7 +31,7 @@ export function download(url, cb) {
         }
       })
       .on("error", (err) => {
-        handleError(encryptedFileName, err, cb);
+        handleError(fileName, err, cb);
       });
   }
 }
@@ -46,14 +46,10 @@ function handleError(fileName, err, cb) {
 }
 
 function getFileName(url) {
-  return url.split("/").pop();
-}
-
-function getEncryptedFileName(fileName) {
   let hash = "";
 
-  if (fileName) {
-    hash = crypto.createHash("md5").update(fileName).digest("hex");
+  if (url) {
+    hash = crypto.createHash("md5").update(url).digest("hex");
   }
 
   return hash;
