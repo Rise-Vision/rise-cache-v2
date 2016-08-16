@@ -10,8 +10,8 @@
   },
   "rules": {
     "indent": ["error", 2],
+    "no-console": 0,
     "no-unused-vars": 1,
-    "no-use-before-define": 1,
     "quotes": ["error", "double"],
     "semi": 1
   }
