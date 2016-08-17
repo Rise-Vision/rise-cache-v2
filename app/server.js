@@ -3,10 +3,14 @@
 const http = require("http");
 const express = require("express");
 
-const ServerFactory = function(config){
+const ServerFactory = function(config, createDir){
 
   const app = express(),
     server =  http.createServer(app);
+
+  const init = () => {
+    createDir(config.downloadPath);
+  };
 
   const start = () => {
     return server.listen(config.port, config.url, () => {
@@ -19,6 +23,7 @@ const ServerFactory = function(config){
   };
 
   return {
+    init: init,
     start: start,
     stop: stop,
     app: app,
