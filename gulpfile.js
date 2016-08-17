@@ -1,7 +1,6 @@
 "use strict";
 
-const babel = require("babel-core/register"),
-  eslint = require("gulp-eslint"),
+const eslint = require("gulp-eslint"),
   gulp = require("gulp"),
   mocha = require("gulp-mocha");
 
