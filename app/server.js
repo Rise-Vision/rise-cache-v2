@@ -2,14 +2,15 @@
 
 const http = require("http");
 const express = require("express");
+const fileSystem = require("./helpers/file-system");
 
-const ServerFactory = function(config, createDir){
+const ServerFactory = function(config){
 
   const app = express(),
     server =  http.createServer(app);
 
   const init = () => {
-    createDir(config.downloadPath);
+    fileSystem.createDir(config.downloadPath);
   };
 
   const start = () => {

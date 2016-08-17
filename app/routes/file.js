@@ -1,10 +1,10 @@
-const FileRoute = function(app, fs) {
+const FileRoute = function(app) {
 
-  app.get("/files/", (req, res, next) => {
+  app.get("/files", (req, res, next) => {
     const url = req.query.url;
 
     if (url) {
-      const file = require("../controllers/file")(url, fs);
+      const file = require("../controllers/file")(url);
 
       // Download the file.
       file.download((err, statusCode) => {

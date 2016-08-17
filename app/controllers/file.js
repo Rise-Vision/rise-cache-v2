@@ -1,9 +1,10 @@
+const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const request = require("request");
 const config = require("../../config/config");
 
-const FileController = function(url, fs) {
+const FileController = function(url) {
   "use strict";
 
   let fileName = config.downloadPath + path.sep;
