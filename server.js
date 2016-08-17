@@ -4,4 +4,4 @@ const pkg = require("../../package.json");
 
 server.start();
 
-require("./app/controllers/ping")(server.app, pkg);
+require("./app/routes/ping")(server.app, pkg);

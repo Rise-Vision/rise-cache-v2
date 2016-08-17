@@ -13,7 +13,7 @@ describe("Ping", function () {
 
   beforeEach(function () {
     server.start();
-    require("../../app/controllers/ping")(server.app, pkg);
+    require("../../app/routes/ping")(server.app, pkg);
   });
 
   it("should return name and version", function (done) {

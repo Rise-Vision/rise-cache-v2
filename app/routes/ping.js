@@ -1,4 +1,4 @@
-const PingController = function(app, pkg){
+const PingRoute = function(app, pkg){
 
   app.get("/", (req, res) => {
     const response = { name : pkg.name, version: pkg.version };
@@ -6,4 +6,4 @@ const PingController = function(app, pkg){
     res.json(response);
   });
 };
-module.exports = PingController;
+module.exports = PingRoute;
