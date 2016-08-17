@@ -1,5 +1,7 @@
-import express from "express";
+const config = require("./config/config");
+const server = require("./app/server")(config);
+const pkg = require("./package.json");
 
-const app = express();
+server.start();
 
-app.listen(9494, "localhost");
+require("./app/routes/ping")(server.app, pkg);
