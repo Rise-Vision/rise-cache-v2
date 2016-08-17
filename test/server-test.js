@@ -13,7 +13,7 @@ describe("Loading", function () {
     server.start();
   });
 
-  it('should listen on localhost:9494', function (done) {
+  it("should listen on localhost:9494", function (done) {
     chai.request('http://localhost:9494')
     .get('/')
     .end(function(err, res) {

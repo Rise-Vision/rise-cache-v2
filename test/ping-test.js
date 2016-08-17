@@ -16,7 +16,7 @@ describe("Ping", function () {
     require("../app/controllers/ping")(server.app, pkg);
   });
 
-  it('should return name and version', function (done) {
+  it("should return name and version", function (done) {
     chai.request('http://localhost:9494')
     .get('/')
     .end(function(err, res) {

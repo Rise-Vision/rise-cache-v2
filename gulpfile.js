@@ -6,7 +6,7 @@ const babel = require("babel-core/register"),
   mocha = require("gulp-mocha");
 
 gulp.task("lint", (cb) => {
-  return gulp.src(["*.js", "!node_modules/**", "!gulpfile.js"])
+  return gulp.src(["./**/*.js", "!node_modules/**", "!test/**", "!gulpfile.js"])
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());

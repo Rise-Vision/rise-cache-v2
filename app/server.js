@@ -1,14 +1,16 @@
-const http = require('http');
+/*eslint no-console: ["error", { allow: ["log"] }] */
+
+const http = require("http");
 const express = require("express");
 
 const ServerFactory = function(config){
 
   const app = express(),
-        server =  http.createServer(app);
+    server =  http.createServer(app);
 
   const start = () => {
     return server.listen(config.port, config.url, () => {
-      console.log('Rise Cache is up and running on port: ' + config.port);
+      console.log("Rise Cache is up and running on port: " + config.port);
     });
   };
 
@@ -22,6 +24,6 @@ const ServerFactory = function(config){
     app: app,
     server: server
   };
-}
+};
 
 module.exports = ServerFactory;
