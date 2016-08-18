@@ -4,69 +4,61 @@ const fs = require("fs"),
   path = require("path"),
   crypto = require("crypto"),
   request = require("request"),
-  config = require("../../config/config");
+  config = require("../../config/config"),
+  EventEmitter = require("events").EventEmitter,
+  util = require("util");
 
-const FileController = function() {
-  let _url = "",
-    _fileName = config.downloadPath + path.sep;
+const FileController = function(url) {
+  EventEmitter.call(this);
+  let fileName = config.downloadPath + path.sep;
 
-  const setUrl = (url) => {
-    _url = url;
-  };
+  this.download = () => {
+    let self = this;
 
-  const download = (cb) => {
-    if (_url) {
-      _fileName += getFileName(_url);
-      let file = fs.createWriteStream(_fileName);
+    if (url) {
+      fileName += getFileName(url);
+      let file = fs.createWriteStream(fileName);
 
       file.on("finish", () => {
-        file.close(cb);
+        file.close(() => {
+          self.emit("downloaded");
+        });
       }).on("error", (err) => {
-        handleError(err, cb);
+        handleError(err, "file-error", self);
       });
 
       // Download the file.
-      request.get(_url)
+      request.get(url)
         .on("response", (res) => {
-          if (res.statusCode !== 200) {
-            fs.unlink(_fileName);
-
-            if (cb) {
-              cb(new Error("Invalid url parameter"), res.statusCode);
-            }
-          }
-          else {
+          if (res.statusCode == 200) {
             res.pipe(file);
+          } else {
+            fs.unlink(fileName);
           }
+          self.emit("stream", res);
         })
         .on("error", (err) => {
-          handleError(err, cb);
+          handleError(err, "request-error", self);
         });
     }
   };
 
-  const handleError = (err, cb) => {
-    fs.unlink(_fileName);
-
-    if (cb) {
-      cb(err);
-    }
+  const handleError = (err, type, self) => {
+    fs.unlink(fileName);
+    self.emit(type, err);
   };
 
   const getFileName = () => {
     let hash = "";
 
-    if (_url) {
-      hash = crypto.createHash("md5").update(_url).digest("hex");
+    if (url) {
+      hash = crypto.createHash("md5").update(url).digest("hex");
     }
 
     return hash;
   };
-
-  return {
-    download: download,
-    setUrl: setUrl
-  };
 };
+
+util.inherits(FileController, EventEmitter);
 
 module.exports = FileController;

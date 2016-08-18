@@ -5,10 +5,11 @@ const fs = require("fs"),
   nock = require("nock"),
   mock = require("mock-fs"),
   config = require("../../config/config"),
-  file = require("../../app/controllers/file")(),
+  FileController = require("../../app/controllers/file"),
   expect = chai.expect;
 
 describe("download", () => {
+  let fileController;
   beforeEach(() => {
     // Mock the file system.
     mock({
@@ -16,11 +17,14 @@ describe("download", () => {
       "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
     });
 
-    file.setUrl("http://example.com/logo.png");
+    fileController = new FileController("http://example.com/logo.png");
   });
 
   afterEach(() => {
     mock.restore();
+  });
+
+  after(() => {
     nock.restore();
   });
 
@@ -29,7 +33,9 @@ describe("download", () => {
       .get("/logo.png")
       .replyWithFile(200, "/data/logo.png");
 
-    file.download((err, statusCode) => {
+    fileController.download();
+
+    fileController.on("downloaded", () => {
       const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
         expect(err).to.be.null;
         expect(stats).to.not.be.null;
@@ -40,16 +46,28 @@ describe("download", () => {
     });
   });
 
+  it("should fire a stream event", (done) => {
+    nock("http://example.com")
+      .get("/logo.png")
+      .replyWithFile(200, "/data/logo.png");
+
+    fileController.download();
+
+    fileController.on("stream", (resFromDownload) => {
+      expect(resFromDownload.statusCode).to.equal(200, "status code");
+      done();
+    });
+  });
+
   it("should return error if file not found", (done) => {
     nock("http://example.com")
       .get("/logo.png")
       .reply(404);
 
-    file.download((err, statusCode) => {
-      expect(err).to.not.be.null;
-      expect(err.message).to.equal("Invalid url parameter", "error message");
-      expect(statusCode).to.equal(404, "status code");
+    fileController.download();
 
+    fileController.on("stream", (resFromDownload) => {
+      expect(resFromDownload.statusCode).to.equal(404, "status code");
       done();
     });
   });
@@ -59,7 +77,9 @@ describe("download", () => {
       .get("/logo.png")
       .reply(404);
 
-    file.download((err, statusCode) => {
+    fileController.download();
+
+    fileController.on("stream", (resFromDownload) => {
       const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
         expect(err).to.not.be.null;
         expect(stats).to.be.undefined;
