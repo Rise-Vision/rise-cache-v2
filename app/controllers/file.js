@@ -1,18 +1,23 @@
-const fs = require("fs");
-const path = require("path");
-const crypto = require("crypto");
-const request = require("request");
-const config = require("../../config/config");
+"use strict";
 
-const FileController = function(url) {
-  "use strict";
+const fs = require("fs"),
+  path = require("path"),
+  crypto = require("crypto"),
+  request = require("request"),
+  config = require("../../config/config");
 
-  let fileName = config.downloadPath + path.sep;
+const FileController = function() {
+  let _url = "",
+    _fileName = config.downloadPath + path.sep;
+
+  const setUrl = (url) => {
+    _url = url;
+  };
 
   const download = (cb) => {
-    if (url) {
-      fileName += getFileName(url);
-      let file = fs.createWriteStream(fileName);
+    if (_url) {
+      _fileName += getFileName(_url);
+      let file = fs.createWriteStream(_fileName);
 
       file.on("finish", () => {
         file.close(cb);
@@ -21,10 +26,10 @@ const FileController = function(url) {
       });
 
       // Download the file.
-      request.get(url)
+      request.get(_url)
         .on("response", (res) => {
           if (res.statusCode !== 200) {
-            fs.unlink(fileName);
+            fs.unlink(_fileName);
 
             if (cb) {
               cb(new Error("Invalid url parameter"), res.statusCode);
@@ -41,7 +46,7 @@ const FileController = function(url) {
   };
 
   const handleError = (err, cb) => {
-    fs.unlink(fileName);
+    fs.unlink(_fileName);
 
     if (cb) {
       cb(err);
@@ -51,15 +56,16 @@ const FileController = function(url) {
   const getFileName = () => {
     let hash = "";
 
-    if (url) {
-      hash = crypto.createHash("md5").update(url).digest("hex");
+    if (_url) {
+      hash = crypto.createHash("md5").update(_url).digest("hex");
     }
 
     return hash;
   };
 
   return {
-    download: download
+    download: download,
+    setUrl: setUrl
   };
 };
 

@@ -1,10 +1,14 @@
+"use strict";
+
+const file = require("../controllers/file")();
+
 const FileRoute = function(app) {
 
   app.get("/files", (req, res, next) => {
     const url = req.query.url;
 
     if (url) {
-      const file = require("../controllers/file")(url);
+      file.setUrl(url);
 
       // Download the file.
       file.download((err, statusCode) => {

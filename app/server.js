@@ -1,5 +1,3 @@
-/*eslint no-console: ["error", { allow: ["log"] }] */
-
 const http = require("http");
 const express = require("express");
 const fileSystem = require("./helpers/file-system");

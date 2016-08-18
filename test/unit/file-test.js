@@ -5,23 +5,26 @@ const fs = require("fs"),
   nock = require("nock"),
   mock = require("mock-fs"),
   config = require("../../config/config"),
-  file = require("../../app/controllers/file")("http://example.com/logo.png"),
+  file = require("../../app/controllers/file")(),
   expect = chai.expect;
 
 describe("download", () => {
-  before(() => {
+  beforeEach(() => {
     // Mock the file system.
     mock({
       [config.downloadPath]: {},
       "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
     });
+
+    file.setUrl("http://example.com/logo.png");
   });
 
-  after(() => {
+  afterEach(() => {
     mock.restore();
+    nock.restore();
   });
 
-  it("should save downloaded file to disk with encrypted file name", () => {
+  it("should save downloaded file to disk with encrypted file name", (done) => {
     nock("http://example.com")
       .get("/logo.png")
       .replyWithFile(200, "/data/logo.png");
@@ -31,11 +34,13 @@ describe("download", () => {
         expect(err).to.be.null;
         expect(stats).to.not.be.null;
         expect(stats.isFile()).to.be.true;
+
+        done();
       });
     });
   });
 
-  it("should return error if file not found", () => {
+  it("should return error if file not found", (done) => {
     nock("http://example.com")
       .get("/logo.png")
       .reply(404);
@@ -44,37 +49,12 @@ describe("download", () => {
       expect(err).to.not.be.null;
       expect(err.message).to.equal("Invalid url parameter", "error message");
       expect(statusCode).to.equal(404, "status code");
+
+      done();
     });
   });
 
-  it("should return error if file server responds with an error", () => {
-    nock("http://example.com")
-      .get("/logo.png")
-      .replyWithError("Something bad happened");
-
-    file.download((err) => {
-      expect(err).to.not.be.null;
-      expect(err.message).to.equal("Something bad happened", "error message");
-    });
-  });
-
-  it("should return error if file could not be written", () => {
-    // Mock the file system without the download directory.
-    mock({
-      "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
-    });
-
-    nock("http://example.com")
-      .get("/logo.png")
-      .replyWithFile(200, "/data/logo.png");
-
-    file.download((err) => {
-      expect(err).to.not.be.null;
-      expect(err.errno).to.equal(34, "error number");
-    });
-  });
-
-  it("should not save file if there's an error", () => {
+  it("should not save file if there's an error", (done) => {
     nock("http://example.com")
       .get("/logo.png")
       .reply(404);
@@ -83,6 +63,8 @@ describe("download", () => {
       const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
         expect(err).to.not.be.null;
         expect(stats).to.be.undefined;
+
+        done();
       });
     });
   });
