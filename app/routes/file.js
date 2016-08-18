@@ -1,6 +1,6 @@
 "use strict";
 
-const file = require("../controllers/file")();
+const FileController = require("../controllers/file");
 
 const FileRoute = function(app) {
 
@@ -8,18 +8,29 @@ const FileRoute = function(app) {
     const url = req.query.url;
 
     if (url) {
-      file.setUrl(url);
-
+      const fileController = new FileController(url);
+      
       // Download the file.
-      file.download((err, statusCode) => {
-        if (err) {
-          res.statusCode = statusCode || 500;
-          next(err);
-        }
-        else {
-          // TODO: Return file.
-          res.sendStatus(200);
-        }
+      fileController.download();
+
+      fileController.on("request-error", (err) => {
+        console.error(err, url);
+        res.statusCode = 500;
+        next(err);
+      });
+
+      fileController.on("file-error", (err) => {
+        console.error(err, url);
+      });
+
+      fileController.on("stream", (resFromDownload) => {
+        const statusCode = resFromDownload.statusCode || 500;
+        res.writeHead(statusCode, resFromDownload.headers);
+        resFromDownload.pipe(res);
+      });
+
+      fileController.on("downloaded", () => {
+        console.info("File Downloaded", url);
       });
     }
     else {
