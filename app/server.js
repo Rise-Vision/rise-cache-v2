@@ -1,12 +1,15 @@
-/*eslint no-console: ["error", { allow: ["log"] }] */
-
 const http = require("http");
 const express = require("express");
+const fileSystem = require("./helpers/file-system");
 
 const ServerFactory = function(config){
 
   const app = express(),
     server =  http.createServer(app);
+
+  const init = () => {
+    fileSystem.createDir(config.downloadPath);
+  };
 
   const start = () => {
     return server.listen(config.port, config.url, () => {
@@ -19,6 +22,7 @@ const ServerFactory = function(config){
   };
 
   return {
+    init: init,
     start: start,
     stop: stop,
     app: app,
