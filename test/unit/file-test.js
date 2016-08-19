@@ -8,16 +8,20 @@ const fs = require("fs"),
   FileController = require("../../app/controllers/file"),
   expect = chai.expect;
 
-describe("download", () => {
+describe("downloadFile", () => {
   let fileController;
+
   beforeEach(() => {
+    let url = "http://example.com/logo.png",
+      path = config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5";
+
     // Mock the file system.
     mock({
       [config.downloadPath]: {},
       "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
     });
 
-    fileController = new FileController("http://example.com/logo.png");
+    fileController = new FileController(url, path);
   });
 
   afterEach(() => {
@@ -33,7 +37,7 @@ describe("download", () => {
       .get("/logo.png")
       .replyWithFile(200, "/data/logo.png");
 
-    fileController.download();
+    fileController.downloadFile();
 
     fileController.on("downloaded", () => {
       const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -51,7 +55,7 @@ describe("download", () => {
       .get("/logo.png")
       .replyWithFile(200, "/data/logo.png");
 
-    fileController.download();
+    fileController.downloadFile();
 
     fileController.on("stream", (resFromDownload) => {
       expect(resFromDownload.statusCode).to.equal(200, "status code");
@@ -64,7 +68,7 @@ describe("download", () => {
       .get("/logo.png")
       .reply(404);
 
-    fileController.download();
+    fileController.downloadFile();
 
     fileController.on("stream", (resFromDownload) => {
       expect(resFromDownload.statusCode).to.equal(404, "status code");
@@ -77,7 +81,7 @@ describe("download", () => {
       .get("/logo.png")
       .reply(404);
 
-    fileController.download();
+    fileController.downloadFile();
 
     fileController.on("stream", (resFromDownload) => {
       const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {

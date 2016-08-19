@@ -1,6 +1,7 @@
 "use strict";
 
-const FileController = require("../controllers/file");
+const fileSystem = require("../helpers/file-system"),
+  FileController = require("../controllers/file");
 
 const FileRoute = function(app) {
 
@@ -8,10 +9,11 @@ const FileRoute = function(app) {
     const url = req.query.url;
 
     if (url) {
-      const fileController = new FileController(url);
-      
+      const path = fileSystem.getPath(url),
+        fileController = new FileController(url, path);
+
       // Download the file.
-      fileController.download();
+      fileController.downloadFile();
 
       fileController.on("request-error", (err) => {
         console.error(err, url);
