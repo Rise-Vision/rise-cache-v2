@@ -15,6 +15,17 @@ module.exports = {
     });
   },
 
+  fileExists: function(path, callback) {
+    fs.stat(path, (err, stats) => {
+      if (!err) {
+        callback(true);
+      }
+      else {
+        callback(false);
+      }
+    });
+  },
+
   getFileName: function(url) {
     return url ? crypto.createHash("md5").update(url).digest("hex") : "";
   },

@@ -14,6 +14,7 @@ const FileController = function(url, path) {
 
 util.inherits(FileController, EventEmitter);
 
+/* Download file and save to disk. */
 FileController.prototype.downloadFile = function() {
   if (this.url) {
     let file = fs.createWriteStream(this.path);
@@ -23,7 +24,7 @@ FileController.prototype.downloadFile = function() {
         this.emit("downloaded");
       });
     }).on("error", (err) => {
-      this.handleDownloadError(err, "file-error");
+      this.handleDownloadError("file-error", err);
     });
 
     // Download the file.
@@ -38,12 +39,24 @@ FileController.prototype.downloadFile = function() {
         this.emit("stream", res);
       })
       .on("error", (err) => {
-        this.handleDownloadError(err, "request-error");
+        this.handleDownloadError("request-error", err);
       });
   }
 };
 
-FileController.prototype.handleDownloadError = function(err, type) {
+/* Read a file from disk. */
+FileController.prototype.readFile = function() {
+  let file = fs.createReadStream(this.path);
+
+  file.on("error", (err) => {
+    this.emit("file-error", err);
+  });
+
+  this.emit("read", file);
+};
+
+/* Handle error when downloading a file. */
+FileController.prototype.handleDownloadError = function(type, err) {
   fs.unlink(this.path);
   this.emit(type, err);
 };

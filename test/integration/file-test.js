@@ -12,17 +12,11 @@ const nock = require("nock"),
 
 chai.use(chaiHttp);
 
-describe("files endpoint", () => {
+describe("/files endpoint", () => {
 
   beforeEach(() => {
     server.start();
     server.app.use(error.handleError);
-
-    // Mock the file system.
-    mock({
-      [config.downloadPath]: {},
-      "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
-    });
   });
 
   afterEach(() => {
@@ -30,44 +24,104 @@ describe("files endpoint", () => {
     mock.restore();
   });
 
-  it("should return 200 status code if the file was successfully downloaded", (done) => {
-    nock("http://example.com")
-      .get("/logo.png")
-      .replyWithFile(200, "/data/logo.png");
+  describe("download file", () => {
 
-    chai.request("http://localhost:9494")
-      .get("/files?url=http://example.com/logo.png")
-      .end((err, res) => {
-        expect(res).to.have.status(200);
-
-        done();
+    beforeEach(() => {
+      // Mock the file system.
+      mock({
+        [config.downloadPath]: {},
+        "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
+    });
+
+    it("should return 200 status code if the file was successfully downloaded", (done) => {
+      nock("http://example.com")
+        .get("/logo.png")
+        .replyWithFile(200, "/data/logo.png");
+
+      chai.request("http://localhost:9494")
+        .get("/files?url=http://example.com/logo.png")
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+
+          done();
+        });
+    });
+
+    it("should return error if url parameter is missing", (done) => {
+      chai.request("http://localhost:9494")
+        .get("/files")
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          expect(res.body).to.deep.equal({ status: 400, message: "Missing url parameter" });
+
+          done();
+        });
+    });
+
+    it("should return error if file server responds with an error", (done) => {
+      nock("http://example.com")
+        .get("/error.png")
+        .replyWithError("Something bad happened");
+
+      chai.request("http://localhost:9494")
+        .get("/files?url=http://example.com/error.png")
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body).to.deep.equal({ status: 500, message: "Something bad happened" });
+
+          done();
+        });
+    });
+
   });
 
-  it("should return error if url parameter is missing", (done) => {
-    chai.request("http://localhost:9494")
-      .get("/files")
-      .end((err, res) => {
-        expect(res).to.have.status(400);
-        expect(res.body).to.deep.equal({ status: 400, message: "Missing url parameter" });
+  describe("existing file", () => {
 
-        done();
+    it("should fetch file from disk if it already exists", (done) => {
+      // Create file on mock file system.
+      mock({
+        [config.downloadPath]: {
+          "cdf42c077fe6037681ae3c003550c2c5": "some content"
+        }
       });
-  });
 
-  it("should return error if file server responds with an error", (done) => {
-    nock("http://example.com")
-      .get("/error.png")
-      .replyWithError("Something bad happened");
+      chai.request("http://localhost:9494")
+        .get("/files")
+        .query({ url: "http://example.com/logo.png" })
+        .end((err, res) => {
+          expect(err).to.be.null;
+          expect(res).to.have.status(200);
 
-    chai.request("http://localhost:9494")
-      .get("/files?url=http://example.com/error.png")
-      .end((err, res) => {
-        expect(res).to.have.status(500);
-        expect(res.body).to.deep.equal({ status: 500, message: "Something bad happened" });
+          done();
+        });
+    });
 
-        done();
+    it("should return an error if file exists but could not be read", (done) => {
+      // Create file with no read permissions.
+      mock({
+        [config.downloadPath]: {
+          "cdf42c077fe6037681ae3c003550c2c5": mock.file({
+            content: "some content",
+            mode: "0000"
+          })
+        }
       });
+
+      chai.request("http://localhost:9494")
+        .get("/files")
+        .query({ url: "http://example.com/logo.png" })
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body).to.deep.equal({
+            status: 500,
+            message: "EACCES, permission denied '" + config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5'"
+          });
+
+          done();
+        });
+    });
+
   });
 
 });
