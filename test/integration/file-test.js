@@ -7,12 +7,20 @@ const nock = require("nock"),
   config = require("../../config/config"),
   server = require("../../app/server")(config),
   error = require("../../app/middleware/error"),
-  file = require("../../app/routes/file")(server.app),
+  Database = require("../../app/database"),
   expect = chai.expect;
 
 chai.use(chaiHttp);
 
 describe("/files endpoint", () => {
+
+  before(() => {
+    mock({
+      [config.headersDBPath]: ""
+    });
+    let headerDB = new Database(config.headersDBPath);
+    require("../../app/routes/file")(server.app, headerDB.db);
+  });
 
   beforeEach(() => {
     server.start();
@@ -21,6 +29,9 @@ describe("/files endpoint", () => {
 
   afterEach(() => {
     server.stop();
+  });
+
+  after(() => {
     mock.restore();
   });
 
@@ -30,6 +41,7 @@ describe("/files endpoint", () => {
       // Mock the file system.
       mock({
         [config.downloadPath]: {},
+        [config.headersDBPath]: "",
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
     });
