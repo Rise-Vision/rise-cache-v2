@@ -27,6 +27,7 @@ const FileRoute = function(app) {
           });
 
           fileController.readFile();
+          console.info("File exists in cache. Not downloading", url);
         } else {
           // Download the file.
           fileController.downloadFile();
