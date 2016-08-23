@@ -11,10 +11,19 @@ const fs = require("fs"),
 
 describe("FileController", () => {
   let fileController;
+  let header = {
+    save: function () {
+      return;
+    },
+    set: function () {
+
+    }
+  };
 
   beforeEach(() => {
-    fileController = new FileController("http://example.com/logo.png",
-      config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5");
+
+    fileController = new FileController("http://example.com/logo.png", header);
+
   });
 
   describe("downloadFile", () => {
@@ -23,8 +32,10 @@ describe("FileController", () => {
       // Mock the file system.
       mock({
         [config.downloadPath]: {},
+        [config.headersDBPath]: "",
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
+
     });
 
     afterEach(() => {
@@ -36,6 +47,8 @@ describe("FileController", () => {
     });
 
     it("should save downloaded file to disk with encrypted file name", (done) => {
+      let headerSaveSpy = sinon.spy(header, "save");
+
       nock("http://example.com")
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png");
@@ -48,8 +61,62 @@ describe("FileController", () => {
           expect(stats).to.not.be.null;
           expect(stats.isFile()).to.be.true;
 
+          expect(headerSaveSpy.calledOnce).to.be.true;
           done();
         });
+      });
+    });
+
+    it("should not set key if there is already headers for it on db", (done) => {
+      header = {
+        save: function () {
+          return;
+        },
+        set: function () {
+
+        }
+      };
+
+      fileController = new FileController("http://example.com/logo.png", header);
+
+      let headerSaveSpy = sinon.spy(header, "save");
+
+      nock("http://example.com")
+        .get("/logo.png")
+        .replyWithFile(200, "/data/logo.png");
+
+      fileController.downloadFile();
+
+      fileController.on("downloaded", () => {
+        expect(headerSaveSpy.calledOnce).to.be.true;
+        done();
+      });
+    });
+
+    it("should emit an error event if an error happens when saving headers", (done) => {
+      header = {
+        save: function (cb) {
+          cb(new Error("ERROR"));
+        },
+        set: function () {
+
+        }
+      };
+
+      fileController = new FileController("http://example.com/logo.png", header);
+
+      let headerSaveSpy = sinon.spy(header, "save");
+
+      nock("http://example.com")
+        .get("/logo.png")
+        .replyWithFile(200, "/data/logo.png");
+
+      fileController.downloadFile();
+
+      fileController.on("headers-error", (err) => {
+        expect(headerSaveSpy.calledOnce).to.be.true;
+        expect(err.message).to.equal("ERROR");
+        done();
       });
     });
 

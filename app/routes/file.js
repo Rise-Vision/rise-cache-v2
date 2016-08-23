@@ -1,16 +1,18 @@
 "use strict";
 
 const fileSystem = require("../helpers/file-system"),
-  FileController = require("../controllers/file");
+  FileController = require("../controllers/file"),
+  Header = require("../models/header");
 
-const FileRoute = function(app) {
+const FileRoute = function(app, headerDB) {
 
   app.get("/files", (req, res, next) => {
     const url = req.query.url;
 
     if (url) {
       const path = fileSystem.getPath(url),
-        fileController = new FileController(url, path);
+        header = new Header({}, headerDB),
+        fileController = new FileController(url, header);
 
       // An error occurred either reading or writing the file.
       fileController.on("file-error", (err) => {
