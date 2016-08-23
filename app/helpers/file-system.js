@@ -31,7 +31,7 @@ module.exports = {
   },
 
   getPath: function(url) {
-    return config.downloadPath + path.sep + this.getFileName(url);
+    return path.join(config.downloadPath, this.getFileName(url));
   }
 
 };
