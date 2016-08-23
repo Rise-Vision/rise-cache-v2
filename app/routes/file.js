@@ -4,7 +4,7 @@ const fileSystem = require("../helpers/file-system"),
   FileController = require("../controllers/file"),
   Header = require("../models/header");
 
-const FileRoute = function(app, headerDB) {
+const FileRoute = function(app, proxy, headerDB) {
 
   app.get("/files", (req, res, next) => {
     const url = req.query.url;
@@ -12,52 +12,62 @@ const FileRoute = function(app, headerDB) {
     if (url) {
       const path = fileSystem.getPath(url),
         header = new Header({}, headerDB),
-        fileController = new FileController(url, header);
+        controller = new FileController(url, header);
 
-      // An error occurred either reading or writing the file.
-      fileController.on("file-error", (err) => {
+      controller.on("file-error", (err) => {
         res.statusCode = 500;
         next(err);
       });
 
-      // Check whether or not the file already exists.
-      fileSystem.fileExists(path, (exists) => {
-        if (exists) {
+      // Check if the file is cached.
+      isCached(path, (cached) => {
+        if (cached) {
           // Get file from disk and stream to client.
-          fileController.on("read", (file) => {
+          controller.on("read", (file) => {
             file.pipe(res);
           });
 
-          fileController.readFile();
-          console.info("File exists in cache. Not downloading", url);
+          getFromCache(res, controller, url);
         } else {
-          // Download the file.
-          fileController.downloadFile();
+          req.on("proxyRes", (proxyRes) => {
+            if (proxyRes.statusCode == 200) {
+              controller.writeFile(proxyRes);
+            }
+          });
 
-          fileController.on("request-error", (err) => {
-            console.error(err, url);
+          req.on("proxyError", (err) => {
             res.statusCode = 500;
             next(err);
           });
 
-          fileController.on("stream", (resFromDownload) => {
-            const statusCode = resFromDownload.statusCode || 500;
-            res.writeHead(statusCode, resFromDownload.headers);
-            resFromDownload.pipe(res);
-          });
-
-          fileController.on("downloaded", () => {
+          controller.on("downloaded", () => {
             console.info("File Downloaded", url);
           });
+
+          proxyRequest(req, res, url);
         }
       });
-    }
-    else {
+    } else {
       res.statusCode = 400;
       next(new Error("Missing url parameter"));
     }
   });
 
+  function isCached(path, cb) {
+    fileSystem.fileExists(path, (exists) => {
+      cb(exists);
+    });
+  }
+
+  function getFromCache(res, controller, url) {
+    controller.readFile();
+    console.info("File exists in cache. Not downloading", url);
+  }
+
+  function proxyRequest(req, res, url) {
+    req.url = url;
+    proxy.web(req, res, { target: url, prependPath: false });
+  }
 };
 
 module.exports = FileRoute;

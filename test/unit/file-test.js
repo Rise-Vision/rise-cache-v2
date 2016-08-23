@@ -10,23 +10,21 @@ const fs = require("fs"),
   expect = chai.expect;
 
 describe("FileController", () => {
-  let fileController;
-  let header = {
-    save: function () {
-      return;
-    },
-    set: function () {
+  let fileController,
+    header = {
+      save: function () {
+        return;
+      },
+      set: function () {
 
-    }
-  };
+      }
+    };
 
   beforeEach(() => {
-
     fileController = new FileController("http://example.com/logo.png", header);
-
   });
 
-  describe("downloadFile", () => {
+  describe("saveHeaders", () => {
 
     beforeEach(() => {
       // Mock the file system.
@@ -35,7 +33,6 @@ describe("FileController", () => {
         [config.headersDBPath]: "",
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
-
     });
 
     afterEach(() => {
@@ -46,28 +43,7 @@ describe("FileController", () => {
       nock.restore();
     });
 
-    it("should save downloaded file to disk with encrypted file name", (done) => {
-      let headerSaveSpy = sinon.spy(header, "save");
-
-      nock("http://example.com")
-        .get("/logo.png")
-        .replyWithFile(200, "/data/logo.png");
-
-      fileController.downloadFile();
-
-      fileController.on("downloaded", () => {
-        const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
-          expect(err).to.be.null;
-          expect(stats).to.not.be.null;
-          expect(stats.isFile()).to.be.true;
-
-          expect(headerSaveSpy.calledOnce).to.be.true;
-          done();
-        });
-      });
-    });
-
-    it("should not set key if there is already headers for it on db", (done) => {
+    it("should not set key if there is already headers for it on db", () => {
       header = {
         save: function () {
           return;
@@ -85,12 +61,9 @@ describe("FileController", () => {
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png");
 
-      fileController.downloadFile();
+      fileController.saveHeaders();
 
-      fileController.on("downloaded", () => {
-        expect(headerSaveSpy.calledOnce).to.be.true;
-        done();
-      });
+      expect(headerSaveSpy.calledOnce).to.be.true;
     });
 
     it("should emit an error event if an error happens when saving headers", (done) => {
@@ -111,56 +84,13 @@ describe("FileController", () => {
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png");
 
-      fileController.downloadFile();
-
       fileController.on("headers-error", (err) => {
         expect(headerSaveSpy.calledOnce).to.be.true;
         expect(err.message).to.equal("ERROR");
         done();
       });
-    });
 
-    it("should fire a stream event", (done) => {
-      nock("http://example.com")
-        .get("/logo.png")
-        .replyWithFile(200, "/data/logo.png");
-
-      fileController.downloadFile();
-
-      fileController.on("stream", (resFromDownload) => {
-        expect(resFromDownload.statusCode).to.equal(200, "status code");
-        done();
-      });
-    });
-
-    it("should return error if file not found", (done) => {
-      nock("http://example.com")
-        .get("/logo.png")
-        .reply(404);
-
-      fileController.downloadFile();
-
-      fileController.on("stream", (resFromDownload) => {
-        expect(resFromDownload.statusCode).to.equal(404, "status code");
-        done();
-      });
-    });
-
-    it("should not save file if there's an error", (done) => {
-      nock("http://example.com")
-        .get("/logo.png")
-        .reply(404);
-
-      fileController.downloadFile();
-
-      fileController.on("stream", (resFromDownload) => {
-        const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
-          expect(err).to.not.be.null;
-          expect(stats).to.be.undefined;
-
-          done();
-        });
-      });
+      fileController.saveHeaders();
     });
 
   });

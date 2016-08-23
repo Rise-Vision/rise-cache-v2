@@ -1,14 +1,23 @@
+const http = require("http"),
+  httpProxy = require("http-proxy"),
+  express = require("express"),
+  fileSystem = require("./helpers/file-system");
 
-const http = require("http");
-const express = require("express");
-const fileSystem = require("./helpers/file-system");
-
-const ServerFactory = function(config){
+const ServerFactory = function(config) {
 
   const app = express(),
-    server =  http.createServer(app);
+    server =  http.createServer(app),
+    proxy = httpProxy.createProxyServer({ secure: false });
 
   const init = () => {
+    proxy.on("proxyRes", (proxyRes, req, res) => {
+      req.emit("proxyRes", proxyRes);
+    });
+
+    proxy.on("error", (err, req, res) => {
+      req.emit("proxyError", err);
+    });
+
     fileSystem.createDir(config.downloadPath);
   };
 
@@ -27,7 +36,8 @@ const ServerFactory = function(config){
     start: start,
     stop: stop,
     app: app,
-    server: server
+    server: server,
+    proxy: proxy
   };
 };
 

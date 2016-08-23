@@ -15,11 +15,10 @@ chai.use(chaiHttp);
 describe("/files endpoint", () => {
 
   before(() => {
-    mock({
-      [config.headersDBPath]: ""
-    });
     let headerDB = new Database(config.headersDBPath);
-    require("../../app/routes/file")(server.app, headerDB.db);
+    require("../../app/routes/file")(server.app, server.proxy, headerDB.db);
+
+    server.init();
   });
 
   beforeEach(() => {
