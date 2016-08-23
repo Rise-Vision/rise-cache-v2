@@ -43,6 +43,28 @@ const FileRoute = function(app, proxy, headerDB) {
           });
 
           getFromCache(res, controller, fileUrl);
+
+          // check if file is stale
+          controller.isStale((err, stale) => {
+
+            if (err) {
+              console.error(err, url);
+            }
+
+            if (stale) {
+
+              controller.getHeaders((err, headers) => {
+                if (err) { console.error(err, url); }
+
+                //TODO: request file again using request library, not proxy
+                console.log("Request file from server again adding 'If-None-Match' header with etag value", headers.etag);
+              });
+
+
+            }
+
+          });
+
         } else {
           req.on("proxyRes", (proxyRes) => {
             if (proxyRes.statusCode == 200) {
