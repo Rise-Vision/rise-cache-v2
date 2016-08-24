@@ -1,6 +1,7 @@
 "use strict";
 
-const nock = require("nock"),
+const fs = require("fs"),
+  nock = require("nock"),
   mock = require("mock-fs"),
   chai = require("chai"),
   chaiHttp = require("chai-http"),
@@ -15,11 +16,10 @@ chai.use(chaiHttp);
 describe("/files endpoint", () => {
 
   before(() => {
-    mock({
-      [config.headersDBPath]: ""
-    });
     let headerDB = new Database(config.headersDBPath);
-    require("../../app/routes/file")(server.app, headerDB.db);
+    require("../../app/routes/file")(server.app, server.proxy, headerDB.db);
+
+    server.init();
   });
 
   beforeEach(() => {
@@ -57,6 +57,41 @@ describe("/files endpoint", () => {
           expect(res).to.have.status(200);
 
           done();
+        });
+    });
+
+    it("should save downloaded file to disk with encrypted file name", (done) => {
+      nock("http://example.com")
+        .get("/logo.png")
+        .replyWithFile(200, "/data/logo.png");
+
+      chai.request("http://localhost:9494")
+        .get("/files?url=http://example.com/logo.png")
+        .end((err, res) => {
+          const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
+            expect(err).to.be.null;
+            expect(stats).to.not.be.null;
+            expect(stats.isFile()).to.be.true;
+
+            done();
+          });
+        });
+    });
+
+    it("should not save file if there's an error", (done) => {
+      nock("http://example.com")
+        .get("/logo.png")
+        .reply(404);
+
+      chai.request("http://localhost:9494")
+        .get("/files?url=http://example.com/logo.png")
+        .end((err, res) => {
+          const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
+            expect(err).to.not.be.null;
+            expect(stats).to.be.undefined;
+
+            done();
+          });
         });
     });
 
