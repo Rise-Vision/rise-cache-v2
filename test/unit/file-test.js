@@ -1,7 +1,6 @@
 "use strict";
 
-const fs = require("fs"),
-  chai = require("chai"),
+const chai = require("chai"),
   nock = require("nock"),
   mock = require("mock-fs"),
   sinon = require("sinon"),
