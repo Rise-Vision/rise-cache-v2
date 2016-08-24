@@ -2,17 +2,18 @@
 
 const fileSystem = require("../helpers/file-system"),
   FileController = require("../controllers/file"),
-  Header = require("../models/header");
+  Header = require("../models/header"),
+  url = require("url");
 
 const FileRoute = function(app, proxy, headerDB) {
 
   app.get("/files", (req, res, next) => {
-    const url = req.query.url;
+    const fileUrl = req.query.url;
 
-    if (url) {
-      const path = fileSystem.getPath(url),
+    if (fileUrl) {
+      const path = fileSystem.getPath(fileUrl),
         header = new Header({}, headerDB),
-        controller = new FileController(url, header);
+        controller = new FileController(fileUrl, header);
 
       controller.on("file-error", (err) => {
         res.statusCode = 500;
@@ -27,7 +28,7 @@ const FileRoute = function(app, proxy, headerDB) {
             file.pipe(res);
           });
 
-          getFromCache(res, controller, url);
+          getFromCache(res, controller, fileUrl);
         } else {
           req.on("proxyRes", (proxyRes) => {
             if (proxyRes.statusCode == 200) {
@@ -41,10 +42,10 @@ const FileRoute = function(app, proxy, headerDB) {
           });
 
           controller.on("downloaded", () => {
-            console.info("File Downloaded", url);
+            console.info("File Downloaded", fileUrl);
           });
 
-          proxyRequest(req, res, url);
+          proxyRequest(req, res, fileUrl);
         }
       });
     } else {
@@ -59,14 +60,23 @@ const FileRoute = function(app, proxy, headerDB) {
     });
   }
 
-  function getFromCache(res, controller, url) {
+  function getFromCache(res, controller, fileUrl) {
     controller.readFile();
-    console.info("File exists in cache. Not downloading", url);
+    console.info("File exists in cache. Not downloading", fileUrl);
   }
 
-  function proxyRequest(req, res, url) {
-    req.url = url;
-    proxy.web(req, res, { target: url, prependPath: false });
+  function proxyRequest(req, res, fileUrl) {
+    let parsedUrl = url.parse(fileUrl);
+
+    req.url = fileUrl;
+
+    proxy.web(req, res, {
+      prependPath: false,
+      target: fileUrl,
+      headers: {
+        host: parsedUrl.hostname
+      }
+    });
   }
 };
 
