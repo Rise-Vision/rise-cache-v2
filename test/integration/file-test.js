@@ -14,11 +14,15 @@ const fs = require("fs"),
 chai.use(chaiHttp);
 
 describe("/files endpoint", () => {
-
+  let headers = {etag:"1a42b4479c62b39b93726d793a2295ca"};
+  let headerDB = null;
   before(() => {
-    let headerDB = new Database(config.headersDBPath);
+    mock({
+      [config.headersDBPath]: ""
+    });
+    headerDB = new Database(config.headersDBPath);
     require("../../app/routes/file")(server.app, server.proxy, headerDB.db);
-
+    
     server.init();
   });
 
@@ -49,7 +53,7 @@ describe("/files endpoint", () => {
     it("should return 200 status code if the file was successfully downloaded", (done) => {
       nock("http://example.com")
         .get("/logo.png")
-        .replyWithFile(200, "/data/logo.png");
+        .replyWithFile(200, "/data/logo.png", headers);
 
       chai.request("http://localhost:9494")
         .get("/files?url=http://example.com/logo.png")
@@ -63,7 +67,7 @@ describe("/files endpoint", () => {
     it("should save downloaded file to disk with encrypted file name", (done) => {
       nock("http://example.com")
         .get("/logo.png")
-        .replyWithFile(200, "/data/logo.png");
+        .replyWithFile(200, "/data/logo.png", headers);
 
       chai.request("http://localhost:9494")
         .get("/files?url=http://example.com/logo.png")
@@ -140,6 +144,41 @@ describe("/files endpoint", () => {
           expect(err).to.be.null;
           expect(res).to.have.status(200);
 
+          done();
+        });
+    });
+
+    it("should return headers saved on DB", (done) => {
+
+      chai.request("http://localhost:9494")
+        .get("/files")
+        .query({ url: "http://example.com/logo.png" })
+        .end((err, res) => {
+          expect(err).to.be.null;
+          expect(res).to.have.status(200);
+          expect(res.headers.etag).to.deep.equal(headers.etag);
+          done();
+        });
+    });
+
+    it("should not return headers if it is not available", (done) => {
+
+      mock({
+        [config.downloadPath]: {
+          "cdf42c077fe6037681ae3c003550c2c5": "some content"
+        },
+        [config.headersDBPath]: ""
+      });
+
+      headerDB.db.loadDatabase();
+
+      chai.request("http://localhost:9494")
+        .get("/files")
+        .query({ url: "http://example.com/logo.png" })
+        .end((err, res) => {
+          expect(err).to.be.null;
+          expect(res).to.have.status(200);
+          expect(res.headers.etag).to.be.undefined;
           done();
         });
     });

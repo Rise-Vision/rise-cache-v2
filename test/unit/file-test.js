@@ -153,4 +153,46 @@ describe("FileController", () => {
 
   });
 
+  describe("getHeaders", () => {
+
+    it("should get the headers from DB", (done) => {
+      const newHeader = {data: {key: "test", headers: {etag: "etag"}}};
+      header = {
+        findByKey: function (key, cb) {
+          cb(null, newHeader);
+        }
+      };
+
+      fileController = new FileController("http://example.com/logo.png", header);
+
+      let headerFindByKeySpy = sinon.spy(header, "findByKey");
+
+      fileController.getHeaders( (err, headers) => {
+        expect(headerFindByKeySpy.calledOnce).to.be.true;
+        expect(headers).to.deep.equal(newHeader.data.headers);
+        done();
+      });
+    });
+
+    it("should return an error if there is an error on getting headers from DB", (done) => {
+      let errorMessage = "Error getting headers";
+      header = {
+        findByKey: function (key, cb) {
+          cb(new Error(errorMessage));
+        }
+      };
+
+      fileController = new FileController("http://example.com/logo.png", header);
+
+      let headerFindByKeySpy = sinon.spy(header, "findByKey");
+
+      fileController.getHeaders( (err, headers) => {
+        expect(headerFindByKeySpy.calledOnce).to.be.true;
+        expect(headers).to.be.undefined;
+        expect(err.message).to.equal(errorMessage);
+        done();
+      });
+    });
+
+  });
 });

@@ -11,6 +11,7 @@ const FileController = function(url, header) {
 
   this.url = url;
   this.header = header;
+  this.fileName = fileSystem.getFileName(this.url);
   this.path = fileSystem.getPath(this.url);
 };
 
@@ -29,12 +30,11 @@ FileController.prototype.readFile = function() {
 
 /* Write a file to disk. */
 FileController.prototype.writeFile = function(res) {
-  const file = fs.createWriteStream(this.path),
-    fileName = fileSystem.getFileName(this.url);
+  const file = fs.createWriteStream(this.path);
 
   file.on("finish", () => {
     file.close(() => {
-      this.saveHeaders(res.headers, fileName);
+      this.saveHeaders(res.headers);
       this.emit("downloaded");
     });
   }).on("error", (err) => {
@@ -50,13 +50,20 @@ FileController.prototype.handleWriteError = function(type, err) {
   this.emit(type, err);
 };
 
-FileController.prototype.saveHeaders = function(headers, fileName) {
-  this.header.set("key", fileName);
+FileController.prototype.saveHeaders = function(headers) {
+  this.header.set("key", this.fileName);
   this.header.set("headers", headers);
 
   this.header.save((err, newHeader) => {
     if (err) return this.emit("headers-error", err);
     this.emit("headers", newHeader);
+  });
+};
+
+FileController.prototype.getHeaders = function(cb) {
+  this.header.findByKey(this.fileName, (err, newHeader) => {
+    if (err) return cb(err);
+    cb(null, newHeader.data.headers);
   });
 };
 
