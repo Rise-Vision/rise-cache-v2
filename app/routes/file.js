@@ -42,7 +42,7 @@ const FileRoute = function(app, proxy, headerDB) {
           });
 
           controller.on("downloaded", () => {
-            console.info("File Downloaded", fileUrl);
+            console.info("File Downloaded", fileUrl, new Date());
           });
 
           proxyRequest(req, res, fileUrl);
@@ -62,7 +62,7 @@ const FileRoute = function(app, proxy, headerDB) {
 
   function getFromCache(res, controller, fileUrl) {
     controller.readFile();
-    console.info("File exists in cache. Not downloading", fileUrl);
+    console.info("File exists in cache. Not downloading", fileUrl, new Date());
   }
 
   function proxyRequest(req, res, fileUrl) {
