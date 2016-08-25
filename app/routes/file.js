@@ -30,7 +30,7 @@ const FileRoute = function(app, proxy, headerDB) {
             controller.getHeaders((err, headers) => {
 
               if (err) {
-                console.error(err, url);
+                console.error(err, fileUrl, new Date());
               }
 
               if (headers) {
@@ -44,22 +44,43 @@ const FileRoute = function(app, proxy, headerDB) {
 
           getFromCache(res, controller, fileUrl);
         } else {
-          req.on("proxyRes", (proxyRes) => {
-            if (proxyRes.statusCode == 200) {
-              controller.writeFile(proxyRes);
-            }
+          // Download the file.
+          controller.on("request-error", (err) => {
+            res.statusCode = 500;
+
+            console.error(err, fileUrl, new Date());
+            next(err);
           });
 
-          req.on("proxyError", (err) => {
-            res.statusCode = 500;
-            next(err);
+          controller.on("stream", (downloadRes) => {
+            const statusCode = downloadRes.statusCode || 500;
+
+            res.writeHead(statusCode, downloadRes.headers);
+            downloadRes.pipe(res);
           });
 
           controller.on("downloaded", () => {
             console.info("File Downloaded", fileUrl, new Date());
           });
 
-          proxyRequest(req, res, fileUrl);
+          controller.downloadFile();
+          // TODO: Use proxy if file isDownloading.
+          // req.on("proxyRes", (proxyRes) => {
+          //   if (proxyRes.statusCode == 200) {
+          //     controller.writeFile(proxyRes);
+          //   }
+          // });
+
+          // req.on("proxyError", (err) => {
+          //   res.statusCode = 500;
+          //   next(err);
+          // });
+
+          // controller.on("downloaded", () => {
+          //   console.info("File Downloaded", fileUrl, new Date());
+          // });
+
+          // proxyRequest(req, res, fileUrl);
         }
       });
     } else {

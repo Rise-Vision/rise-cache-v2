@@ -17,6 +17,23 @@ const FileController = function(url, header) {
 
 util.inherits(FileController, EventEmitter);
 
+/* Download file and save to disk. */
+FileController.prototype.downloadFile = function() {
+  if (this.url) {
+    request.get(this.url)
+      .on("response", (res) => {
+        if (res.statusCode == 200) {
+          this.writeFile(res);
+        }
+
+        this.emit("stream", res);
+      })
+      .on("error", (err) => {
+        this.emit("request-error", err);
+      });
+  }
+};
+
 /* Read a file from disk. */
 FileController.prototype.readFile = function() {
   let file = fs.createReadStream(this.path);
@@ -34,20 +51,15 @@ FileController.prototype.writeFile = function(res) {
 
   file.on("finish", () => {
     file.close(() => {
-      this.saveHeaders(res.headers);
+      this.saveHeaders(res.headers, this.fileName);
       this.emit("downloaded");
     });
   }).on("error", (err) => {
-    this.handleWriteError("file-error", err);
+    fs.unlink(this.path);
+    this.emit("file-error", err);
   });
 
   res.pipe(file);
-};
-
-/* Handle error when writing to a file. */
-FileController.prototype.handleWriteError = function(type, err) {
-  fs.unlink(this.path);
-  this.emit(type, err);
 };
 
 FileController.prototype.saveHeaders = function(headers) {

@@ -1,7 +1,6 @@
 "use strict";
 
-const fs = require("fs"),
-  nock = require("nock"),
+const nock = require("nock"),
   mock = require("mock-fs"),
   chai = require("chai"),
   chaiHttp = require("chai-http"),
@@ -16,13 +15,14 @@ chai.use(chaiHttp);
 describe("/files endpoint", () => {
   let headers = {etag:"1a42b4479c62b39b93726d793a2295ca"};
   let headerDB = null;
+
   before(() => {
     mock({
       [config.headersDBPath]: ""
     });
     headerDB = new Database(config.headersDBPath);
     require("../../app/routes/file")(server.app, server.proxy, headerDB.db);
-    
+
     server.init();
   });
 
@@ -56,55 +56,26 @@ describe("/files endpoint", () => {
         .replyWithFile(200, "/data/logo.png", headers);
 
       chai.request("http://localhost:9494")
-        .get("/files?url=http://example.com/logo.png")
+        .get("/files")
+        .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(res).to.have.status(200);
+          expect(res).to.not.be.null;
 
           done();
         });
     });
 
-    it("should save downloaded file to disk with encrypted file name", (done) => {
+    it("should return headers if the file was successfully downloaded", (done) => {
       nock("http://example.com")
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png", headers);
 
       chai.request("http://localhost:9494")
-        .get("/files?url=http://example.com/logo.png")
-        .end((err, res) => {
-          const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
-            expect(err).to.be.null;
-            expect(stats).to.not.be.null;
-            expect(stats.isFile()).to.be.true;
-
-            done();
-          });
-        });
-    });
-
-    it("should not save file if there's an error", (done) => {
-      nock("http://example.com")
-        .get("/logo.png")
-        .reply(404);
-
-      chai.request("http://localhost:9494")
-        .get("/files?url=http://example.com/logo.png")
-        .end((err, res) => {
-          const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
-            expect(err).to.not.be.null;
-            expect(stats).to.be.undefined;
-
-            done();
-          });
-        });
-    });
-
-    it("should return error if url parameter is missing", (done) => {
-      chai.request("http://localhost:9494")
         .get("/files")
+        .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
-          expect(res).to.have.status(400);
-          expect(res.body).to.deep.equal({ status: 400, message: "Missing url parameter" });
+          expect(res.headers.etag).to.deep.equal(headers.etag);
 
           done();
         });
@@ -120,6 +91,17 @@ describe("/files endpoint", () => {
         .end((err, res) => {
           expect(res).to.have.status(500);
           expect(res.body).to.deep.equal({ status: 500, message: "Something bad happened" });
+
+          done();
+        });
+    });
+
+    it("should return error if url parameter is missing", (done) => {
+      chai.request("http://localhost:9494")
+        .get("/files")
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          expect(res.body).to.deep.equal({ status: 400, message: "Missing url parameter" });
 
           done();
         });
