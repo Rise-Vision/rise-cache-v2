@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require("fs"),
+  request = require("request"),
   fileSystem = require("../helpers/file-system"),
   EventEmitter = require("events").EventEmitter,
   util = require("util");
