@@ -18,7 +18,9 @@ describe("/files endpoint", () => {
   let headerDB = null;
   before(() => {
     mock({
-      [config.headersDBPath]: ""
+      [config.headersDBPath]: "",
+      [config.downloadPath]: {},
+      [config.cachePath]: {}
     });
     headerDB = new Database(config.headersDBPath);
     require("../../app/routes/file")(server.app, server.proxy, headerDB.db);
@@ -45,6 +47,7 @@ describe("/files endpoint", () => {
       // Mock the file system.
       mock({
         [config.downloadPath]: {},
+        [config.cachePath]: {},
         [config.headersDBPath]: "",
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
@@ -72,7 +75,7 @@ describe("/files endpoint", () => {
       chai.request("http://localhost:9494")
         .get("/files?url=http://example.com/logo.png")
         .end((err, res) => {
-          const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
+          const stats = fs.stat(config.cachePath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
             expect(err).to.be.null;
             expect(stats).to.not.be.null;
             expect(stats.isFile()).to.be.true;
@@ -90,7 +93,7 @@ describe("/files endpoint", () => {
       chai.request("http://localhost:9494")
         .get("/files?url=http://example.com/logo.png")
         .end((err, res) => {
-          const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
+          const stats = fs.stat(config.cachePath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
             expect(err).to.not.be.null;
             expect(stats).to.be.undefined;
 
@@ -132,7 +135,7 @@ describe("/files endpoint", () => {
     it("should fetch file from disk if it already exists", (done) => {
       // Create file on mock file system.
       mock({
-        [config.downloadPath]: {
+        [config.cachePath]: {
           "cdf42c077fe6037681ae3c003550c2c5": "some content"
         }
       });
@@ -164,7 +167,7 @@ describe("/files endpoint", () => {
     it("should not return headers if it is not available", (done) => {
 
       mock({
-        [config.downloadPath]: {
+        [config.cachePath]: {
           "cdf42c077fe6037681ae3c003550c2c5": "some content"
         },
         [config.headersDBPath]: ""
@@ -186,7 +189,7 @@ describe("/files endpoint", () => {
     it("should return an error if file exists but could not be read", (done) => {
       // Create file with no read permissions.
       mock({
-        [config.downloadPath]: {
+        [config.cachePath]: {
           "cdf42c077fe6037681ae3c003550c2c5": mock.file({
             content: "some content",
             mode: "0000"
@@ -201,7 +204,7 @@ describe("/files endpoint", () => {
           expect(res).to.have.status(500);
           expect(res.body).to.deep.equal({
             status: 500,
-            message: "EACCES, permission denied '" + config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5'"
+            message: "EACCES, permission denied '" + config.cachePath + "/cdf42c077fe6037681ae3c003550c2c5'"
           });
 
           done();

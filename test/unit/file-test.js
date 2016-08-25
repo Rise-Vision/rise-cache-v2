@@ -1,6 +1,7 @@
 "use strict";
 
-const chai = require("chai"),
+const fs = require("fs"),
+  chai = require("chai"),
   nock = require("nock"),
   mock = require("mock-fs"),
   sinon = require("sinon"),
@@ -29,6 +30,7 @@ describe("FileController", () => {
       // Mock the file system.
       mock({
         [config.downloadPath]: {},
+        [config.cachePath]: {},
         [config.headersDBPath]: "",
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
@@ -105,7 +107,7 @@ describe("FileController", () => {
 
       // Mock file system and create file in the download directory.
       mock({
-        [config.downloadPath]: {
+        [config.cachePath]: {
           "cdf42c077fe6037681ae3c003550c2c5": "some content"
         },
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
@@ -122,7 +124,7 @@ describe("FileController", () => {
 
       // Mock file system and create file in the download directory.
       mock({
-        [config.downloadPath]: {
+        [config.cachePath]: {
           "cdf42c077fe6037681ae3c003550c2c5": "some content"
         },
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
@@ -151,6 +153,49 @@ describe("FileController", () => {
       fileController.readFile();
     });
 
+  });
+
+  describe("move from download to cache", () => {
+
+    afterEach(() => {
+      mock.restore();
+    });
+
+    it("should move file to cache", () => {
+      let content = "some content";
+
+      // Mock file system and create file in the download directory.
+      mock({
+        [config.downloadPath]: {
+          "cdf42c077fe6037681ae3c003550c2c5": content
+        },
+        [config.cachePath]: {
+        }
+      });
+
+      fileController.moveFileFromDownloadToCache();
+
+      fs.readFile(config.cachePath + "/cdf42c077fe6037681ae3c003550c2c5", 'utf8', function(err, contents) {
+        expect(contents).to.equal(content);
+      });
+    });
+
+    it("should emit an err if there is an error on moving file", () => {
+
+      // Mock file system and create file in the download directory.
+      mock({
+        [config.downloadPath]: {
+        },
+        [config.cachePath]: {
+        }
+      });
+
+      fileController.moveFileFromDownloadToCache();
+
+      fileController.on("file-error", (err) => {
+        expect(err).to.not.be.null;
+      });
+    });
   });
 
   describe("getHeaders", () => {

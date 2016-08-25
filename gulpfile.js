@@ -2,7 +2,7 @@
 
 const eslint = require("gulp-eslint"),
   gulp = require("gulp"),
-  mocha = require("gulp-mocha");
+  mocha = require("gulp-spawn-mocha");
 
 gulp.task("lint", (cb) => {
   return gulp.src(["./**/*.js", "!node_modules/**", "!test/**", "!gulpfile.js"])
