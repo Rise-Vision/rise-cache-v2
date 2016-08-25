@@ -25,7 +25,21 @@ const FileRoute = function(app, proxy, headerDB) {
         if (cached) {
           // Get file from disk and stream to client.
           controller.on("read", (file) => {
-            file.pipe(res);
+
+            // Get file headers before streaming.
+            controller.getHeaders((err, headers) => {
+
+              if (err) {
+                console.error(err, url);
+              }
+
+              if (headers) {
+                const statusCode = 200;
+                res.writeHead(statusCode, headers);
+              }
+
+              file.pipe(res);
+            });
           });
 
           getFromCache(res, controller, fileUrl);
