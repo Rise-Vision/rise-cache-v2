@@ -11,7 +11,7 @@ const FileRoute = function(app, proxy, headerDB) {
     const fileUrl = req.query.url;
 
     if (fileUrl) {
-      const path = fileSystem.getPath(fileUrl),
+      const path = fileSystem.getPathInCache(fileUrl),
         header = new Header({}, headerDB),
         controller = new FileController(fileUrl, header);
 

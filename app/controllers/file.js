@@ -12,14 +12,15 @@ const FileController = function(url, header) {
   this.url = url;
   this.header = header;
   this.fileName = fileSystem.getFileName(this.url);
-  this.path = fileSystem.getPath(this.url);
+  this.pathInCache = fileSystem.getPathInCache(this.url);
+  this.pathInDownload = fileSystem.getPathInDownload(this.url);
 };
 
 util.inherits(FileController, EventEmitter);
 
 /* Read a file from disk. */
 FileController.prototype.readFile = function() {
-  let file = fs.createReadStream(this.path);
+  let file = fs.createReadStream(this.pathInCache);
 
   file.on("error", (err) => {
     this.emit("file-error", err);
@@ -30,11 +31,12 @@ FileController.prototype.readFile = function() {
 
 /* Write a file to disk. */
 FileController.prototype.writeFile = function(res) {
-  const file = fs.createWriteStream(this.path);
+  const file = fs.createWriteStream(this.pathInDownload);
 
   file.on("finish", () => {
     file.close(() => {
       this.saveHeaders(res.headers);
+      this.moveFileFromDownloadToCache();
       this.emit("downloaded");
     });
   }).on("error", (err) => {
@@ -44,9 +46,16 @@ FileController.prototype.writeFile = function(res) {
   res.pipe(file);
 };
 
+/* Move downloaded file form download folder to cache folder. */
+FileController.prototype.moveFileFromDownloadToCache = function() {
+  fileSystem.move(this.pathInDownload, this.pathInCache, (err) =>{
+    if (err) this.emit("file-error", err);
+  });
+};
+
 /* Handle error when writing to a file. */
 FileController.prototype.handleWriteError = function(type, err) {
-  fs.unlink(this.path);
+  fs.unlink(this.pathInDownload);
   this.emit(type, err);
 };
 

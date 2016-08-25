@@ -1,14 +1,13 @@
-const fs = require("fs"),
+const fs = require("fs-extra"),
   path = require("path"),
   crypto = require("crypto"),
-  mkdirp = require("mkdirp"),
   config = require("../../config/config");
 
 module.exports = {
 
   // Create directory if it does not already exist.
   createDir: function(dir) {
-    mkdirp(dir, (err) => {
+    fs.mkdirs(dir, (err) => {
       if (err) {
         // TODO: Directory could not be created.
       }
@@ -26,12 +25,20 @@ module.exports = {
     });
   },
 
+  move: function(from, to, cb) {
+    fs.move(from, to, cb);
+  },
+
   getFileName: function(url) {
     return url ? crypto.createHash("md5").update(url).digest("hex") : "";
   },
 
-  getPath: function(url) {
+  getPathInDownload: function(url) {
     return path.join(config.downloadPath, this.getFileName(url));
+  },
+
+  getPathInCache: function(url) {
+    return path.join(config.cachePath, this.getFileName(url));
   }
 
 };
