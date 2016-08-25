@@ -266,7 +266,7 @@ describe("FileController", () => {
 
       fileController = new FileController("http://example.com/logo.png", header);
 
-      fileController.isStale( (err, stale) => {
+      fileController.isStale(config.fileUpdateDuration, (err, stale) => {
         expect(stale).to.be.false;
         done();
       });
@@ -286,7 +286,7 @@ describe("FileController", () => {
       // tick clock by 15 minutes
       clock.tick(900000);
 
-      fileController.isStale( (err, stale) => {
+      fileController.isStale(config.fileUpdateDuration, (err, stale) => {
         expect(stale).to.be.true;
         done();
       });

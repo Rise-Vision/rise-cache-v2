@@ -5,7 +5,7 @@ const fileSystem = require("../helpers/file-system"),
   Header = require("../models/header"),
   url = require("url");
 
-const FileRoute = function(app, proxy, headerDB) {
+const FileRoute = function(app, proxy, headerDB, updateDuration) {
 
   app.get("/files", (req, res, next) => {
     const fileUrl = req.query.url;
@@ -45,7 +45,7 @@ const FileRoute = function(app, proxy, headerDB) {
           getFromCache(res, controller, fileUrl);
 
           // check if file is stale
-          controller.isStale((err, stale) => {
+          controller.isStale(updateDuration, (err, stale) => {
 
             if (err) {
               console.error(err, url);
@@ -59,7 +59,6 @@ const FileRoute = function(app, proxy, headerDB) {
                 //TODO: request file again using request library, not proxy
                 console.log("Request file from server again adding 'If-None-Match' header with etag value", headers.etag);
               });
-
 
             }
 
