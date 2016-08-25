@@ -23,7 +23,7 @@ describe("/files endpoint", () => {
       [config.cachePath]: {}
     });
     headerDB = new Database(config.headersDBPath);
-    require("../../app/routes/file")(server.app, server.proxy, headerDB.db);
+    require("../../app/routes/file")(server.app, headerDB.db);
 
     server.init();
   });

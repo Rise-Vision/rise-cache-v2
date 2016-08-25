@@ -2,10 +2,9 @@
 
 const fileSystem = require("../helpers/file-system"),
   FileController = require("../controllers/file"),
-  Header = require("../models/header"),
-  url = require("url");
+  Header = require("../models/header");
 
-const FileRoute = function(app, proxy, headerDB, updateDuration) {
+const FileRoute = function(app, headerDB, updateDuration) {
 
   app.get("/files", (req, res, next) => {
     const fileUrl = req.query.url;
@@ -48,13 +47,13 @@ const FileRoute = function(app, proxy, headerDB, updateDuration) {
           controller.isStale(updateDuration, (err, stale) => {
 
             if (err) {
-              console.error(err, url);
+              console.error(err, fileUrl);
             }
 
             if (stale) {
 
               controller.getHeaders((err, headers) => {
-                if (err) { console.error(err, url); }
+                if (err) { console.error(err, fileUrl); }
 
                 //TODO: request file again using request library, not proxy
                 console.log("Request file from server again adding 'If-None-Match' header with etag value", headers.etag);
@@ -85,23 +84,6 @@ const FileRoute = function(app, proxy, headerDB, updateDuration) {
           });
 
           controller.downloadFile();
-          // TODO: Use proxy if file isDownloading.
-          // req.on("proxyRes", (proxyRes) => {
-          //   if (proxyRes.statusCode == 200) {
-          //     controller.writeFile(proxyRes);
-          //   }
-          // });
-
-          // req.on("proxyError", (err) => {
-          //   res.statusCode = 500;
-          //   next(err);
-          // });
-
-          // controller.on("downloaded", () => {
-          //   console.info("File Downloaded", fileUrl, new Date());
-          // });
-
-          // proxyRequest(req, res, fileUrl);
         }
       });
     } else {
@@ -119,20 +101,6 @@ const FileRoute = function(app, proxy, headerDB, updateDuration) {
   function getFromCache(res, controller, fileUrl) {
     controller.readFile();
     console.info("File exists in cache. Not downloading", fileUrl, new Date());
-  }
-
-  function proxyRequest(req, res, fileUrl) {
-    let parsedUrl = url.parse(fileUrl);
-
-    req.url = fileUrl;
-
-    proxy.web(req, res, {
-      prependPath: false,
-      target: fileUrl,
-      headers: {
-        host: parsedUrl.hostname
-      }
-    });
   }
 };
 
