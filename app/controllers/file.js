@@ -2,7 +2,6 @@
 
 const fs = require("fs"),
   fileSystem = require("../helpers/file-system"),
-  request = require("request"),
   EventEmitter = require("events").EventEmitter,
   util = require("util");
 
@@ -12,7 +11,8 @@ const FileController = function(url, header) {
   this.url = url;
   this.header = header;
   this.fileName = fileSystem.getFileName(this.url);
-  this.path = fileSystem.getPath(this.url);
+  this.pathInCache = fileSystem.getPathInCache(this.url);
+  this.pathInDownload = fileSystem.getPathInDownload(this.url);
 };
 
 util.inherits(FileController, EventEmitter);
@@ -36,7 +36,7 @@ FileController.prototype.downloadFile = function() {
 
 /* Read a file from disk. */
 FileController.prototype.readFile = function() {
-  let file = fs.createReadStream(this.path);
+  let file = fs.createReadStream(this.pathInCache);
 
   file.on("error", (err) => {
     this.emit("file-error", err);
@@ -47,11 +47,12 @@ FileController.prototype.readFile = function() {
 
 /* Write a file to disk. */
 FileController.prototype.writeFile = function(res) {
-  const file = fs.createWriteStream(this.path);
+  const file = fs.createWriteStream(this.pathInDownload);
 
   file.on("finish", () => {
     file.close(() => {
-      this.saveHeaders(res.headers, this.fileName);
+      this.saveHeaders(res.headers);
+      this.moveFileFromDownloadToCache();
       this.emit("downloaded");
     });
   }).on("error", (err) => {
@@ -60,6 +61,13 @@ FileController.prototype.writeFile = function(res) {
   });
 
   res.pipe(file);
+};
+
+/* Move downloaded file form download folder to cache folder. */
+FileController.prototype.moveFileFromDownloadToCache = function() {
+  fileSystem.move(this.pathInDownload, this.pathInCache, (err) =>{
+    if (err) this.emit("file-error", err);
+  });
 };
 
 FileController.prototype.saveHeaders = function(headers) {
@@ -76,6 +84,33 @@ FileController.prototype.getHeaders = function(cb) {
   this.header.findByKey(this.fileName, (err, newHeader) => {
     if (err) return cb(err);
     cb(null, newHeader.data.headers);
+  });
+};
+
+FileController.prototype.getTimestampData = function(cb) {
+  this.header.findByKey(this.fileName, (err, newHeader) => {
+    if (err) return cb(err);
+    cb(null, {
+      createdAt: newHeader.data.createdAt,
+      updatedAt: newHeader.data.updatedAt
+    });
+  });
+};
+
+FileController.prototype.isStale = function(updateDuration, cb) {
+  this.getTimestampData((err, timestamp) => {
+    if (err) return cb(err);
+
+    let now = new Date(),
+      passed = new Date(now - updateDuration),
+      prev;
+
+    if (err) return cb(err);
+
+    // use the updatedAt time from previous last save of headers
+    prev = new Date(timestamp.updatedAt);
+
+    cb(null, prev < passed);
   });
 };
 

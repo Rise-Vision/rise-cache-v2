@@ -10,6 +10,6 @@ server.init();
 server.start();
 
 require("./app/routes/ping")(server.app, pkg);
-require("./app/routes/file")(server.app, server.proxy, headerDB.db);
+require("./app/routes/file")(server.app, server.proxy, headerDB.db, config.fileUpdateDuration);
 
 server.app.use(error.handleError);

@@ -1,6 +1,7 @@
 "use strict";
 
-const mock = require("mock-fs"),
+const fs = require("fs"),
+  mock = require("mock-fs"),
   chai = require("chai"),
   fileSystem = require("../../app/helpers/file-system"),
   config = require("../../config/config"),
@@ -30,6 +31,48 @@ describe("fileExists", () => {
 
 });
 
+describe("move", () => {
+
+  it("should move file", () => {
+    mock({
+      "from": {
+        "file.txt": "some content"
+      },
+      "to": {}
+    });
+
+    fileSystem.move("from/file.txt", "to/file.txt", (err) => {
+      expect(err).to.be.null;
+      fileSystem.fileExists("to/file.txt", (exists) => {
+        expect(exists).to.be.true;
+        mock.restore();
+      });
+    });
+  });
+
+  it("should replace file", () => {
+    let newContent = "some content";
+    mock({
+      "from": {
+        "file.txt": newContent
+      },
+      "to": {
+        "file.txt": "another content"
+      }
+    });
+
+    fileSystem.move("from/file.txt", "to/file.txt", (err) => {
+      expect(err).to.be.null;
+
+      fs.readFile("to/file.txt", 'utf8', function(err, contents) {
+        expect(contents).to.equal(newContent);
+        mock.restore();
+      });
+    });
+  });
+
+});
+
 describe("getFileName", () => {
 
   it("should return an encoded file name given a url", () => {
@@ -42,11 +85,20 @@ describe("getFileName", () => {
 
 });
 
-describe("getPath", () => {
+describe("getPathInDownload", () => {
 
   it("should return the path given a url", () => {
-    expect(fileSystem.getPath("http://example.com/logo.png"))
+    expect(fileSystem.getPathInDownload("http://example.com/logo.png"))
       .to.equal(config.downloadPath + "/" + "cdf42c077fe6037681ae3c003550c2c5");
+  });
+
+});
+
+describe("getPathInCache", () => {
+
+  it("should return the path given a url", () => {
+    expect(fileSystem.getPathInCache("http://example.com/logo.png"))
+      .to.equal(config.cachePath + "/" + "cdf42c077fe6037681ae3c003550c2c5");
   });
 
 });

@@ -19,6 +19,8 @@ const ServerFactory = function(config) {
     });
 
     fileSystem.createDir(config.downloadPath);
+    fileSystem.createDir(config.cachePath);
+
   };
 
   const start = () => {
