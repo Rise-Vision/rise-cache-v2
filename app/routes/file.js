@@ -10,8 +10,7 @@ const FileRoute = function(app, headerDB, updateDuration) {
     const fileUrl = req.query.url;
 
     if (fileUrl) {
-      const path = fileSystem.getPathInCache(fileUrl),
-        header = new Header({}, headerDB),
+      const header = new Header({}, headerDB),
         controller = new FileController(fileUrl, header);
 
       controller.on("file-error", (err) => {
@@ -20,7 +19,7 @@ const FileRoute = function(app, headerDB, updateDuration) {
       });
 
       // Check if the file is cached.
-      isCached(path, (cached) => {
+      fileSystem.isCached(fileUrl, (cached) => {
         if (cached) {
           // Get file from disk and stream to client.
           controller.on("read", (file) => {
@@ -64,26 +63,28 @@ const FileRoute = function(app, headerDB, updateDuration) {
           });
 
         } else {
-          // Download the file.
-          controller.on("request-error", (err) => {
-            res.statusCode = 500;
+          // Check if the file is downloading.
+          fileSystem.isDownloading(fileUrl, (downloading) => {
+            if (downloading) {
+              sendResponse(res, fileUrl);
+            } else {
+              // Download the file.
+              controller.on("downloaded", () => {
+                console.info("File Downloaded", fileUrl, new Date());
+              });
 
-            console.error(err, fileUrl, new Date());
-            next(err);
+              controller.on("request-error", (err) => {
+                res.statusCode = 500;
+
+                console.error(err, fileUrl, new Date());
+                next(err);
+              });
+
+              controller.downloadFile();
+              sendResponse(res, fileUrl);
+            }
+
           });
-
-          controller.on("stream", (downloadRes) => {
-            const statusCode = downloadRes.statusCode || 500;
-
-            res.writeHead(statusCode, downloadRes.headers);
-            downloadRes.pipe(res);
-          });
-
-          controller.on("downloaded", () => {
-            console.info("File Downloaded", fileUrl, new Date());
-          });
-
-          controller.downloadFile();
         }
       });
     } else {
@@ -92,15 +93,19 @@ const FileRoute = function(app, headerDB, updateDuration) {
     }
   });
 
-  function isCached(path, cb) {
-    fileSystem.fileExists(path, (exists) => {
-      cb(exists);
-    });
-  }
-
   function getFromCache(res, controller, fileUrl) {
     controller.readFile();
     console.info("File exists in cache. Not downloading", fileUrl, new Date());
+  }
+
+  function sendResponse(res, fileUrl) {
+    res.status(202)
+      .send({
+        status: "202",
+        message: "File is downloading"
+      });
+
+    console.info("File is downloading", fileUrl, new Date());
   }
 };
 

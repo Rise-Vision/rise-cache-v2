@@ -26,8 +26,6 @@ FileController.prototype.downloadFile = function() {
         if (res.statusCode == 200) {
           this.writeFile(res);
         }
-
-        this.emit("stream", res);
       })
       .on("error", (err) => {
         this.emit("request-error", err);
