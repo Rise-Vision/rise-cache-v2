@@ -43,11 +43,11 @@ const FileRoute = function(app, headerDB, updateDuration) {
 
             if (stale) {
 
-              controller.getHeaders((err, headers) => {
+              controller.getUpdateHeaderField((err, field) => {
                 if (err) { console.error(err, fileUrl); }
 
                 //TODO: request file again using request library, not proxy
-                console.log("Request file from server again adding 'If-None-Match' header with etag value", headers.etag);
+                console.log("Request file from server again with header field", field);
               });
             }
           });

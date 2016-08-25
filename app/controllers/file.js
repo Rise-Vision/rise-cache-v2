@@ -134,4 +134,23 @@ FileController.prototype.isStale = function(updateDuration, cb) {
   });
 };
 
+FileController.prototype.getUpdateHeaderField = function(cb) {
+  this.getHeaders((err, headers) => {
+    if (err) return cb(err);
+
+    let header = {};
+
+    // prioritize using etag
+    if (headers.hasOwnProperty("etag") && headers.etag !== "") {
+      header["If-None-Match"] = headers.etag;
+    }
+    else if (headers.hasOwnProperty("last-modified")) {
+      header["If-Modified-Since"] = headers["last-modified"];
+    }
+
+    return cb(null, header);
+
+  });
+};
+
 module.exports = FileController;
