@@ -2,7 +2,6 @@
 
 const fs = require("fs"),
   fileSystem = require("../helpers/file-system"),
-  request = require("request"),
   EventEmitter = require("events").EventEmitter,
   util = require("util");
 
@@ -64,6 +63,33 @@ FileController.prototype.getHeaders = function(cb) {
   this.header.findByKey(this.fileName, (err, newHeader) => {
     if (err) return cb(err);
     cb(null, newHeader.data.headers);
+  });
+};
+
+FileController.prototype.getTimestampData = function(cb) {
+  this.header.findByKey(this.fileName, (err, newHeader) => {
+    if (err) return cb(err);
+    cb(null, {
+      createdAt: newHeader.data.createdAt,
+      updatedAt: newHeader.data.updatedAt
+    });
+  });
+};
+
+FileController.prototype.isStale = function(updateDuration, cb) {
+  this.getTimestampData((err, timestamp) => {
+    if (err) return cb(err);
+
+    let now = new Date(),
+      passed = new Date(now - updateDuration),
+      prev;
+
+    if (err) return cb(err);
+
+    // use the updatedAt time from previous last save of headers
+    prev = new Date(timestamp.updatedAt);
+
+    cb(null, prev < passed);
   });
 };
 

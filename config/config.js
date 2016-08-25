@@ -6,5 +6,6 @@ module.exports = {
   port: 9494,
   url: "localhost",
   downloadPath: path.join(riseCachePath,"download"),
-  headersDBPath: path.join(riseCachePath,"database","headers.db")
+  headersDBPath: path.join(riseCachePath,"database","headers.db"),
+  fileUpdateDuration: 1200000 // 20 minutes
 };

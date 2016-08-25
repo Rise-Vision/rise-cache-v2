@@ -195,4 +195,102 @@ describe("FileController", () => {
     });
 
   });
+
+  describe("getTimestampData", () => {
+
+    it("should return an object with timestamp data from DB", (done) => {
+      const newHeader = {data: {key: "test", createdAt: 1472140800000, updatedAt: 1472133000000, headers: {etag: "etag"}}};
+      header = {
+        findByKey: function (key, cb) {
+          cb(null, newHeader);
+        }
+      };
+
+      fileController = new FileController("http://example.com/logo.png", header);
+
+      let headerFindByKeySpy = sinon.spy(header, "findByKey");
+
+      fileController.getTimestampData( (err, timestamp) => {
+        expect(headerFindByKeySpy.calledOnce).to.be.true;
+        expect(timestamp).to.deep.equal({
+          createdAt: newHeader.data.createdAt,
+          updatedAt: newHeader.data.updatedAt
+        });
+        done();
+      });
+    });
+
+    it("should return an error if there is an error on getting timestamp data from DB", (done) => {
+      let errorMessage = "Error getting timestamp data";
+      header = {
+        findByKey: function (key, cb) {
+          cb(new Error(errorMessage));
+        }
+      };
+
+      fileController = new FileController("http://example.com/logo.png", header);
+
+      let headerFindByKeySpy = sinon.spy(header, "findByKey");
+
+      fileController.getTimestampData( (err, timestamp) => {
+        expect(headerFindByKeySpy.calledOnce).to.be.true;
+        expect(timestamp).to.be.undefined;
+        expect(err.message).to.equal(errorMessage);
+        done();
+      });
+    });
+
+  });
+
+  describe("isStale", () => {
+
+    let clock, date;
+
+    before(() => {
+      date = new Date(1472133600000);
+      clock = sinon.useFakeTimers(date.getTime());
+    });
+
+    after(() => {
+      clock.restore();
+    });
+
+    it("should return false when last time checked is less than 20 mins", (done) => {
+      // updatedAt is 10 minutes less than current time
+      const newHeader = {data: {key: "test", createdAt: 1472140800000, updatedAt: 1472133000000, headers: {etag: "etag"}}};
+      header = {
+        findByKey: function (key, cb) {
+          cb(null, newHeader);
+        }
+      };
+
+      fileController = new FileController("http://example.com/logo.png", header);
+
+      fileController.isStale(config.fileUpdateDuration, (err, stale) => {
+        expect(stale).to.be.false;
+        done();
+      });
+    });
+
+    it("should return true when last time checked is more than 20 mins", (done) => {
+      // updatedAt is 10 minutes less than current time
+      const newHeader = {data: {key: "test", createdAt: 1472140800000, updatedAt: 1472133000000, headers: {etag: "etag"}}};
+      header = {
+        findByKey: function (key, cb) {
+          cb(null, newHeader);
+        }
+      };
+
+      fileController = new FileController("http://example.com/logo.png", header);
+
+      // tick clock by 15 minutes
+      clock.tick(900000);
+
+      fileController.isStale(config.fileUpdateDuration, (err, stale) => {
+        expect(stale).to.be.true;
+        done();
+      });
+    });
+
+  });
 });
