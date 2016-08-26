@@ -65,7 +65,7 @@ describe("FileController", () => {
       });
     });
 
-    it("should fire a downloaded event", (done) => {
+    it("should emit 'downloaded' event", (done) => {
       nock("http://example.com")
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png");
@@ -78,46 +78,14 @@ describe("FileController", () => {
       });
     });
 
-    it("should fire a stream event", (done) => {
-      nock("http://example.com")
-        .get("/logo.png")
-        .replyWithFile(200, "/data/logo.png");
-
+    it("should emit 'request-error' event if file server responds with an error", (done) => {
       fileController.downloadFile();
 
-      fileController.on("stream", (downloadRes) => {
-        expect(downloadRes.statusCode).to.equal(200, "status code");
+      fileController.on("request-error", (err) => {
+        expect(err).to.not.be.null;
+        expect(err.status).to.equal(404);
+
         done();
-      });
-    });
-
-    it("should fire a stream event with correct status code", (done) => {
-      nock("http://example.com")
-        .get("/logo.png")
-        .reply(404);
-
-      fileController.downloadFile();
-
-      fileController.on("stream", (downloadRes) => {
-        expect(downloadRes.statusCode).to.equal(404, "status code");
-        done();
-      });
-    });
-
-    it("should not save file if status code is not 200", (done) => {
-      nock("http://example.com")
-        .get("/logo.png")
-        .reply(404);
-
-      fileController.downloadFile();
-
-      fileController.on("stream", (resFromDownload) => {
-        const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
-          expect(err).to.not.be.null;
-          expect(stats).to.be.undefined;
-
-          done();
-        });
       });
     });
 

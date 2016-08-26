@@ -74,10 +74,7 @@ const FileRoute = function(app, headerDB, updateDuration) {
               });
 
               controller.on("request-error", (err) => {
-                res.statusCode = 500;
-
                 console.error(err, fileUrl, new Date());
-                next(err);
               });
 
               controller.downloadFile();
@@ -101,7 +98,7 @@ const FileRoute = function(app, headerDB, updateDuration) {
   function sendResponse(res, fileUrl) {
     res.status(202)
       .send({
-        status: "202",
+        status: 202,
         message: "File is downloading"
       });
 
