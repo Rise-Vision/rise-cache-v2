@@ -55,7 +55,7 @@ FileController.prototype.writeFile = function(res) {
       this.emit("downloaded");
     });
   }).on("error", (err) => {
-    fs.unlink(this.path);
+    fs.unlink(this.pathInDownload);
     this.emit("file-error", err);
   });
 
