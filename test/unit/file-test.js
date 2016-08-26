@@ -21,7 +21,7 @@ describe("FileController", () => {
     };
 
   beforeEach(() => {
-    fileController = new FileController("http://example.com/logo.png", header);
+    fileController = new FileController("http://abc123.com/logo.png", header);
   });
 
   describe("downloadFile", () => {
@@ -47,7 +47,7 @@ describe("FileController", () => {
     it("should save downloaded file to disk with encrypted file name", (done) => {
       let headerSaveSpy = sinon.spy(header, "save");
 
-      nock("http://example.com")
+      nock("http://abc123.com")
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png");
 
@@ -66,7 +66,7 @@ describe("FileController", () => {
     });
 
     it("should emit 'downloaded' event", (done) => {
-      nock("http://example.com")
+      nock("http://abc123.com")
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png");
 
@@ -83,7 +83,6 @@ describe("FileController", () => {
 
       fileController.on("request-error", (err) => {
         expect(err).to.not.be.null;
-        expect(err.status).to.equal(404);
 
         done();
       });
@@ -121,11 +120,11 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       let headerSaveSpy = sinon.spy(header, "save");
 
-      nock("http://example.com")
+      nock("http://abc123.com")
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png");
 
@@ -144,11 +143,11 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       let headerSaveSpy = sinon.spy(header, "save");
 
-      nock("http://example.com")
+      nock("http://abc123.com")
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png");
 
@@ -275,7 +274,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
@@ -294,7 +293,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
@@ -318,7 +317,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
@@ -340,7 +339,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
@@ -376,7 +375,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       fileController.isStale(config.fileUpdateDuration, (err, stale) => {
         expect(stale).to.be.false;
@@ -393,7 +392,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       // tick clock by 15 minutes
       clock.tick(900000);
