@@ -102,3 +102,57 @@ describe("getPathInCache", () => {
   });
 
 });
+
+describe("isCached", () => {
+
+  it("should return true if file is found in the cache folder", (done) => {
+    mock({
+      [config.cachePath]: {
+        "cdf42c077fe6037681ae3c003550c2c5": "some content"
+      }
+    });
+
+    fileSystem.isCached("http://example.com/logo.png", (isCached) => {
+      expect(isCached).to.be.true;
+
+      mock.restore();
+      done();
+    });
+  });
+
+  it("should return false if file is not found in the cache folder", (done) => {
+    fileSystem.isCached("http://example.com/logo.png", (isCached) => {
+      expect(isCached).to.be.false;
+
+      done();
+    });
+  });
+
+});
+
+describe("isDownloading", () => {
+
+  it("should return true if file is found in the download folder", (done) => {
+    mock({
+      [config.downloadPath]: {
+        "cdf42c077fe6037681ae3c003550c2c5": "some content"
+      }
+    });
+
+    fileSystem.isDownloading("http://example.com/logo.png", (isDownloading) => {
+      expect(isDownloading).to.be.true;
+
+      mock.restore();
+      done();
+    });
+  });
+
+  it("should return false if file is not found in the download folder", (done) => {
+    fileSystem.isDownloading("http://example.com/logo.png", (isDownloading) => {
+      expect(isDownloading).to.be.false;
+
+      done();
+    });
+  });
+
+});

@@ -39,6 +39,18 @@ module.exports = {
 
   getPathInCache: function(url) {
     return path.join(config.cachePath, this.getFileName(url));
+  },
+
+  isCached: function(url, cb) {
+    this.fileExists(this.getPathInCache(url), (exists) => {
+      cb(exists);
+    });
+  },
+
+  isDownloading: function(url, cb) {
+    this.fileExists(this.getPathInDownload(url), (exists) => {
+      cb(exists);
+    });
   }
 
 };

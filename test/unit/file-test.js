@@ -21,7 +21,74 @@ describe("FileController", () => {
     };
 
   beforeEach(() => {
-    fileController = new FileController("http://example.com/logo.png", header);
+    fileController = new FileController("http://abc123.com/logo.png", header);
+  });
+
+  describe("downloadFile", () => {
+
+    beforeEach(() => {
+      // Mock the file system.
+      mock({
+        [config.downloadPath]: {},
+        [config.cachePath]: {},
+        [config.headersDBPath]: "",
+        "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
+      });
+
+    });
+
+    afterEach(() => {
+      mock.restore();
+    });
+
+    after(() => {
+      nock.restore();
+    });
+
+    it("should save downloaded file to disk with encrypted file name", (done) => {
+      let headerSaveSpy = sinon.spy(header, "save");
+
+      nock("http://abc123.com")
+        .get("/logo.png")
+        .replyWithFile(200, "/data/logo.png");
+
+      fileController.downloadFile();
+
+      fileController.on("downloaded", () => {
+        const stats = fs.stat(config.downloadPath + "/0e36e4d268b63fd0573185fe3a9e01f0", (err, stats) => {
+          expect(err).to.be.null;
+          expect(stats).to.not.be.null;
+          expect(stats.isFile()).to.be.true;
+          expect(headerSaveSpy.calledOnce).to.be.true;
+
+          done();
+        });
+      });
+    });
+
+    it("should emit 'downloaded' event", (done) => {
+      nock("http://abc123.com")
+        .get("/logo.png")
+        .replyWithFile(200, "/data/logo.png");
+
+      fileController.downloadFile();
+
+      fileController.on("downloaded", () => {
+        expect(true).to.be.true;
+        done();
+      });
+    });
+
+    it("should emit 'request-error' event if file server responds with an error", (done) => {
+      fileController.downloadFile();
+
+      fileController.on("request-error", (err) => {
+        expect(err).to.not.be.null;
+
+        done();
+      });
+    });
+
   });
 
   describe("saveHeaders", () => {
@@ -54,11 +121,11 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       let headerSaveSpy = sinon.spy(header, "save");
 
-      nock("http://example.com")
+      nock("http://abc123.com")
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png");
 
@@ -77,11 +144,11 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       let headerSaveSpy = sinon.spy(header, "save");
 
-      nock("http://example.com")
+      nock("http://abc123.com")
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png");
 
@@ -108,7 +175,7 @@ describe("FileController", () => {
       // Mock file system and create file in the download directory.
       mock({
         [config.cachePath]: {
-          "cdf42c077fe6037681ae3c003550c2c5": "some content"
+          "0e36e4d268b63fd0573185fe3a9e01f0": "some content"
         },
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
@@ -125,7 +192,7 @@ describe("FileController", () => {
       // Mock file system and create file in the download directory.
       mock({
         [config.cachePath]: {
-          "cdf42c077fe6037681ae3c003550c2c5": "some content"
+          "0e36e4d268b63fd0573185fe3a9e01f0": "some content"
         },
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
@@ -167,7 +234,7 @@ describe("FileController", () => {
       // Mock file system and create file in the download directory.
       mock({
         [config.downloadPath]: {
-          "cdf42c077fe6037681ae3c003550c2c5": content
+          "0e36e4d268b63fd0573185fe3a9e01f0": content
         },
         [config.cachePath]: {
         }
@@ -175,7 +242,7 @@ describe("FileController", () => {
 
       fileController.moveFileFromDownloadToCache();
 
-      fs.readFile(config.cachePath + "/cdf42c077fe6037681ae3c003550c2c5", 'utf8', function(err, contents) {
+      fs.readFile(config.cachePath + "/0e36e4d268b63fd0573185fe3a9e01f0", 'utf8', function(err, contents) {
         expect(contents).to.equal(content);
       });
     });
@@ -208,7 +275,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
@@ -227,7 +294,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
@@ -251,7 +318,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
@@ -273,7 +340,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
@@ -309,7 +376,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       fileController.isStale(config.fileUpdateDuration, (err, stale) => {
         expect(stale).to.be.false;
@@ -326,7 +393,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header);
 
       // tick clock by 15 minutes
       clock.tick(900000);
@@ -338,4 +405,5 @@ describe("FileController", () => {
     });
 
   });
+
 });

@@ -20,7 +20,6 @@
   "dependencies": {
     "express": "^4.14.0",
     "fs-extra": "^0.30.0",
-    "http-proxy": "^1.14.0",
     "nedb": "^1.8.0",
     "request": "^2.74.0"
   },
@@ -30,6 +29,7 @@
     "gulp": "^3.9.1",
     "gulp-eslint": "^3.0.1",
     "gulp-spawn-mocha": "^3.1.0",
+    "mocha": "^3.0.2",
     "mock-fs": "^3.5.0",
     "nock": "^8.0.0",
     "sinon": "^1.17.5"
