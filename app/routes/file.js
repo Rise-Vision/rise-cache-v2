@@ -22,25 +22,17 @@ const FileRoute = function(app, headerDB, updateDuration) {
       fileSystem.isCached(fileUrl, (cached) => {
         if (cached) {
           // Get file from disk and stream to client.
-          controller.on("read", (file) => {
+          controller.getHeaders((err, headers) => {
 
-            // Get file headers before streaming.
-            controller.getHeaders((err, headers) => {
+            if (err) {
+              console.error(err, fileUrl);
+            }
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Cache-Control", "no-cache");
 
-              if (err) {
-                console.error(err, fileUrl, new Date());
-              }
+            getFromCache(req, res, controller, fileUrl, headers);
 
-              if (headers) {
-                const statusCode = 200;
-                res.writeHead(statusCode, headers);
-              }
-
-              file.pipe(res);
-            });
           });
-
-          getFromCache(res, controller, fileUrl);
 
           // check if file is stale
           controller.isStale(updateDuration, (err, stale) => {
@@ -57,9 +49,7 @@ const FileRoute = function(app, headerDB, updateDuration) {
                 //TODO: request file again using request library, not proxy
                 console.log("Request file from server again adding 'If-None-Match' header with etag value", headers.etag);
               });
-
             }
-
           });
 
         } else {
@@ -94,8 +84,8 @@ const FileRoute = function(app, headerDB, updateDuration) {
     }
   });
 
-  function getFromCache(res, controller, fileUrl) {
-    controller.readFile();
+  function getFromCache(req, res, controller, fileUrl, headers) {
+    controller.streamFile(req, res, headers);
     console.info("File exists in cache. Not downloading", fileUrl, new Date());
   }
 

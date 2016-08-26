@@ -4,7 +4,8 @@ const fs = require("fs"),
   request = require("request"),
   fileSystem = require("../helpers/file-system"),
   EventEmitter = require("events").EventEmitter,
-  util = require("util");
+  util = require("util"),
+  send = require("send");
 
 const FileController = function(url, header) {
   EventEmitter.call(this);
@@ -34,14 +35,34 @@ FileController.prototype.downloadFile = function() {
 };
 
 /* Read a file from disk. */
-FileController.prototype.readFile = function() {
-  let file = fs.createReadStream(this.pathInCache);
+FileController.prototype.streamFile = function(req, res, headers) {
 
-  file.on("error", (err) => {
+  const option = {
+    acceptRanges: true,
+    cacheControl: true,
+    etag: false,
+    lastModified: false,
+    maxAge:0
+  };
+
+  send(req, this.pathInCache, option)
+  .on("error", (err) => {
     this.emit("file-error", err);
-  });
-
-  this.emit("read", file);
+  })
+  .on("headers", (res) => {
+    if (headers) {
+      if (headers["content-type"]) {
+        res.setHeader("Content-Type", headers["content-type"]);
+      }
+      if (headers["etag"]) {
+        res.setHeader("ETag", headers["etag"]);
+      }
+      if (headers["last-modified"]) {
+        res.setHeader("Last-Modified", headers["last-modified"]);
+      }
+    }
+  })
+  .pipe(res);
 };
 
 /* Write a file to disk. */
