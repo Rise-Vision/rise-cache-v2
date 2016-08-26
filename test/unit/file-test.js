@@ -30,6 +30,7 @@ describe("FileController", () => {
       // Mock the file system.
       mock({
         [config.downloadPath]: {},
+        [config.cachePath]: {},
         [config.headersDBPath]: "",
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
@@ -54,12 +55,12 @@ describe("FileController", () => {
       fileController.downloadFile();
 
       fileController.on("downloaded", () => {
-        const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
+        const stats = fs.stat(config.downloadPath + "/0e36e4d268b63fd0573185fe3a9e01f0", (err, stats) => {
           expect(err).to.be.null;
           expect(stats).to.not.be.null;
           expect(stats.isFile()).to.be.true;
-
           expect(headerSaveSpy.calledOnce).to.be.true;
+
           done();
         });
       });
@@ -174,7 +175,7 @@ describe("FileController", () => {
       // Mock file system and create file in the download directory.
       mock({
         [config.cachePath]: {
-          "cdf42c077fe6037681ae3c003550c2c5": "some content"
+          "0e36e4d268b63fd0573185fe3a9e01f0": "some content"
         },
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
@@ -191,7 +192,7 @@ describe("FileController", () => {
       // Mock file system and create file in the download directory.
       mock({
         [config.cachePath]: {
-          "cdf42c077fe6037681ae3c003550c2c5": "some content"
+          "0e36e4d268b63fd0573185fe3a9e01f0": "some content"
         },
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
@@ -233,7 +234,7 @@ describe("FileController", () => {
       // Mock file system and create file in the download directory.
       mock({
         [config.downloadPath]: {
-          "cdf42c077fe6037681ae3c003550c2c5": content
+          "0e36e4d268b63fd0573185fe3a9e01f0": content
         },
         [config.cachePath]: {
         }
@@ -241,7 +242,7 @@ describe("FileController", () => {
 
       fileController.moveFileFromDownloadToCache();
 
-      fs.readFile(config.cachePath + "/cdf42c077fe6037681ae3c003550c2c5", 'utf8', function(err, contents) {
+      fs.readFile(config.cachePath + "/0e36e4d268b63fd0573185fe3a9e01f0", 'utf8', function(err, contents) {
         expect(contents).to.equal(content);
       });
     });
@@ -404,4 +405,5 @@ describe("FileController", () => {
     });
 
   });
+
 });
