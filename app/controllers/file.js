@@ -65,7 +65,7 @@ FileController.prototype.writeFile = function(res) {
 /* Move downloaded file form download folder to cache folder. */
 FileController.prototype.moveFileFromDownloadToCache = function() {
   fileSystem.move(this.pathInDownload, this.pathInCache, (err) =>{
-    if (err) this.emit("file-error", err);
+    if (err) this.emit("move-file-error", err);
   });
 };
 

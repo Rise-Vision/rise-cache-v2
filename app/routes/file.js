@@ -77,6 +77,10 @@ const FileRoute = function(app, headerDB, updateDuration) {
                 console.error(err, fileUrl, new Date());
               });
 
+              controller.on("move-file-error", (err) => {
+                console.error(err, fileUrl, new Date());
+              });
+
               controller.downloadFile();
               sendResponse(res, fileUrl);
             }
