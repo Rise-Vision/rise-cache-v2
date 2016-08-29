@@ -7,7 +7,9 @@ const fs = require("fs"),
   sinon = require("sinon"),
   config = require("../../config/config"),
   FileController = require("../../app/controllers/file"),
-  expect = chai.expect;
+  expect = chai.expect,
+  httpMocks = require('node-mocks-http'),
+  EventEmitter = require("events").EventEmitter;
 
 describe("FileController", () => {
   let fileController,
@@ -163,14 +165,29 @@ describe("FileController", () => {
 
   });
 
-  describe("readFile", () => {
+  describe("streamFile", () => {
+    let res;
+
+    beforeEach(() => {
+      res = httpMocks.createResponse({
+        eventEmitter: EventEmitter
+      });
+    });
 
     afterEach(() => {
       mock.restore();
     });
 
-    it("should emit 'read' event", () => {
-      let readSpy = sinon.spy();
+    it("should stream file content", (done) => {
+      let content = "some content";
+
+      let req = httpMocks.createRequest({
+        method: "GET",
+        url: "/files",
+        params: {
+          url: "http://example.com/logo.png"
+        }
+      });
 
       // Mock file system and create file in the download directory.
       mock({
@@ -180,14 +197,25 @@ describe("FileController", () => {
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
 
-      fileController.on("read", readSpy);
-      fileController.readFile();
-
-      expect(readSpy.calledOnce).to.be.true;
+      fileController.streamFile(req, res);
+      res.on('end', function() {
+        expect(res._getData()).to.equal(content);
+        done();
+      });
     });
 
-    it ("should pass the file as an argument to the event listener", () =>  {
-      let readSpy = sinon.spy();
+    it ("should stream a range of the file content", (done) =>  {
+
+      let req = httpMocks.createRequest({
+        method: "GET",
+        url: "/files",
+        params: {
+          url: "http://example.com/logo.png"
+        },
+        headers: {
+          "range": "bytes= 5-12"
+        }
+      });
 
       // Mock file system and create file in the download directory.
       mock({
@@ -197,16 +225,27 @@ describe("FileController", () => {
         "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
 
-      fileController.on("read", readSpy);
-      fileController.readFile();
-
-      expect(readSpy.args[0].length).equal(1);
-      expect(readSpy.args[0][0]).to.be.an("object");
+      fileController.streamFile(req, res);
+      res.on('end', function() {
+        // Expected to get only the bytes 5-12
+        expect(res._getData()).to.be.equal("content");
+        done();
+      });
     });
 
     it("should emit 'file-error' event if file does not exist", (done) => {
-      let errorSpy = sinon.spy(),
-        handler;
+      let handler;
+
+      let req = httpMocks.createRequest({
+        method: "GET",
+        url: "/files",
+        params: {
+          url: "http://example.com/logo.png"
+        },
+        headers: {
+          "range": "bytes= 5-12"
+        }
+      });
 
       handler = (err) => {
         expect(err).to.not.be.null;
@@ -217,7 +256,7 @@ describe("FileController", () => {
       };
 
       fileController.on("file-error", handler);
-      fileController.readFile();
+      fileController.streamFile(req, res);
     });
 
   });
