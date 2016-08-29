@@ -20,12 +20,27 @@ const FileController = function(url, header) {
 util.inherits(FileController, EventEmitter);
 
 /* Download file and save to disk. */
-FileController.prototype.downloadFile = function() {
+FileController.prototype.downloadFile = function(opts) {
+  let options = {};
+
   if (this.url) {
-    request.get(this.url)
+
+    options.url = this.url;
+    options.headers = {
+      "User-Agent": "request"
+    };
+
+    if (opts) {
+      Object.assign(options.headers, opts);
+    }
+
+    request.get(options)
       .on("response", (res) => {
         if (res.statusCode == 200) {
           this.writeFile(res);
+        }
+        else if (res.statusCode == 304) {
+          this.saveHeaders(res.headers);
         }
       })
       .on("error", (err) => {

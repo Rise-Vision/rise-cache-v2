@@ -81,6 +81,31 @@ describe("FileController", () => {
       });
     });
 
+    it("should save headers when response is 304", (done) => {
+      let header = {
+        save: function (cb) {
+          cb(null, {});
+        },
+        set: function () {
+
+        }
+      };
+
+      fileController = new FileController("http://abc123.com/logo.png", header);
+
+      nock("http://abc123.com")
+        .get("/logo.png")
+        .replyWithFile(304, "/data/logo.png");
+
+      fileController.downloadFile();
+
+      fileController.on("headers", () => {
+        expect(true).to.be.true;
+        done();
+      });
+
+    });
+
     it("should emit 'request-error' event if file server responds with an error", (done) => {
       fileController.downloadFile();
 
