@@ -20,12 +20,27 @@ const FileController = function(url, header) {
 util.inherits(FileController, EventEmitter);
 
 /* Download file and save to disk. */
-FileController.prototype.downloadFile = function() {
+FileController.prototype.downloadFile = function(opts) {
+  let options = {};
+
   if (this.url) {
-    request.get(this.url)
+
+    options.url = this.url;
+    options.headers = {
+      "User-Agent": "request"
+    };
+
+    if (opts) {
+      Object.assign(options.headers, opts);
+    }
+
+    request.get(options)
       .on("response", (res) => {
         if (res.statusCode == 200) {
           this.writeFile(res);
+        }
+        else if (res.statusCode == 304) {
+          this.saveHeaders(res.headers);
         }
       })
       .on("error", (err) => {
@@ -131,6 +146,25 @@ FileController.prototype.isStale = function(updateDuration, cb) {
     prev = new Date(timestamp.updatedAt);
 
     cb(null, prev < passed);
+  });
+};
+
+FileController.prototype.getUpdateHeaderField = function(cb) {
+  this.getHeaders((err, headers) => {
+    if (err) return cb(err);
+
+    let header = {};
+
+    // prioritize using etag
+    if (headers.hasOwnProperty("etag") && headers.etag !== "") {
+      header["If-None-Match"] = headers.etag;
+    }
+    else if (headers.hasOwnProperty("last-modified")) {
+      header["If-Modified-Since"] = headers["last-modified"];
+    }
+
+    return cb(null, header);
+
   });
 };
 

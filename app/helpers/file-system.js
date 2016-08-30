@@ -26,7 +26,7 @@ module.exports = {
   },
 
   move: function(from, to, cb) {
-    fs.move(from, to, cb);
+    fs.move(from, to, {clobber: true}, cb);
   },
 
   getFileName: function(url) {

@@ -81,6 +81,31 @@ describe("FileController", () => {
       });
     });
 
+    it("should save headers when response is 304", (done) => {
+      let header = {
+        save: function (cb) {
+          cb(null, {});
+        },
+        set: function () {
+
+        }
+      };
+
+      fileController = new FileController("http://abc123.com/logo.png", header);
+
+      nock("http://abc123.com")
+        .get("/logo.png")
+        .replyWithFile(304, "/data/logo.png");
+
+      fileController.downloadFile();
+
+      fileController.on("headers", () => {
+        expect(true).to.be.true;
+        done();
+      });
+
+    });
+
     it("should emit 'request-error' event if file server responds with an error", (done) => {
       fileController.downloadFile();
 
@@ -445,4 +470,60 @@ describe("FileController", () => {
 
   });
 
+  describe("getUpdateHeaderField", () => {
+
+    it("should return 'If-None-Match' field when etag exists", (done) => {
+      const newHeader = {data: {key: "test", headers: {etag: "etag", "last-modified": "Thu, 25 Aug 2016 14:53:30 GMT"}}};
+      header = {
+        findByKey: function (key, cb) {
+          cb(null, newHeader);
+        }
+      };
+
+      fileController = new FileController("http://example.com/logo.png", header);
+
+      fileController.getUpdateHeaderField( (err, field) => {
+        expect(field).to.deep.equal({
+          "If-None-Match": newHeader.data.headers.etag
+        });
+        done();
+      });
+    });
+
+    it("should return 'If-Modified-Since' field when etag not present and use last-modified", (done) => {
+      const newHeader = {data: {key: "test", headers: {"last-modified": "Thu, 25 Aug 2016 14:53:30 GMT"}}};
+      header = {
+        findByKey: function (key, cb) {
+          cb(null, newHeader);
+        }
+      };
+
+      fileController = new FileController("http://example.com/logo.png", header);
+
+      fileController.getUpdateHeaderField( (err, field) => {
+        expect(field).to.deep.equal({
+          "If-Modified-Since": newHeader.data.headers["last-modified"]
+        });
+        done();
+      });
+    });
+
+    it("should return an error if there is an error on getting headers from DB", (done) => {
+      let errorMessage = "Error getting timestamp data";
+      header = {
+        findByKey: function (key, cb) {
+          cb(new Error(errorMessage));
+        }
+      };
+
+      fileController = new FileController("http://example.com/logo.png", header);
+
+      fileController.getUpdateHeaderField( (err, field) => {
+        expect(field).to.be.undefined;
+        expect(err.message).to.equal(errorMessage);
+        done();
+      });
+    });
+
+  });
 });

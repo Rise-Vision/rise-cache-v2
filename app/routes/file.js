@@ -43,11 +43,31 @@ const FileRoute = function(app, headerDB, updateDuration) {
 
             if (stale) {
 
-              controller.getHeaders((err, headers) => {
-                if (err) { console.error(err, fileUrl); }
+              // Check if the file is downloading.
+              fileSystem.isDownloading(fileUrl, (downloading) => {
+                if (!downloading) {
 
-                //TODO: request file again using request library, not proxy
-                console.log("Request file from server again adding 'If-None-Match' header with etag value", headers.etag);
+                  // get the appropriate header field for request
+                  controller.getUpdateHeaderField((err, field) => {
+                    if (err) { console.error(err, fileUrl); }
+
+                    controller.on("downloaded", () => {
+                      console.info("Latest File Downloaded", fileUrl, new Date());
+                    });
+
+                    controller.on("request-error", (err) => {
+                      console.error(err, fileUrl, new Date());
+                    });
+
+                    controller.on("move-file-error", (err) => {
+                      console.error(err, fileUrl, new Date());
+                    });
+
+                    // Make request to download file passing request header
+                    controller.downloadFile(field);
+                  });
+
+                }
               });
             }
           });
