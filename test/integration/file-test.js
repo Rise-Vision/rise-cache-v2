@@ -50,14 +50,14 @@ describe("/files endpoint", () => {
         [config.downloadPath]: {},
         [config.cachePath]: {},
         [config.headersDBPath]: "",
-        "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
+        "../data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
     });
 
     it("should return 202 with message while the file is downloading", (done) => {
       nock("http://example.com")
         .get("/logo.png")
-        .replyWithFile(200, "/data/logo.png", headers);
+        .replyWithFile(200, "../data/logo.png", headers);
 
       chai.request("http://localhost:9494")
         .get("/files")
@@ -113,12 +113,12 @@ describe("/files endpoint", () => {
         },
         [config.cachePath]: {},
         [config.headersDBPath]: "",
-        "/data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
+        "../data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
 
       nock("http://example.com")
         .get("/logo.png")
-        .replyWithFile(200, "/data/logo.png", headers);
+        .replyWithFile(200, "../data/logo.png", headers);
 
       chai.request("http://localhost:9494")
         .get("/files")

@@ -1,0 +1,195 @@
+{
+  "result": true,
+  "code": 200,
+  "files": [
+    {
+      "bucket": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013",
+      "cacheControl": "public, max-age=86400",
+      "contentType": "text/plain",
+      "crc32c": "AAAAAA==",
+      "etag": "CKiSkeLRv8gCEAY=",
+      "generation": "1444745868233000",
+      "id": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/Images/sdsu//1444745868233000",
+      "kind": "storage#object",
+      "md5Hash": "1B2M2Y8AsgTpgAmY7PhCfg==",
+      "mediaLink": "https://www.googleapis.com/download/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2F?generation=1444745868233000&alt=media",
+      "metageneration": "6",
+      "name": "Images/sdsu/",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2F",
+      "size": 0,
+      "storageClass": "STANDARD",
+      "updated": {
+        "value": "1472009441011",
+        "dateOnly": false,
+        "timeZoneShift": 0
+      },
+      "timeCreated": "2015-10-13T14:17:48.150Z",
+      "isThrottled": false
+    },
+    {
+      "bucket": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013",
+      "cacheControl": "public, max-age=86400",
+      "contentType": "image/jpeg",
+      "crc32c": "wx6Mmw==",
+      "etag": "CNi7++LRv8gCEAw=",
+      "generation": "1444745869975000",
+      "id": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/Images/sdsu/CoBank-logo.JPG/1444745869975000",
+      "kind": "storage#object",
+      "md5Hash": "PmtdgOEVJy4a86T0DUDRlg==",
+      "mediaLink": "https://www.googleapis.com/download/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2FCoBank-logo.JPG?generation=1444745869975000&alt=media",
+      "metadata": {
+        "thumbnail": "http://lh3.googleusercontent.com/pYcoj9pQEmUKtNWczRqwuGFBsu9P6cq32GicpMV14IjaMlUyAnoXOh2cSnaLKG-kZnr5QJa2rGsy45hppwOHIVQ"
+      },
+      "metageneration": "12",
+      "name": "Images/sdsu/CoBank-logo.JPG",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2FCoBank-logo.JPG",
+      "size": 111920,
+      "storageClass": "STANDARD",
+      "updated": {
+        "value": "1472488723988",
+        "dateOnly": false,
+        "timeZoneShift": 0
+      },
+      "timeCreated": "2015-10-13T14:17:49.974Z",
+      "isThrottled": false
+    },
+    {
+      "bucket": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013",
+      "cacheControl": "public, max-age=86400",
+      "contentType": "image/jpeg",
+      "crc32c": "6Nexng==",
+      "etag": "CJDAq+PRv8gCEAw=",
+      "generation": "1444745870762000",
+      "id": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/Images/sdsu/FDNB_blue_RGB.jpg/1444745870762000",
+      "kind": "storage#object",
+      "md5Hash": "syOnbEU8FwCv9MdGrF1pgA==",
+      "mediaLink": "https://www.googleapis.com/download/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2FFDNB_blue_RGB.jpg?generation=1444745870762000&alt=media",
+      "metadata": {
+        "thumbnail": "http://lh3.googleusercontent.com/f-GWGxYdymGJ2ByFALVntK8sX1Q8p7GlsS4jpuMf6J2OHR5rxpV6remMi7i5cANw6Tp5IgPCUxzY9-Hn_CuG"
+      },
+      "metageneration": "12",
+      "name": "Images/sdsu/FDNB_blue_RGB.jpg",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2FFDNB_blue_RGB.jpg",
+      "size": 132834,
+      "storageClass": "STANDARD",
+      "updated": {
+        "value": "1472488725077",
+        "dateOnly": false,
+        "timeZoneShift": 0
+      },
+      "timeCreated": "2015-10-13T14:17:50.760Z",
+      "isThrottled": false
+    },
+    {
+      "bucket": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013",
+      "cacheControl": "public, max-age=86400",
+      "contentType": "image/jpeg",
+      "crc32c": "suGCfA==",
+      "etag": "CIib1OPRv8gCEAw=",
+      "generation": "1444745871429000",
+      "id": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/Images/sdsu/chsFoundation.jpg/1444745871429000",
+      "kind": "storage#object",
+      "md5Hash": "DfM2874rsszG53JaSiNjVA==",
+      "mediaLink": "https://www.googleapis.com/download/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2FchsFoundation.jpg?generation=1444745871429000&alt=media",
+      "metadata": {
+        "thumbnail": "http://lh3.googleusercontent.com/LECjzjK7LegSGoifqp22zM7cHzJ_ljfnnIWzKxEK5BDN6LFX_Ftuhpf_H8tXyM55wuAA1XrweIX5ujtyRFjkH5Y"
+      },
+      "metageneration": "12",
+      "name": "Images/sdsu/chsFoundation.jpg",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2FchsFoundation.jpg",
+      "size": 55617,
+      "storageClass": "STANDARD",
+      "updated": {
+        "value": "1472488726194",
+        "dateOnly": false,
+        "timeZoneShift": 0
+      },
+      "timeCreated": "2015-10-13T14:17:51.428Z",
+      "isThrottled": false
+    },
+    {
+      "bucket": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013",
+      "cacheControl": "public, max-age=86400",
+      "contentType": "image/jpeg",
+      "crc32c": "q73epA==",
+      "etag": "CMjIs+LRv8gCEAw=",
+      "generation": "1444745868797000",
+      "id": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/Images/sdsu/farm-credit-services-agriculture-works-here-logo.jpg/1444745868797000",
+      "kind": "storage#object",
+      "md5Hash": "/sIbHBjIwtpvaIrEh2oD1w==",
+      "mediaLink": "https://www.googleapis.com/download/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2Ffarm-credit-services-agriculture-works-here-logo.jpg?generation=1444745868797000&alt=media",
+      "metadata": {
+        "thumbnail": "http://lh3.googleusercontent.com/tngVC7L9ocpsdruYm3-lw1yPk9wOf80H0ntEmV3It3NcdaAP9CiuZVcSVEazBn-hILju_-KsS3UTSA6LEsv3HQ"
+      },
+      "metageneration": "12",
+      "name": "Images/sdsu/farm-credit-services-agriculture-works-here-logo.jpg",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2Ffarm-credit-services-agriculture-works-here-logo.jpg",
+      "size": 13476,
+      "storageClass": "STANDARD",
+      "updated": {
+        "value": "1472488727193",
+        "dateOnly": false,
+        "timeZoneShift": 0
+      },
+      "timeCreated": "2015-10-13T14:17:48.796Z",
+      "isThrottled": false
+    },
+    {
+      "bucket": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013",
+      "cacheControl": "public, max-age=86400",
+      "contentType": "image/gif",
+      "crc32c": "PbesvQ==",
+      "etag": "CNi+9+PRv8gCEAw=",
+      "generation": "1444745872007000",
+      "id": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/Images/sdsu/sdaclogo800.gif/1444745872007000",
+      "kind": "storage#object",
+      "md5Hash": "Um1uD1ybGoUUw3/n1jFvmQ==",
+      "mediaLink": "https://www.googleapis.com/download/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2Fsdaclogo800.gif?generation=1444745872007000&alt=media",
+      "metadata": {
+        "thumbnail": "http://lh3.googleusercontent.com/IJc5KlltaMmp5KuUhjz4bbtOqX0CRi4f7h1l-q-CZBFHNsgHKp1VL_IbTBWX0rOC_6XxLotEzWlnghQfspm4QQ"
+      },
+      "metageneration": "12",
+      "name": "Images/sdsu/sdaclogo800.gif",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2Fsdaclogo800.gif",
+      "size": 24779,
+      "storageClass": "STANDARD",
+      "updated": {
+        "value": "1472488728186",
+        "dateOnly": false,
+        "timeZoneShift": 0
+      },
+      "timeCreated": "2015-10-13T14:17:52.006Z",
+      "isThrottled": false
+    },
+    {
+      "bucket": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013",
+      "cacheControl": "public, max-age=86400",
+      "contentType": "image/jpeg",
+      "crc32c": "LMtshA==",
+      "etag": "CMC11uLRv8gCEAw=",
+      "generation": "1444745869368000",
+      "id": "risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/Images/sdsu/wheatgrowers_logo.jpg/1444745869368000",
+      "kind": "storage#object",
+      "md5Hash": "+QQHeESOv80Z5VH30Bf6ug==",
+      "mediaLink": "https://www.googleapis.com/download/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2Fwheatgrowers_logo.jpg?generation=1444745869368000&alt=media",
+      "metadata": {
+        "thumbnail": "http://lh3.googleusercontent.com/nlQkHwDulbM374AiIykfIt481CZbcE3PvJZWGtMTF75Nq8r-JnTSFDirwzbzgk_0aZY7P0XSFwrKBnU8mhv9"
+      },
+      "metageneration": "12",
+      "name": "Images/sdsu/wheatgrowers_logo.jpg",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/Images%2Fsdsu%2Fwheatgrowers_logo.jpg",
+      "size": 113007,
+      "storageClass": "STANDARD",
+      "updated": {
+        "value": "1472488728883",
+        "dateOnly": false,
+        "timeZoneShift": 0
+      },
+      "timeCreated": "2015-10-13T14:17:49.367Z",
+      "isThrottled": false
+    }
+  ],
+  "bucketExists": true,
+  "kind": "storage#filesItem",
+  "etag": "\"6XzXMmlTndVQ5OgzBe7hlpI9J88/fPYO77oh1l39sigmtYZX9oM_J4Y\""
+}

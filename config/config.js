@@ -8,5 +8,6 @@ module.exports = {
   cachePath: path.join(riseCachePath,"cache"),
   downloadPath: path.join(riseCachePath,"download"),
   headersDBPath: path.join(riseCachePath,"database","headers.db"),
+  metadataDBPath: path.join(riseCachePath,"database","metadata.db"),
   fileUpdateDuration: 1200000 // 20 minutes
 };
