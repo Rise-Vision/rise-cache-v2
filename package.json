@@ -1,11 +1,12 @@
 {
   "name": "rise-cache-v2",
-  "version": "1.0.0",
+  "version": "0.0.3",
   "description": "Rise Cache for Rise Player",
-  "main": "server.js",
+  "main": "rise-cache.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "gulp test"
+    "start": "node rise-cache.js",
+    "test": "gulp test",
+    "2npm": "publish"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,7 @@
     "mock-fs": "^3.5.0",
     "nock": "^8.0.0",
     "node-mocks-http": "https://github.com/Rise-Vision/node-mocks-http.git",
+    "publish": "^0.6.0",
     "sinon": "^1.17.5"
   }
 }
