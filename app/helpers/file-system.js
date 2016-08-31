@@ -1,3 +1,5 @@
+"use strict";
+
 const fs = require("fs-extra"),
   path = require("path"),
   crypto = require("crypto"),
@@ -39,6 +41,16 @@ module.exports = {
 
   getPathInCache: function(url) {
     return path.join(config.cachePath, this.getFileName(url));
+  },
+
+  getAccessTime: function(url, cb) {
+    fs.stat(this.getPathInCache(url), (err, stats) => {
+      if (!err) {
+        cb(stats.atime);
+      } else {
+        cb(null);
+      }
+    });
   },
 
   isCached: function(url, cb) {

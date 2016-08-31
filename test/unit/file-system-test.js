@@ -103,6 +103,38 @@ describe("getPathInCache", () => {
 
 });
 
+describe("getAccessTime", () => {
+
+  it("should return the access time of a file", (done) => {
+    let now = new Date();
+
+    mock({
+      [config.cachePath]: {
+        "cdf42c077fe6037681ae3c003550c2c5": mock.file({
+          content: "some content",
+          atime: now
+        })
+      }
+    });
+
+    fileSystem.getAccessTime("http://example.com/logo.png", (accessTime) => {
+      expect(accessTime).to.equal(now);
+
+      mock.restore();
+      done();
+    });
+  });
+
+  it("should return null if the file does not exist", (done) => {
+    fileSystem.getAccessTime("http://example.com/logo.png", (accessTime) => {
+      expect(accessTime).to.be.null;
+
+      done();
+    });
+  });
+
+});
+
 describe("isCached", () => {
 
   it("should return true if file is found in the cache folder", (done) => {
