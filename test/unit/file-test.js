@@ -44,7 +44,7 @@ describe("FileController", () => {
     });
 
     after(() => {
-      nock.restore();
+      nock.cleanAll();
     });
 
     it("should save downloaded file to disk with encrypted file name", (done) => {
@@ -135,7 +135,7 @@ describe("FileController", () => {
     });
 
     after(() => {
-      nock.restore();
+      nock.cleanAll();
     });
 
     it("should not set key if there is already headers for it on db", () => {

@@ -13,7 +13,7 @@ gulp.task("lint", (cb) => {
 
 gulp.task("test", ["lint"], () =>
   gulp.src("test/**/*-test.js", {read: false})
-    .pipe(mocha({reporter: "nyan"}))
+    .pipe(mocha({reporter: "spec"}))
 );
 
 gulp.task("default", ["test"]);
