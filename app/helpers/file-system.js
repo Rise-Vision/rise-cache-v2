@@ -31,6 +31,17 @@ module.exports = {
     fs.move(from, to, {clobber: true}, cb);
   },
 
+  /* Delete a file. */
+  delete: function(path, cb) {
+    fs.unlink(path, (err) => {
+      if (err) {
+        cb(err);
+      } else {
+        cb();
+      }
+    });
+  },
+
   getFileName: function(url) {
     return url ? crypto.createHash("md5").update(url).digest("hex") : "";
   },
@@ -43,8 +54,9 @@ module.exports = {
     return path.join(config.cachePath, this.getFileName(url));
   },
 
-  getAccessTime: function(url, cb) {
-    fs.stat(this.getPathInCache(url), (err, stats) => {
+  /* Get the last access time of a file. */
+  getAccessTime: function(path, cb) {
+    fs.stat(path, (err, stats) => {
       if (!err) {
         cb(stats.atime);
       } else {
@@ -62,6 +74,20 @@ module.exports = {
   isDownloading: function(url, cb) {
     this.fileExists(this.getPathInDownload(url), (exists) => {
       cb(exists);
+    });
+  },
+
+  /* Check if a file has not been accessed within the past 7 days. */
+  isUnused: function(path, cb) {
+    this.getAccessTime(path, (accessTime) => {
+      if (accessTime) {
+        let now = new Date(),
+          lastWeek = now.setDate(now.getDate() - 7);
+
+        cb(accessTime.getTime() <= lastWeek);
+      } else {
+        cb(false);
+      }
     });
   }
 

@@ -117,7 +117,7 @@ describe("getAccessTime", () => {
       }
     });
 
-    fileSystem.getAccessTime("http://example.com/logo.png", (accessTime) => {
+    fileSystem.getAccessTime(config.cachePath + "/" + "cdf42c077fe6037681ae3c003550c2c5", (accessTime) => {
       expect(accessTime).to.equal(now);
 
       mock.restore();
@@ -126,7 +126,7 @@ describe("getAccessTime", () => {
   });
 
   it("should return null if the file does not exist", (done) => {
-    fileSystem.getAccessTime("http://example.com/logo.png", (accessTime) => {
+    fileSystem.getAccessTime(config.cachePath + "/" + "cdf42c077fe6037681ae3c003550c2c5", (accessTime) => {
       expect(accessTime).to.be.null;
 
       done();
