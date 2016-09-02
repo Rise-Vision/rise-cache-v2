@@ -1,4 +1,5 @@
 const config = require("./config/config");
+const cors = require("cors");
 const error = require("./app/middleware/error");
 const server = require("./app/server")(config);
 const pkg = require("./package.json");
@@ -7,6 +8,7 @@ const Database = require("./app/database");
 const headerDB = new Database(config.headersDBPath);
 const metadataDB = new Database(config.metadataDBPath);
 
+server.app.use(cors());
 
 server.init();
 server.start();
