@@ -73,6 +73,41 @@ describe("move", () => {
 
 });
 
+describe("delete", () => {
+
+  it("should delete a file", (done) => {
+    mock({
+      "test": {
+        "file.txt": "some content"
+      }
+    });
+
+    fileSystem.delete("test/file.txt", (err) => {
+
+      fs.stat("test/file.txt", (err, stats) => {
+        expect(stats).to.be.undefined;
+        expect(err).to.not.be.null;
+        expect(err.code).to.equal("ENOENT");  // No such file or directory.
+
+        mock.restore();
+        done();
+      });
+
+    });
+
+  });
+
+  it("should return an error if file could not be deleted", (done) => {
+    fileSystem.delete("test/file.txt", (err) => {
+      expect(err).to.not.be.null;
+      expect(err.code).to.equal("ENOENT");  // No such file or directory.
+
+      done();
+    });
+  });
+
+});
+
 describe("getFileName", () => {
 
   it("should return an encoded file name given a url", () => {
@@ -182,6 +217,48 @@ describe("isDownloading", () => {
   it("should return false if file is not found in the download folder", (done) => {
     fileSystem.isDownloading("http://example.com/logo.png", (isDownloading) => {
       expect(isDownloading).to.be.false;
+
+      done();
+    });
+  });
+
+});
+
+describe("isUnused", () => {
+
+  it("should return true if a file has not been accessed within the last 7 days", (done) => {
+    let now = new Date();
+
+    now.setDate(now.getDate() - 7);
+
+    mock({
+      [config.cachePath]: {
+        "cdf42c077fe6037681ae3c003550c2c5": mock.file({
+          content: "some content",
+          atime: now
+        })
+      }
+    });
+
+    fileSystem.isUnused(config.cachePath + "/" + "cdf42c077fe6037681ae3c003550c2c5", (isUnused) => {
+      expect(isUnused).to.be.true;
+
+      done();
+    });
+  });
+
+  it("should return false if a file has been accessed within the last 7 days", (done) => {
+    mock({
+      [config.cachePath]: {
+        "cdf42c077fe6037681ae3c003550c2c5": mock.file({
+          content: "some content",
+          atime: new Date()
+        })
+      }
+    });
+
+    fileSystem.isUnused(config.cachePath + "/" + "cdf42c077fe6037681ae3c003550c2c5", (isUnused) => {
+      expect(isUnused).to.be.false;
 
       done();
     });
