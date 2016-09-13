@@ -9,13 +9,22 @@ const fs = require("fs"),
   server = require("../../app/server")(config),
   error = require("../../app/middleware/error"),
   Database = require("../../app/database"),
-  expect = chai.expect;
+  expect = chai.expect,
+  httpProxy = require('http-proxy');
 
 chai.use(chaiHttp);
 
 describe("/files endpoint", () => {
   let headers = {etag:"1a42b4479c62b39b93726d793a2295ca"};
   let headerDB = null;
+
+  let riseDisplayNetworkII = {
+    get: function (property) {
+      if (property == "proxy") {
+        return "";
+      }
+    }
+  };
 
   before(() => {
     mock({
@@ -24,7 +33,7 @@ describe("/files endpoint", () => {
       [config.cachePath]: {}
     });
     headerDB = new Database(config.headersDBPath);
-    require("../../app/routes/file")(server.app, headerDB.db);
+    require("../../app/routes/file")(server.app, headerDB.db, config.fileUpdateDuration, riseDisplayNetworkII);
 
     server.init();
   });
@@ -81,25 +90,164 @@ describe("/files endpoint", () => {
         });
     });
 
-    it("should not save file if file server returns a 404", (done) => {
+    describe("File not found", () => {
+
+      beforeEach(()=> {
+        nock("http://example.com")
+          .get("/logo.png")
+          .reply(404);
+      });
+
+      it("should not save file if file server returns a 404", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
+              expect(err).to.not.be.null;
+              expect(err.errno).to.equal(34);
+              expect(err.code).to.equal("ENOENT");
+              expect(stats).to.be.undefined;
+
+              done();
+            });
+          });
+      });
+
+      it("should return 534 when file is not found on the server", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(534);
+            done();
+          });
+      });
+    });
+
+  });
+
+  describe("download file through a proxy", () => {
+    let proxy;
+    before(() => {
+      proxy = httpProxy.createProxyServer({target:'http://example.com'}).listen(8080);
+    });
+
+    after(() => {
+      proxy.close();
+    });
+
+    beforeEach(() => {
+      // Mock the file system.
+      mock({
+        [config.downloadPath]: {},
+        [config.cachePath]: {},
+        [config.headersDBPath]: "",
+        "../data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
+      });
+
+      riseDisplayNetworkII.get = function (property) {
+        if (property == "proxy") {
+          return "http://localhost:8080";
+        }
+      };
+    });
+
+    it("should return 202 with message while the file is downloading", (done) => {
       nock("http://example.com")
         .get("/logo.png")
-        .reply(404);
+        .replyWithFile(200, "../data/logo.png", headers);
 
       chai.request("http://localhost:9494")
         .get("/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
-          const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
-            expect(err).to.not.be.null;
-            expect(err.errno).to.equal(34);
-            expect(err.code).to.equal("ENOENT");
-            expect(stats).to.be.undefined;
+          expect(res).to.have.status(202);
+          expect(res.body).to.deep.equal({ status: 202, message: "File is downloading" });
 
-            done();
-          });
+          done();
         });
     });
+
+    describe("File not found", () => {
+
+      beforeEach(()=> {
+        nock("http://example.com")
+          .get("/logo.png")
+          .reply(404);
+      });
+
+      it("should not save file if file server returns a 404", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
+              expect(err).to.not.be.null;
+              expect(err.errno).to.equal(34);
+              expect(err.code).to.equal("ENOENT");
+              expect(stats).to.be.undefined;
+
+              done();
+            });
+          });
+      });
+
+      it("should return 534 when file is not found on the server through proxy", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(534);
+            done();
+          });
+      });
+    });
+
+    describe("Not Reachable proxy server", () => {
+
+      beforeEach(()=> {
+        riseDisplayNetworkII.get = function (property) {
+          if (property == "proxy") {
+            return "http://localhost:8081";
+          }
+        };
+      });
+
+      it("should not save file if proxy server can't be reached", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
+              expect(err).to.not.be.null;
+              expect(err.errno).to.equal(34);
+              expect(err.code).to.equal("ENOENT");
+              expect(stats).to.be.undefined;
+
+              done();
+            });
+          });
+      });
+
+      it("should return a 504 status code if proxy server is not reachable", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(504);
+            done();
+          });
+      });
+    });
+
+
 
   });
 
