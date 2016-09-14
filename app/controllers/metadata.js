@@ -5,12 +5,13 @@ const EventEmitter = require("events").EventEmitter,
   fileSystem = require("../helpers/file-system");
 
 
-const MetadataController = function(url, metadata) {
+const MetadataController = function(url, metadata, riseDisplayNetworkII) {
   EventEmitter.call(this);
 
   this.url = url;
   this.fileName = fileSystem.getFileName(this.url);
   this.metadata = metadata;
+  this.riseDisplayNetworkII = riseDisplayNetworkII;
 };
 
 util.inherits(MetadataController, EventEmitter);
@@ -18,8 +19,10 @@ util.inherits(MetadataController, EventEmitter);
 /* Get folder/file metadata and store it on db. */
 MetadataController.prototype.getMetadata = function() {
   if (this.url) {
-    const requestOptions = { method: "GET", uri: this.url, json: true };
+    const requestOptions = { method: "GET", url: this.url, json: true, proxy: this.riseDisplayNetworkII.get("proxy") };
     request(requestOptions, (err, res, body) => {
+      if (err) console.error(err, this.url);
+
       if (err || res.statusCode != 200) {
         this.getCachedMetadata( (err, cachedRes) => {
           if(err) {

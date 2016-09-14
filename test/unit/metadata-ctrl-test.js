@@ -21,8 +21,16 @@ describe("MetadataController", () => {
     }
   };
 
+  let riseDisplayNetworkII = {
+    get: function (property) {
+      if (property == "proxy") {
+        return "";
+      }
+    }
+  };
+
   beforeEach(() => {
-    metadataController = new MetadataController("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F", metadata);
+    metadataController = new MetadataController("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F", metadata, riseDisplayNetworkII);
   });
 
   describe("getMetadata", () => {

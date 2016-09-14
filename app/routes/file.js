@@ -4,14 +4,14 @@ const fileSystem = require("../helpers/file-system"),
   FileController = require("../controllers/file"),
   Header = require("../models/header");
 
-const FileRoute = function(app, headerDB, updateDuration) {
+const FileRoute = function(app, headerDB, updateDuration, riseDisplayNetworkII) {
 
   app.get("/files", (req, res, next) => {
     const fileUrl = req.query.url;
 
     if (fileUrl) {
       const header = new Header({}, headerDB),
-        controller = new FileController(fileUrl, header);
+        controller = new FileController(fileUrl, header, riseDisplayNetworkII);
 
       controller.on("file-error", (err) => {
         res.statusCode = 500;
@@ -76,15 +76,24 @@ const FileRoute = function(app, headerDB, updateDuration) {
           // Check if the file is downloading.
           fileSystem.isDownloading(fileUrl, (downloading) => {
             if (downloading) {
-              sendResponse(res, fileUrl);
+              sendDownloadingResponse(res, fileUrl);
             } else {
               // Download the file.
               controller.on("downloaded", () => {
                 console.info("File Downloaded", fileUrl, new Date());
               });
 
+              controller.on("downloading", () => {
+                sendDownloadingResponse(res, fileUrl);
+              });
+
+              controller.on("invalid-response", (statusCode) => {
+                sendInvalidResponseResponse(res, fileUrl, statusCode);
+              });
+
               controller.on("request-error", (err) => {
                 console.error(err, fileUrl, new Date());
+                sendResponse(res, 504, "File's host server could not be reached", fileUrl);
               });
 
               controller.on("move-file-error", (err) => {
@@ -92,9 +101,7 @@ const FileRoute = function(app, headerDB, updateDuration) {
               });
 
               controller.downloadFile();
-              sendResponse(res, fileUrl);
             }
-
           });
         }
       });
@@ -109,14 +116,27 @@ const FileRoute = function(app, headerDB, updateDuration) {
     console.info("File exists in cache. Not downloading", fileUrl, new Date());
   }
 
-  function sendResponse(res, fileUrl) {
-    res.status(202)
-      .send({
-        status: 202,
-        message: "File is downloading"
-      });
+  function sendInvalidResponseResponse(res, fileUrl, statusCode) {
+    console.info("Invalid Response with status code: ", statusCode, fileUrl, new Date());
 
+    if (statusCode === 404) {
+      sendResponse(res, 534, "File not found on the host server", fileUrl);
+    } else {
+      sendResponse(res, 502, "File's host server returned an invalid response with status code: " + statusCode, fileUrl);
+    }
+  }
+
+  function sendDownloadingResponse(res, fileUrl) {
+    sendResponse(res, 202, "File is downloading", fileUrl);
     console.info("File is downloading", fileUrl, new Date());
+  }
+
+  function sendResponse(res, statusCode, message, fileUrl) {
+    res.status(statusCode)
+      .send({
+        status: statusCode,
+        message: message
+      });
   }
 };
 

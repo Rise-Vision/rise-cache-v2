@@ -9,20 +9,28 @@ const nock = require("nock"),
   error = require("../../app/middleware/error"),
   Database = require("../../app/database"),
   expect = chai.expect,
-  metadataResponse = require("../data/metadata.json");
+  metadataResponse = require("../data/metadata.json"),
+  httpProxy = require('http-proxy');
 
 chai.use(chaiHttp);
 
 describe("/metadata endpoint", () => {
-  let metadata = {etag:"1a42b4479c62b39b93726d793a2295ca"};
   let metadataDB = null;
+
+  let riseDisplayNetworkII = {
+    get: function (property) {
+      if (property == "proxy") {
+        return "";
+      }
+    }
+  };
 
   before(() => {
     mock({
       [config.metadataDBPath]: ""
     });
     metadataDB = new Database(config.metadataDBPath);
-    require("../../app/routes/metadata")(server.app, metadataDB.db);
+    require("../../app/routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII);
 
     server.init();
   });
@@ -86,7 +94,7 @@ describe("/metadata endpoint", () => {
         });
     });
 
-    it("should return 404 with no metadata found when there is no metadata cached and it cannot also be got from storage", (done) => {
+    it("should return 502 with no metadata found when there is no metadata cached and it cannot also be got from storage", (done) => {
 
       mock({
         [config.metadataDBPath]: ""
@@ -102,14 +110,120 @@ describe("/metadata endpoint", () => {
         .get("/metadata")
         .query({ url: "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
-          expect(res).to.have.status(404);
+          expect(res).to.have.status(502);
           expect(res.body).to.deep.equal({
-            status: 404,
-            message: "No metadata found"
+            status: 502,
+            message: "Could not get metadata from storage server"
           });
 
           done();
         });
+    });
+  });
+
+
+  describe("get metadata through proxy server", () => {
+    let proxy;
+    before(() => {
+      proxy = httpProxy.createProxyServer({target:'http://storage-dot-rvaserver2.appspot.com'}).listen(8080);
+    });
+
+    after(() => {
+      proxy.close();
+    });
+
+    beforeEach(() => {
+      riseDisplayNetworkII.get = function (property) {
+        if (property == "proxy") {
+          return "http://localhost:8080";
+        }
+      };
+    });
+
+    it("should return 200 with metadata", (done) => {
+      nock("http://storage-dot-rvaserver2.appspot.com")
+        .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
+        .reply(200, metadataResponse);
+
+      chai.request("http://localhost:9494")
+        .get("/metadata")
+        .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body).to.deep.equal(metadataResponse);
+
+          done();
+        });
+    });
+
+    it("should return cached metadata if error happen when getting from storage", (done) => {
+
+      nock("http://storage-dot-rvaserver2.appspot.com")
+        .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
+        .reply(404);
+
+      chai.request("http://localhost:9494")
+        .get("/metadata")
+        .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body).to.deep.equal(metadataResponse);
+
+          done();
+        });
+    });
+
+    it("should return 502 with no metadata found when there is no metadata cached and it cannot also be got from storage", (done) => {
+
+      mock({
+        [config.metadataDBPath]: ""
+      });
+
+      metadataDB.db.loadDatabase();
+
+      nock("http://storage-dot-rvaserver2.appspot.com")
+        .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
+        .reply(404);
+
+      chai.request("http://localhost:9494")
+        .get("/metadata")
+        .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
+        .end((err, res) => {
+          expect(res).to.have.status(502);
+          expect(res.body).to.deep.equal({
+            status: 502,
+            message: "Could not get metadata from storage server"
+          });
+
+          done();
+        });
+    });
+
+    describe("Not Reachable proxy server", () => {
+
+      beforeEach(()=> {
+        riseDisplayNetworkII.get = function (property) {
+          if (property == "proxy") {
+            return "http://localhost:8081";
+          }
+        };
+      });
+
+      it("should not get metadata if proxy server can't be reached", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/metadata")
+          .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
+          .end((err, res) => {
+            expect(res).to.have.status(502);
+            expect(res.body).to.deep.equal({
+              status: 502,
+              message: "Could not get metadata from storage server"
+            });
+
+            done();
+          });
+      });
     });
   });
 });

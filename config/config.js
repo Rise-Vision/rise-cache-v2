@@ -1,6 +1,7 @@
 const os = require("os");
 const path = require("path");
-const riseCachePath = path.join(os.homedir(), "rvplayer", "RiseCache");
+const rvplayerPath = path.join(os.homedir(), "rvplayer");
+const riseCachePath = path.join(rvplayerPath, "RiseCache");
 
 module.exports = {
   port: 9494,
@@ -9,5 +10,6 @@ module.exports = {
   downloadPath: path.join(riseCachePath,"download"),
   headersDBPath: path.join(riseCachePath,"database","headers.db"),
   metadataDBPath: path.join(riseCachePath,"database","metadata.db"),
+  riseDisplayNetworkIIPath: path.join(rvplayerPath,"RiseDisplayNetworkII.ini"),
   fileUpdateDuration: 1200000 // 20 minutes
 };

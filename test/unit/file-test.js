@@ -22,8 +22,16 @@ describe("FileController", () => {
       }
     };
 
+  let riseDisplayNetworkII = {
+    get: function (property) {
+      if (property == "proxy") {
+        return "";
+      }
+    }
+  };
+
   beforeEach(() => {
-    fileController = new FileController("http://abc123.com/logo.png", header);
+    fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
   });
 
   describe("downloadFile", () => {
@@ -91,7 +99,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://abc123.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
 
       nock("http://abc123.com")
         .get("/logo.png")
@@ -148,7 +156,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://abc123.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
 
       let headerSaveSpy = sinon.spy(header, "save");
 
@@ -171,7 +179,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://abc123.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
 
       let headerSaveSpy = sinon.spy(header, "save");
 
@@ -339,7 +347,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://abc123.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
@@ -358,7 +366,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://abc123.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
@@ -382,7 +390,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://abc123.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
@@ -404,7 +412,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://abc123.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
@@ -440,7 +448,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://abc123.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
 
       fileController.isStale(config.fileUpdateDuration, (err, stale) => {
         expect(stale).to.be.false;
@@ -457,7 +465,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://abc123.com/logo.png", header);
+      fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
 
       // tick clock by 15 minutes
       clock.tick(900000);
@@ -480,7 +488,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://example.com/logo.png", header, riseDisplayNetworkII);
 
       fileController.getUpdateHeaderField( (err, field) => {
         expect(field).to.deep.equal({
@@ -498,7 +506,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://example.com/logo.png", header, riseDisplayNetworkII);
 
       fileController.getUpdateHeaderField( (err, field) => {
         expect(field).to.deep.equal({
@@ -516,7 +524,7 @@ describe("FileController", () => {
         }
       };
 
-      fileController = new FileController("http://example.com/logo.png", header);
+      fileController = new FileController("http://example.com/logo.png", header, riseDisplayNetworkII);
 
       fileController.getUpdateHeaderField( (err, field) => {
         expect(field).to.be.undefined;

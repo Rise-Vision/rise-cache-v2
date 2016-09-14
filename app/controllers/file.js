@@ -7,7 +7,8 @@ const fs = require("fs"),
   util = require("util"),
   send = require("send");
 
-const FileController = function(url, header) {
+
+const FileController = function(url, header, riseDisplayNetworkII) {
   EventEmitter.call(this);
 
   this.url = url;
@@ -15,6 +16,7 @@ const FileController = function(url, header) {
   this.fileName = fileSystem.getFileName(this.url);
   this.pathInCache = fileSystem.getPathInCache(this.url);
   this.pathInDownload = fileSystem.getPathInDownload(this.url);
+  this.riseDisplayNetworkII = riseDisplayNetworkII;
 };
 
 util.inherits(FileController, EventEmitter);
@@ -30,6 +32,8 @@ FileController.prototype.downloadFile = function(opts) {
       "User-Agent": "request"
     };
 
+    options.proxy = this.riseDisplayNetworkII.get("proxy");
+
     if (opts) {
       Object.assign(options.headers, opts);
     }
@@ -38,9 +42,12 @@ FileController.prototype.downloadFile = function(opts) {
       .on("response", (res) => {
         if (res.statusCode == 200) {
           this.writeFile(res);
+          this.emit("downloading");
         }
         else if (res.statusCode == 304) {
           this.saveHeaders(res.headers);
+        } else {
+          this.emit("invalid-response", res.statusCode);
         }
       })
       .on("error", (err) => {

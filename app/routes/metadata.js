@@ -3,7 +3,7 @@
 const MetadataController = require("../controllers/metadata"),
   Metadata = require("../models/metadata");
 
-const MetadataRoute = function(app, metadataDB){
+const MetadataRoute = function(app, metadataDB, riseDisplayNetworkII){
 
   app.get("/metadata", (req, res, next) => {
 
@@ -11,7 +11,7 @@ const MetadataRoute = function(app, metadataDB){
 
     if (fileUrl) {
       const metadata = new Metadata({}, metadataDB),
-        controller = new MetadataController(fileUrl, metadata);
+        controller = new MetadataController(fileUrl, metadata, riseDisplayNetworkII);
 
       controller.on("response", (data) => {
         res.json(data);
@@ -31,13 +31,13 @@ const MetadataRoute = function(app, metadataDB){
   });
 
   function sendNoResponse(res, fileUrl) {
-    res.status(404)
+    res.status(502)
       .send({
-        status: 404,
-        message: "No metadata found"
+        status: 502,
+        message: "Could not get metadata from storage server"
       });
 
-    console.info("No metadata found", fileUrl, new Date());
+    console.info("Could not get metadata from storage server", fileUrl, new Date());
   }
 };
 module.exports = MetadataRoute;
