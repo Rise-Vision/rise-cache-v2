@@ -23,11 +23,20 @@ util.inherits(FileController, EventEmitter);
 
 /* Download file and save to disk. */
 FileController.prototype.downloadFile = function(opts) {
-  let options = {};
+  let options = {},
+    displayId = this.riseDisplayNetworkII.get("displayid");
 
   if (this.url) {
 
     options.url = this.url;
+
+    if (displayId) {
+      if (this.isStorageFile(options.url)) {
+        // append the display id to the request url so that it is included in our storage logs for throttled analysis
+        options.url = this.getUrlWithDisplayID(options.url, displayId);
+      }
+    }
+
     options.headers = {
       "User-Agent": "request"
     };
@@ -173,6 +182,15 @@ FileController.prototype.getUpdateHeaderField = function(cb) {
     return cb(null, header);
 
   });
+};
+
+FileController.prototype.isStorageFile = function(url) {
+  return decodeURIComponent(url).indexOf("storage.googleapis.com") > -1 ||
+    decodeURIComponent(url).indexOf("googleapis.com/storage") > -1;
+};
+
+FileController.prototype.getUrlWithDisplayID = function (url, displayId) {
+  return url + (url.indexOf("?") > -1 ? (url.slice(-1) == "&" ? "":"&") : "?" ) + "displayid=" + displayId;
 };
 
 module.exports = FileController;
