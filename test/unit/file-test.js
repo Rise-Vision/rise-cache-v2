@@ -534,4 +534,38 @@ describe("FileController", () => {
     });
 
   });
+
+  describe("isStorageFile", () => {
+
+    it("should return true for url containing 'storage.googleapis.com'", () => {
+      let url = "https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%2Ftest.jpg";
+      expect(fileController.isStorageFile(url)).to.be.true;
+    });
+
+    it("should return true for url containing 'googleapis.com/storage'", () => {
+      let url = "https%3A%2F%2Fwww.googleapis.com%2Fstorage%2Fv1%2Fb%2Frisemedialibrary-abc123%2Fo%2Fimages%2Ftest.jpg?alt=media";
+      expect(fileController.isStorageFile(url)).to.be.true;
+    });
+
+    it("should return false for non-storage url", () => {
+      let url = "http://test.com/images/test.jpg";
+      expect(fileController.isStorageFile()).to.be.false;
+    });
+
+  });
+
+  describe("getUrlWithDisplayID", () => {
+
+    it("should return url with display id as query param", () => {
+      let url = "https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%2Ftest.jpg";
+      expect(fileController.getUrlWithDisplayID(url, "ABC123")).to.equal(url + "?displayid=ABC123");
+    });
+
+    it("should return url with display id as additional query param", () => {
+      let url = "https%3A%2F%2Fwww.googleapis.com%2Fstorage%2Fv1%2Fb%2Frisemedialibrary-abc123%2Fo%2Fimages%2Ftest.jpg?alt=media";
+      expect(fileController.getUrlWithDisplayID(url, "ABC123")).to.equal(url + "&displayid=ABC123");
+    });
+
+
+  });
 });
