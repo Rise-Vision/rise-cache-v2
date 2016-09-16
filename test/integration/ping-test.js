@@ -1,19 +1,26 @@
-var chai = require("chai"),
+const chai = require("chai"),
   chaiHttp = require("chai-http"),
-  expect = chai.expect;
+  expect = chai.expect,
+  mock = require("mock-fs");
 
-var config = require("../../config/config");
-var server = require("../../app/server")(config);
-var pkg = require("../../package.json");
 
+const app = require("../../app/app")();
+const config = require("../../config/config");
+const pkg = require("../../package.json");
 
 chai.use(chaiHttp);
 
 describe("Ping", function () {
 
   beforeEach(function () {
-    server.start();
-    require("../../app/routes/ping")(server.app, pkg);
+    mock({
+      [config.headersDBPath]: "",
+      [config.metadataDBPath]: "",
+      [config.downloadPath]: {},
+      [config.cachePath]: {},
+      [config.riseDisplayNetworkIIPath]: ""
+    });
+    app.start();
   });
 
   it("should return name and version", function (done) {
@@ -29,7 +36,4 @@ describe("Ping", function () {
     });
   });
 
-  afterEach(function () {
-    server.stop();
-  });
 });

@@ -1,18 +1,12 @@
 "use strict";
 
 const http = require("http"),
-  express = require("express"),
-  fileSystem = require("./helpers/file-system");
+  express = require("express");
 
 const ServerFactory = function(config) {
 
   const app = express(),
     server =  http.createServer(app);
-
-  const init = () => {
-    fileSystem.createDir(config.downloadPath);
-    fileSystem.createDir(config.cachePath);
-  };
 
   const start = () => {
     return server.listen(config.port, config.url, () => {
@@ -26,7 +20,6 @@ const ServerFactory = function(config) {
 
 
   return {
-    init: init,
     start: start,
     stop: stop,
     app: app,
