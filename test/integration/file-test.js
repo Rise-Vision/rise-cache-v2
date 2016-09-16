@@ -34,8 +34,6 @@ describe("/files endpoint", () => {
     });
     headerDB = new Database(config.headersDBPath);
     require("../../app/routes/file")(server.app, headerDB.db, config.fileUpdateDuration, riseDisplayNetworkII);
-
-    server.init();
   });
 
   beforeEach(() => {
