@@ -1,6 +1,8 @@
 const os = require("os");
 const path = require("path");
-const rvplayerPath = path.join(os.homedir(), "rvplayer");
+const rvplayerPath = (process.platform === "win32") ?
+  path.join(process.env["LOCALAPPDATA"], "rvplayer") :
+  path.join(os.homedir(), "rvplayer");
 const riseCachePath = path.join(rvplayerPath, "RiseCache");
 
 module.exports = {
