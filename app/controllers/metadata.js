@@ -19,7 +19,13 @@ util.inherits(MetadataController, EventEmitter);
 /* Get folder/file metadata and store it on db. */
 MetadataController.prototype.getMetadata = function() {
   if (this.url) {
-    const requestOptions = { method: "GET", url: this.url, json: true, proxy: this.riseDisplayNetworkII.get("proxy") };
+    const requestOptions = {
+      method: "GET",
+      url: this.url,
+      json: true,
+      proxy: (this.riseDisplayNetworkII) ? this.riseDisplayNetworkII.get("proxy"): null
+    };
+
     request(requestOptions, (err, res, body) => {
       if (err) console.error(err, this.url);
 
