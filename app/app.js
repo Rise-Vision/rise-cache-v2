@@ -18,14 +18,26 @@ const AppFactory = function() {
     fileSystem.createDir(config.downloadPath);
     fileSystem.createDir(config.cachePath);
 
-    const riseDisplayNetworkII = PropertiesReader(config.riseDisplayNetworkIIPath);
+    const riseDisplayNetworkII = fileSystem.fileExists(config.riseDisplayNetworkIIPath, (exists) => {
+      if (exists) {
+        return PropertiesReader(config.riseDisplayNetworkIIPath);
+      } else {
+        console.warn("RiseDisplayNetworkIIPath.ini file not found.");
+        return null;
+      }
+    });
     const headerDB = new Database(config.headersDBPath);
     const metadataDB = new Database(config.metadataDBPath);
     const cleanupJob = new CleanupJob(config, headerDB.db, metadataDB.db);
 
     server.app.use(cors());
 
-    cleanupJob.run();
+    fileSystem.fileExists(config.cachePath, (exists) => {
+      if (exists) {
+        cleanupJob.run();
+      }
+    });
+
     server.start();
 
     require("./routes/ping")(server.app, pkg);

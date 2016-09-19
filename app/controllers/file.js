@@ -24,7 +24,7 @@ util.inherits(FileController, EventEmitter);
 /* Download file and save to disk. */
 FileController.prototype.downloadFile = function(opts) {
   let options = {},
-    displayId = this.riseDisplayNetworkII.get("displayid");
+    displayId = (this.riseDisplayNetworkII) ? this.riseDisplayNetworkII.get("displayid") : null;
 
   if (this.url) {
 
@@ -41,7 +41,7 @@ FileController.prototype.downloadFile = function(opts) {
       "User-Agent": "request"
     };
 
-    options.proxy = this.riseDisplayNetworkII.get("proxy");
+    options.proxy = (this.riseDisplayNetworkII) ? this.riseDisplayNetworkII.get("proxy"): null;
 
     if (opts) {
       Object.assign(options.headers, opts);
