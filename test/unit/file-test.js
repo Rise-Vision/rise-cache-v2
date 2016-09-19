@@ -76,6 +76,26 @@ describe("FileController", () => {
       });
     });
 
+    it("should save downloaded file without RiseDisplayNetworkII.ini file", (done) => {
+      let controller = new FileController("http://abc123.com/logo.png", header, null);
+
+      nock("http://abc123.com")
+        .get("/logo.png")
+        .replyWithFile(200, "/data/logo.png");
+
+      controller.downloadFile();
+
+      controller.on("downloaded", () => {
+        const stats = fs.stat(config.downloadPath + "/0e36e4d268b63fd0573185fe3a9e01f0", (err, stats) => {
+          expect(err).to.be.null;
+          expect(stats).to.not.be.null;
+          expect(stats.isFile()).to.be.true;
+
+          done();
+        });
+      });
+    });
+
     it("should emit 'downloaded' event", (done) => {
       nock("http://abc123.com")
         .get("/logo.png")

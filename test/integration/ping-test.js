@@ -1,7 +1,10 @@
+"use strict";
+
 const chai = require("chai"),
   chaiHttp = require("chai-http"),
   expect = chai.expect,
-  mock = require("mock-fs");
+  mock = require("mock-fs"),
+  sinon = require("sinon");
 
 
 const app = require("../../app/app")();
@@ -11,19 +14,26 @@ const pkg = require("../../package.json");
 chai.use(chaiHttp);
 
 describe("Ping", function () {
+  let spy;
 
-  beforeEach(function () {
+  before(function () {
+    spy = sinon.spy(console, "warn");
+
     mock({
       [config.headersDBPath]: "",
       [config.metadataDBPath]: "",
       [config.downloadPath]: {},
-      [config.cachePath]: {},
-      [config.riseDisplayNetworkIIPath]: ""
+      [config.cachePath]: {}
     });
     app.start();
   });
 
-  it("should return name and version", function (done) {
+  after(() => {
+    mock.restore();
+    spy.restore();
+  });
+
+  it("should return name and version without RiseDisplayNetworkII.ini file", (done) => {
     chai.request('http://localhost:9494')
     .get('/')
     .end(function(err, res) {
@@ -32,8 +42,32 @@ describe("Ping", function () {
       expect(res.body).to.be.a('object');
       expect(res.body.name).to.be.equal(pkg.name);
       expect(res.body.version).to.be.equal(pkg.version);
+      expect(spy.calledWith("RiseDisplayNetworkIIPath.ini file not found.")).to.be.true;
+
       done();
     });
+  });
+
+  it("should return name and version with RiseDisplayNetworkII.ini file", function (done) {
+    mock({
+      [config.headersDBPath]: "",
+      [config.metadataDBPath]: "",
+      [config.downloadPath]: {},
+      [config.cachePath]: {},
+      [config.riseDisplayNetworkIIPath]: ""
+    });
+
+    chai.request('http://localhost:9494')
+      .get('/')
+      .end(function(err, res) {
+        expect(res).to.have.status(200);
+        expect(res).to.be.json;
+        expect(res.body).to.be.a('object');
+        expect(res.body.name).to.be.equal(pkg.name);
+        expect(res.body.version).to.be.equal(pkg.version);
+        expect(spy.calledTwice).to.be.false;
+        done();
+      });
   });
 
 });

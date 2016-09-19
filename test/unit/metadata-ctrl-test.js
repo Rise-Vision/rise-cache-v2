@@ -53,6 +53,21 @@ describe("MetadataController", () => {
       });
     });
 
+    it("should get metadata without RiseDisplayNetworkII.ini file", (done) => {
+      var controller = new MetadataController("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F", metadata, null);
+
+      nock("https://storage-dot-rvaserver2.appspot.com")
+        .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
+        .reply(200, metadataResponse);
+
+      controller.getMetadata();
+
+      controller.on("response", (data) => {
+        expect(data).to.deep.equal(metadataResponse);
+        done();
+      });
+    });
+
     it("should emit 'response' event", (done) => {
       nock("https://storage-dot-rvaserver2.appspot.com")
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
@@ -156,7 +171,7 @@ describe("MetadataController", () => {
 
   });
 
-  describe("getMetadata", () => {
+  describe("getCachedMetadata", () => {
 
     it("should get the metadata from DB", (done) => {
       const newMetadata = {data: {key: "test", metadata: {etag: "etag"}}};
