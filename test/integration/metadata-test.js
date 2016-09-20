@@ -5,7 +5,6 @@ const nock = require("nock"),
   chai = require("chai"),
   chaiHttp = require("chai-http"),
   config = require("../../config/config"),
-  server = require("../../app/server")(config),
   error = require("../../app/middleware/error"),
   Database = require("../../app/database"),
   expect = chai.expect,
@@ -16,6 +15,13 @@ chai.use(chaiHttp);
 
 describe("/metadata endpoint", () => {
   let metadataDB = null;
+  let logger = {
+    info: function (x){},
+    error:function (x){},
+    warn: function (x){}
+  };
+  let server = require("../../app/server")(config, logger);
+
 
   let riseDisplayNetworkII = {
     get: function (property) {
@@ -44,9 +50,14 @@ describe("/metadata endpoint", () => {
 
   after(() => {
     mock.restore();
+    nock.cleanAll();
   });
 
   describe("get metadata", () => {
+
+    afterEach(() => {
+      nock.cleanAll();
+    });
 
     it("should return 200 with metadata", (done) => {
       nock("https://storage-dot-rvaserver2.appspot.com")

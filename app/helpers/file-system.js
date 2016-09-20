@@ -89,6 +89,10 @@ module.exports = {
         cb(false);
       }
     });
+  },
+
+  appendToLog: function(datetime, message) {
+    fs.appendFileSync(config.logFilePath, datetime + " - " + message + "\n");
   }
 
 };

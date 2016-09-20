@@ -29,6 +29,7 @@ describe("Ping", function () {
   });
 
   after(() => {
+    app.stop();
     mock.restore();
     spy.restore();
   });

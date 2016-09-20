@@ -3,7 +3,6 @@
 const fs = require("fs"),
   mock = require("mock-fs"),
   chai = require("chai"),
-  chaiHttp = require("chai-http"),
   expect = chai.expect,
   config = require("../../config/config"),
   CleanupJob = require("../../app/jobs/cleanup"),
@@ -11,11 +10,13 @@ const fs = require("fs"),
   Header = require("../../app/models/header"),
   Metadata = require("../../app/models/metadata");
 
-
-  chai.use(chaiHttp);
-
 describe("Delete unused files", () => {
   let cleanupJob;
+  let logger = {
+    info: function (x){},
+    error:function (x){},
+    warn: function (x){}
+  };
 
   beforeEach(function () {
     let now = new Date();
@@ -40,7 +41,7 @@ describe("Delete unused files", () => {
     let headerDB = new Database(config.headersDBPath);
     let metadataDB = new Database(config.metadataDBPath);
 
-    cleanupJob = new CleanupJob(config, headerDB.db, metadataDB.db);
+    cleanupJob = new CleanupJob(config, headerDB.db, metadataDB.db, logger);
     cleanupJob.header.set("key", "cdf42c077fe6037681ae3c003550c2c5");
     cleanupJob.header.save((err, obj) => {
 

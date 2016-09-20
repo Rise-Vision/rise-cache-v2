@@ -7,10 +7,11 @@ const fs = require("fs"),
   Metadata = require("../models/metadata");
 
 
-const CleanupJob = function(config, headerDB, metadataDB) {
+const CleanupJob = function(config, headerDB, metadataDB, logger) {
   this.config = config;
   this.header = new Header({}, headerDB);
   this.metadata = new Metadata({}, metadataDB);
+  this.logger = logger;
 };
 
 /* Delete any file that has not been used in 7 or more days. */
@@ -18,7 +19,7 @@ CleanupJob.prototype.run = function() {
   let self = this;
   fs.readdir(self.config.cachePath, function(err, files) {
     if (err) {
-      console.error("Could not read the " + self.config.cachePath + " directory.", err);
+      self.logger.error("Could not read the " + self.config.cachePath + " directory.", err);
     } else {
       // Iterate over the files in the directory.
       files.forEach(function(file) {
@@ -30,9 +31,9 @@ CleanupJob.prototype.run = function() {
 
             fileSystem.delete(filePath, (err) => {
               if (err) {
-                console.error(err, filePath);
+                self.logger.error(err, filePath);
               } else {
-                console.info("File deleted", filePath);
+                self.logger.info("File deleted", filePath);
               }
             });
 
@@ -40,9 +41,9 @@ CleanupJob.prototype.run = function() {
             self.header.set("key", file);
             self.header.delete((err, numRemoved) => {
               if (err) {
-                console.error(err, filePath);
+                self.logger.error(err, filePath);
               } else if (numRemoved > 0) {
-                console.info("File headers deleted", filePath);
+                self.logger.info("File headers deleted", filePath);
               }
             });
 
@@ -50,9 +51,9 @@ CleanupJob.prototype.run = function() {
             self.metadata.set("key", file);
             self.metadata.delete((err, numRemoved) => {
               if (err) {
-                console.error(err, filePath);
+                self.logger.error(err, filePath);
               } else if (numRemoved > 0) {
-                console.info("File metadata deleted", filePath);
+                self.logger.info("File metadata deleted", filePath);
               }
             });
 

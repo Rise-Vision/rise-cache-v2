@@ -3,7 +3,6 @@
 const config = require("../config/config"),
   cors = require("cors"),
   error = require("./middleware/error"),
-  server = require("./server")(config),
   pkg = require("../package.json"),
   Database = require("./database"),
   PropertiesReader = require("properties-reader"),
@@ -13,43 +12,60 @@ const config = require("../config/config"),
 
 const AppFactory = function() {
 
+  let server;
+
   const start = function() {
+    
+    fileSystem.fileExists(config.riseDisplayNetworkIIPath, (exists) => {
 
-    fileSystem.createDir(config.downloadPath);
-    fileSystem.createDir(config.cachePath);
+      let riseDisplayNetworkII = null;
 
-    const riseDisplayNetworkII = fileSystem.fileExists(config.riseDisplayNetworkIIPath, (exists) => {
       if (exists) {
-        return PropertiesReader(config.riseDisplayNetworkIIPath);
+        riseDisplayNetworkII = PropertiesReader(config.riseDisplayNetworkIIPath);
       } else {
         console.warn("RiseDisplayNetworkIIPath.ini file not found.");
-        return null;
       }
+
+      let displayId = (riseDisplayNetworkII) ? riseDisplayNetworkII.get("displayid") : null;
+      var bqClient = require("rise-common-electron").bqClient(config.bqProjectName, config.bqDataset);
+      const externalLogger = require("./helpers/logger/external-logger-bigquery")(bqClient, displayId, pkg.version, config.os);
+      const logger = require("./helpers/logger/logger")(config.debugging, externalLogger, fileSystem);
+
+      fileSystem.createDir(config.downloadPath);
+      fileSystem.createDir(config.cachePath);
+
+      const headerDB = new Database(config.headersDBPath);
+      const metadataDB = new Database(config.metadataDBPath);
+      const cleanupJob = new CleanupJob(config, headerDB.db, metadataDB.db, logger);
+
+      server = require("./server")(config, logger);
+
+      server.app.use(cors());
+
+      fileSystem.fileExists(config.cachePath, (exists) => {
+        if (exists) {
+          cleanupJob.run();
+        }
+      });
+
+      server.start();
+
+      require("./routes/ping")(server.app, pkg);
+      require("./routes/file")(server.app, headerDB.db, config.fileUpdateDuration, riseDisplayNetworkII);
+      require("./routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII);
+
+      server.app.use(error.handleError);
+
     });
-    const headerDB = new Database(config.headersDBPath);
-    const metadataDB = new Database(config.metadataDBPath);
-    const cleanupJob = new CleanupJob(config, headerDB.db, metadataDB.db);
+  };
 
-    server.app.use(cors());
-
-    fileSystem.fileExists(config.cachePath, (exists) => {
-      if (exists) {
-        cleanupJob.run();
-      }
-    });
-
-    server.start();
-
-    require("./routes/ping")(server.app, pkg);
-    require("./routes/file")(server.app, headerDB.db, config.fileUpdateDuration, riseDisplayNetworkII);
-    require("./routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII);
-
-    server.app.use(error.handleError);
-
+  const stop = function() {
+    server.stop();
   };
 
   return {
-    start: start
+    start: start,
+    stop: stop
   };
 };
 

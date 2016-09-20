@@ -264,4 +264,25 @@ describe("isUnused", () => {
     });
   });
 
+})
+
+describe("appendToLog", () => {
+
+  it("should append to log", (done) => {
+    let date = "1969/12/31 21:00:00";
+    let message = "ERROR: test error exception 1";
+
+    mock({
+      [config.logFilePath]: ""
+    });
+
+    fileSystem.appendToLog(date, message);
+
+    fs.readFile(config.logFilePath, 'utf8', function(err, contents) {
+      expect(contents).to.equal("1969/12/31 21:00:00 - ERROR: test error exception 1\n");
+      mock.restore()
+      done();
+    });
+
+  });
 });
