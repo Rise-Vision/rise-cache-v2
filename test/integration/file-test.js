@@ -133,6 +133,82 @@ describe("/files endpoint", () => {
       });
     });
 
+    describe("Not Reachable file server", () => {
+
+      beforeEach(()=> {
+        nock("http://example.com")
+          .get("/logo.png")
+          .replyWithError({"message": "something awful happened", "code": "AWFUL_ERROR"});
+      });
+
+      it("should not save file if file server can't be reached", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
+              expect(err).to.not.be.null;
+              expect(err.errno).to.equal(34);
+              expect(err.code).to.equal("ENOENT");
+              expect(stats).to.be.undefined;
+
+              done();
+            });
+          });
+      });
+
+      it("should return a 504 status code if file server is not reachable", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(504);
+            done();
+          });
+      });
+
+    });
+
+    describe("Invalid response from file server", () => {
+
+      beforeEach(()=> {
+        nock("http://example.com")
+          .get("/logo.png")
+          .reply(403);
+      });
+
+      it("should not save file if file server returns a status other than 200, 304, or 404", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
+              expect(err).to.not.be.null;
+              expect(err.errno).to.equal(34);
+              expect(err.code).to.equal("ENOENT");
+              expect(stats).to.be.undefined;
+
+              done();
+            });
+          });
+      });
+
+      it("should return 502 when file server returns a status other than 200, 304, or 404", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(502);
+            done();
+          });
+      });
+
+    });
+
   });
 
   describe("download file through a proxy", () => {
@@ -253,7 +329,43 @@ describe("/files endpoint", () => {
       });
     });
 
+    describe("Invalid response from proxy server", () => {
 
+      beforeEach(()=> {
+        nock("http://example.com")
+          .get("/logo.png")
+          .reply(403);
+      });
+
+      it("should not save file if proxy server returns a status other than 200, 304, or 404", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
+              expect(err).to.not.be.null;
+              expect(err.errno).to.equal(34);
+              expect(err.code).to.equal("ENOENT");
+              expect(stats).to.be.undefined;
+
+              done();
+            });
+          });
+      });
+
+      it("should return 502 when proxy server returns a status other than 200, 304, or 404", (done) => {
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(502);
+            done();
+          });
+      });
+
+    });
 
   });
 
