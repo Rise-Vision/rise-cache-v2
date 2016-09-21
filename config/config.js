@@ -13,5 +13,10 @@ module.exports = {
   headersDBPath: path.join(riseCachePath,"database","headers.db"),
   metadataDBPath: path.join(riseCachePath,"database","metadata.db"),
   riseDisplayNetworkIIPath: path.join(rvplayerPath,"RiseDisplayNetworkII.ini"),
-  fileUpdateDuration: 1200000 // 20 minutes
+  logFilePath: path.join(riseCachePath,"risecache.log"),
+  fileUpdateDuration: 1200000, // 20 minutes,
+  debugging: process.argv.slice(1).join(" ").indexOf("debug") > -1,
+  os: process.platform,
+  bqProjectName: "client-side-events",
+  bqDataset: "Rise_Cache_V2"
 };

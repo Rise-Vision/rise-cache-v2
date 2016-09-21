@@ -6,7 +6,6 @@ const fs = require("fs"),
   chai = require("chai"),
   chaiHttp = require("chai-http"),
   config = require("../../config/config"),
-  server = require("../../app/server")(config),
   error = require("../../app/middleware/error"),
   Database = require("../../app/database"),
   expect = chai.expect,
@@ -17,6 +16,12 @@ chai.use(chaiHttp);
 describe("/files endpoint", () => {
   let headers = {etag:"1a42b4479c62b39b93726d793a2295ca"};
   let headerDB = null;
+  let server = null;
+  let logger = {
+    info: function (x){},
+    error:function (x){},
+    warn: function (x){}
+  };
 
   let riseDisplayNetworkII = {
     get: function (property) {
@@ -27,6 +32,8 @@ describe("/files endpoint", () => {
   };
 
   before(() => {
+    server = require("../../app/server")(config, logger);
+
     mock({
       [config.headersDBPath]: "",
       [config.downloadPath]: {},
@@ -47,6 +54,7 @@ describe("/files endpoint", () => {
 
   after(() => {
     mock.restore();
+    nock.cleanAll();
   });
 
   describe("download file", () => {

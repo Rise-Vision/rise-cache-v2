@@ -3,14 +3,14 @@
 const http = require("http"),
   express = require("express");
 
-const ServerFactory = function(config) {
+const ServerFactory = function(config, logger) {
 
   const app = express(),
     server =  http.createServer(app);
 
   const start = () => {
     return server.listen(config.port, config.url, () => {
-      console.info("Rise Cache is up and running on port: " + config.port);
+      logger.info("Rise Cache is up and running on port: " + config.port);
     });
   };
 
