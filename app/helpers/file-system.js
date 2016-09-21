@@ -92,7 +92,9 @@ module.exports = {
   },
 
   appendToLog: function(datetime, message) {
-    fs.appendFileSync(config.logFilePath, datetime + " - " + message + "\n");
+    fs.appendFile(config.logFilePath, datetime + " - " + message + "\n", (err) => {
+      if (err) console.error(err);
+    });
   }
 
 };
