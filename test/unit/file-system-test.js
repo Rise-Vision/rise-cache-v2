@@ -286,3 +286,22 @@ describe("appendToLog", () => {
 
   });
 });
+
+describe("cleanupLogFile", () => {
+
+  it("should append to log", (done) => {
+
+    mock({
+      [config.logFilePath]: "2016/09/22 12:12:01 - INFO: Rise Cache is up and running on port: 9494"
+    });
+
+    fileSystem.cleanupLogFile();
+
+    fs.readFile(config.logFilePath, 'utf8', function(err, contents) {
+      expect(contents).to.equal("");
+      mock.restore()
+      done();
+    });
+
+  });
+});

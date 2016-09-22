@@ -1,6 +1,7 @@
 "use strict";
 
-const chai = require("chai"),
+const fs = require("fs"),
+  chai = require("chai"),
   chaiHttp = require("chai-http"),
   expect = chai.expect,
   mock = require("mock-fs"),
@@ -23,7 +24,8 @@ describe("Ping", function () {
       [config.headersDBPath]: "",
       [config.metadataDBPath]: "",
       [config.downloadPath]: {},
-      [config.cachePath]: {}
+      [config.cachePath]: {},
+      [config.logFilePath]: "Some Content"
     });
     app.start();
   });
@@ -69,6 +71,13 @@ describe("Ping", function () {
         expect(spy.calledTwice).to.be.false;
         done();
       });
+  });
+
+  it("should cleanup log file on app start up", function (done) {
+    fs.readFile(config.logFilePath, 'utf8', function(err, contents) {
+      expect(contents).to.not.equal("Some Content");
+      done();
+    });
   });
 
 });
