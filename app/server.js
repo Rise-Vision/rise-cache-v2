@@ -9,6 +9,10 @@ const ServerFactory = function(config, logger) {
     server =  http.createServer(app);
 
   const start = () => {
+    server.on("error", (err) => {
+      logger.error("Unable to start Rise Cache", JSON.stringify(err));
+    });
+
     return server.listen(config.port, config.url, () => {
       logger.info("Rise Cache is up and running on port: " + config.port);
     });
