@@ -15,7 +15,7 @@ const AppFactory = function() {
   let server;
 
   const start = function() {
-    
+
     fileSystem.fileExists(config.riseDisplayNetworkIIPath, (exists) => {
 
       let riseDisplayNetworkII = null;
@@ -30,6 +30,8 @@ const AppFactory = function() {
       var bqClient = require("rise-common-electron").bqClient(config.bqProjectName, config.bqDataset);
       const externalLogger = require("./helpers/logger/external-logger-bigquery")(bqClient, displayId, pkg.version, config.os);
       const logger = require("./helpers/logger/logger")(config.debugging, externalLogger, fileSystem);
+
+      fileSystem.cleanupLogFile();
 
       fileSystem.createDir(config.downloadPath);
       fileSystem.createDir(config.cachePath);
