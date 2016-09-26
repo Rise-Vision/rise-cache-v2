@@ -53,7 +53,7 @@ const AppFactory = function() {
       server.start();
 
       require("./routes/ping")(server.app, pkg);
-      require("./routes/file")(server.app, headerDB.db, config.fileUpdateDuration, riseDisplayNetworkII);
+      require("./routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
       require("./routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII);
 
       server.app.use(error.handleError);

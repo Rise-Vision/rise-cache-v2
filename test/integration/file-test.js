@@ -3,13 +3,15 @@
 const fs = require("fs"),
   nock = require("nock"),
   mock = require("mock-fs"),
+  sinon = require("sinon"),
   chai = require("chai"),
   chaiHttp = require("chai-http"),
   config = require("../../config/config"),
   error = require("../../app/middleware/error"),
+  fileSystem = require("../../app/helpers/file-system"),
   Database = require("../../app/database"),
   expect = chai.expect,
-  httpProxy = require('http-proxy');
+  httpProxy = require("http-proxy");
 
 chai.use(chaiHttp);
 
@@ -19,9 +21,10 @@ describe("/files endpoint", () => {
   let server = null;
   let logger = {
     info: function (x){},
-    error:function (x){},
+    error: function (x){},
     warn: function (x){}
   };
+  let availableSpace = 600000000;
 
   let riseDisplayNetworkII = {
     get: function (property) {
@@ -33,14 +36,19 @@ describe("/files endpoint", () => {
 
   before(() => {
     server = require("../../app/server")(config, logger);
+    headerDB = new Database(config.headersDBPath);
 
     mock({
       [config.headersDBPath]: "",
       [config.downloadPath]: {},
       [config.cachePath]: {}
     });
-    headerDB = new Database(config.headersDBPath);
-    require("../../app/routes/file")(server.app, headerDB.db, config.fileUpdateDuration, riseDisplayNetworkII);
+
+    require("../../app/routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
+
+    fileSystem.getAvailableSpace = function(cb) {
+      cb(availableSpace);
+    };
   });
 
   beforeEach(() => {
@@ -203,6 +211,44 @@ describe("/files endpoint", () => {
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(res.statusCode).to.equal(502);
+            done();
+          });
+      });
+
+    });
+
+    describe("Insufficient disk space", () => {
+
+      before(() => {
+        availableSpace = 60000;
+      });
+
+      after(() => {
+        availableSpace = 600000000;
+      });
+
+      it("should log info when there is insufficient disk space", (done) => {
+        let spy = sinon.spy(logger, "info");
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            expect(spy.getCall(0).args[0]).to.equal("Insufficient disk space");
+            logger.info.restore();
+
+            done();
+          });
+      });
+
+      it("should return 507 when there is insufficient disk space", (done) => {
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(507);
+            expect(res.body).to.deep.equal({ status: 507, message: "Insufficient disk space" });
+
             done();
           });
       });
