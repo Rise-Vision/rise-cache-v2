@@ -138,20 +138,48 @@ describe("Delete unused files", () => {
     }, 200);
   });
 
-  it("should log info when cleanup job starts", (done) => {
-    setTimeout(function() {
-      expect(spy.getCall(0).args[0]).to.include("Cleanup job started at ");
+  describe("Logging", () => {
 
-      done();
-    }, 200);
-  });
+    it("should log info when cleanup job starts", (done) => {
+      setTimeout(function() {
+        expect(spy.getCall(0).args[0]).to.include("Cleanup job started at ");
 
-  it("should log info when cleanup job ends", (done) => {
-    setTimeout(function() {
-      expect(spy.getCall(1).args[0]).to.include("Cleanup job ended at ");
+        done();
+      }, 200);
+    });
 
-      done();
-    }, 200);
+    it("should log info when file deleted", (done) => {
+      setTimeout(function() {
+        expect(spy.getCall(1).args[0]).to.equal("File deleted");
+
+        done();
+      }, 200);
+    });
+
+    it("should log info when file headers deleted", (done) => {
+      setTimeout(function() {
+        expect(spy.getCall(2).args[0]).to.equal("File headers deleted");
+
+        done();
+      }, 200);
+    });
+
+    it("should log info when file metadata deleted", (done) => {
+      setTimeout(function() {
+        expect(spy.getCall(3).args[0]).to.equal("File metadata deleted");
+
+        done();
+      }, 200);
+    });
+
+    it("should log info when cleanup job ends", (done) => {
+      setTimeout(function() {
+        expect(spy.getCall(4).args[0]).to.include("Cleanup job ended at ");
+
+        done();
+      }, 200);
+    });
+
   });
 
 });

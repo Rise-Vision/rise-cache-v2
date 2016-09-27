@@ -17,6 +17,8 @@ const CleanupJob = function(config, headerDB, metadataDB, logger) {
 /* Delete any file that has not been used in 7 or more days. */
 CleanupJob.prototype.run = function() {
   fs.readdir(this.config.cachePath, (err, files) => {
+    let fileCount = 0;
+
     if (err) {
       this.logger.error("Could not read the " + this.config.cachePath + " directory.", err);
     } else {
@@ -34,7 +36,7 @@ CleanupJob.prototype.run = function() {
               if (err) {
                 this.logger.error(err, filePath);
               } else {
-                this.logger.info("File deleted", filePath);
+                this.logger.info("File deleted");
               }
             });
 
@@ -44,7 +46,7 @@ CleanupJob.prototype.run = function() {
               if (err) {
                 this.logger.error(err, filePath);
               } else if (numRemoved > 0) {
-                this.logger.info("File headers deleted", filePath);
+                this.logger.info("File headers deleted");
               }
             });
 
@@ -54,18 +56,32 @@ CleanupJob.prototype.run = function() {
               if (err) {
                 this.logger.error(err, filePath);
               } else if (numRemoved > 0) {
-                this.logger.info("File metadata deleted", filePath);
+                this.logger.info("File metadata deleted");
               }
+
+              fileCount++;
+
+              this.logJobEnded(fileCount, files.length);
             });
 
+          } else {
+            fileCount++;
           }
+
+          this.logJobEnded(fileCount, files.length);
         });
 
       });
 
-      this.logger.info("Cleanup job ended at " + new Date());
     }
   });
+};
+
+/* Log that cleanup job has ended if all files have been processed. */
+CleanupJob.prototype.logJobEnded = function(count, total) {
+  if (count === total) {
+    this.logger.info("Cleanup job ended at " + new Date());
+  }
 };
 
 module.exports = CleanupJob;
