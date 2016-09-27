@@ -142,7 +142,7 @@ describe("Delete unused files", () => {
 
     it("should log info when cleanup job starts", (done) => {
       setTimeout(function() {
-        expect(spy.getCall(0).args[0]).to.include("Cleanup job started at ");
+        expect(spy.getCall(0).args[0]).to.equal("Cleanup job started");
 
         done();
       }, 200);
@@ -174,7 +174,7 @@ describe("Delete unused files", () => {
 
     it("should log info when cleanup job ends", (done) => {
       setTimeout(function() {
-        expect(spy.getCall(4).args[0]).to.include("Cleanup job ended at ");
+        expect(spy.getCall(4).args[0]).to.equal("Cleanup job ended");
 
         done();
       }, 200);

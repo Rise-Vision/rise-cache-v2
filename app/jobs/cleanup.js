@@ -22,7 +22,7 @@ CleanupJob.prototype.run = function() {
     if (err) {
       this.logger.error("Could not read the " + this.config.cachePath + " directory.", err);
     } else {
-      this.logger.info("Cleanup job started at " + new Date());
+      this.logger.info("Cleanup job started");
 
       // Iterate over the files in the directory.
       files.forEach((file) => {
@@ -80,7 +80,7 @@ CleanupJob.prototype.run = function() {
 /* Log that cleanup job has ended if all files have been processed. */
 CleanupJob.prototype.logJobEnded = function(count, total) {
   if (count === total) {
-    this.logger.info("Cleanup job ended at " + new Date());
+    this.logger.info("Cleanup job ended");
   }
 };
 
