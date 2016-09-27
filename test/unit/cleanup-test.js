@@ -2,6 +2,7 @@
 
 const fs = require("fs"),
   mock = require("mock-fs"),
+  sinon = require("sinon"),
   chai = require("chai"),
   expect = chai.expect,
   config = require("../../config/config"),
@@ -11,7 +12,7 @@ const fs = require("fs"),
   Metadata = require("../../app/models/metadata");
 
 describe("Delete unused files", () => {
-  let cleanupJob;
+  let cleanupJob, spy;
   let logger = {
     info: function (x){},
     error:function (x){},
@@ -20,6 +21,8 @@ describe("Delete unused files", () => {
 
   beforeEach(function () {
     let now = new Date();
+
+    spy = sinon.spy(logger, "info");
 
     now.setDate(now.getDate() - 7);
 
@@ -63,6 +66,7 @@ describe("Delete unused files", () => {
   });
 
   afterEach(function () {
+    spy.restore();
     mock.restore();
   });
 
@@ -131,6 +135,22 @@ describe("Delete unused files", () => {
 
         done();
       })
+    }, 200);
+  });
+
+  it("should log info when cleanup job starts", (done) => {
+    setTimeout(function() {
+      expect(spy.getCall(0).args[0]).to.include("Cleanup job started at ");
+
+      done();
+    }, 200);
+  });
+
+  it("should log info when cleanup job ends", (done) => {
+    setTimeout(function() {
+      expect(spy.getCall(1).args[0]).to.include("Cleanup job ended at ");
+
+      done();
     }, 200);
   });
 

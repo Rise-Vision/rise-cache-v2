@@ -16,14 +16,15 @@ const CleanupJob = function(config, headerDB, metadataDB, logger) {
 
 /* Delete any file that has not been used in 7 or more days. */
 CleanupJob.prototype.run = function() {
-  let self = this;
-  fs.readdir(self.config.cachePath, function(err, files) {
+  fs.readdir(this.config.cachePath, (err, files) => {
     if (err) {
-      self.logger.error("Could not read the " + self.config.cachePath + " directory.", err);
+      this.logger.error("Could not read the " + this.config.cachePath + " directory.", err);
     } else {
+      this.logger.info("Cleanup job started at " + new Date());
+
       // Iterate over the files in the directory.
-      files.forEach(function(file) {
-        let filePath = path.join(self.config.cachePath, file);
+      files.forEach((file) => {
+        let filePath = path.join(this.config.cachePath, file);
 
         // Delete any unused files with headers and metadata.
         fileSystem.isUnused(filePath, (isUnused) => {
@@ -31,29 +32,29 @@ CleanupJob.prototype.run = function() {
 
             fileSystem.delete(filePath, (err) => {
               if (err) {
-                self.logger.error(err, filePath);
+                this.logger.error(err, filePath);
               } else {
-                self.logger.info("File deleted", filePath);
+                this.logger.info("File deleted", filePath);
               }
             });
 
             // delete headers
-            self.header.set("key", file);
-            self.header.delete((err, numRemoved) => {
+            this.header.set("key", file);
+            this.header.delete((err, numRemoved) => {
               if (err) {
-                self.logger.error(err, filePath);
+                this.logger.error(err, filePath);
               } else if (numRemoved > 0) {
-                self.logger.info("File headers deleted", filePath);
+                this.logger.info("File headers deleted", filePath);
               }
             });
 
             // delete metadata
-            self.metadata.set("key", file);
-            self.metadata.delete((err, numRemoved) => {
+            this.metadata.set("key", file);
+            this.metadata.delete((err, numRemoved) => {
               if (err) {
-                self.logger.error(err, filePath);
+                this.logger.error(err, filePath);
               } else if (numRemoved > 0) {
-                self.logger.info("File metadata deleted", filePath);
+                this.logger.info("File metadata deleted", filePath);
               }
             });
 
@@ -61,6 +62,8 @@ CleanupJob.prototype.run = function() {
         });
 
       });
+
+      this.logger.info("Cleanup job ended at " + new Date());
     }
   });
 };
