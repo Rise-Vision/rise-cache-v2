@@ -4,7 +4,7 @@ const fileSystem = require("../helpers/file-system"),
   FileController = require("../controllers/file"),
   Header = require("../models/header");
 
-const FileRoute = function(app, headerDB, updateDuration, riseDisplayNetworkII) {
+const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) {
 
   app.get("/files", (req, res, next) => {
     const fileUrl = req.query.url;
@@ -35,7 +35,7 @@ const FileRoute = function(app, headerDB, updateDuration, riseDisplayNetworkII) 
           });
 
           // check if file is stale
-          controller.isStale(updateDuration, (err, stale) => {
+          controller.isStale(config.updateDuration, (err, stale) => {
 
             if (err) {
               console.error(err, fileUrl);
@@ -78,29 +78,37 @@ const FileRoute = function(app, headerDB, updateDuration, riseDisplayNetworkII) 
             if (downloading) {
               sendDownloadingResponse(res, fileUrl);
             } else {
-              // Download the file.
-              controller.on("downloaded", () => {
-                console.info("File Downloaded", fileUrl, new Date());
-              });
+              // Check if there's enough disk space.
+              fileSystem.getAvailableSpace((availableSpace) => {
+                // Download the file.
+                if (availableSpace > config.diskThreshold) {
+                  controller.on("downloaded", () => {
+                    console.info("File Downloaded", fileUrl, new Date());
+                  });
 
-              controller.on("downloading", () => {
-                sendDownloadingResponse(res, fileUrl);
-              });
+                  controller.on("downloading", () => {
+                    sendDownloadingResponse(res, fileUrl);
+                  });
 
-              controller.on("invalid-response", (statusCode) => {
-                sendInvalidResponseResponse(res, fileUrl, statusCode);
-              });
+                  controller.on("invalid-response", (statusCode) => {
+                    sendInvalidResponseResponse(res, fileUrl, statusCode);
+                  });
 
-              controller.on("request-error", (err) => {
-                console.error(err, fileUrl, new Date());
-                sendResponse(res, 504, "File's host server could not be reached", fileUrl);
-              });
+                  controller.on("request-error", (err) => {
+                    console.error(err, fileUrl, new Date());
+                    sendResponse(res, 504, "File's host server could not be reached", fileUrl);
+                  });
 
-              controller.on("move-file-error", (err) => {
-                console.error(err, fileUrl, new Date());
-              });
+                  controller.on("move-file-error", (err) => {
+                    console.error(err, fileUrl, new Date());
+                  });
 
-              controller.downloadFile();
+                  controller.downloadFile();
+                } else {
+                  logger.info("Insufficient disk space");
+                  sendResponse(res, 507, "Insufficient disk space");
+                }
+              });
             }
           });
         }
