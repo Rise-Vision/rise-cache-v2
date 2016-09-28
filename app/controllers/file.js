@@ -41,7 +41,7 @@ FileController.prototype.downloadFile = function(opts) {
       "User-Agent": "request"
     };
 
-    options.proxy = (this.riseDisplayNetworkII) ? this.riseDisplayNetworkII.get("proxy"): null;
+    options.proxy = (this.riseDisplayNetworkII) ? this.riseDisplayNetworkII.get("activeproxy"): null;
 
     if (opts) {
       Object.assign(options.headers, opts);

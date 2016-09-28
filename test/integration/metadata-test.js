@@ -25,7 +25,7 @@ describe("/metadata endpoint", () => {
 
   let riseDisplayNetworkII = {
     get: function (property) {
-      if (property == "proxy") {
+      if (property == "activeproxy") {
         return "";
       }
     }
@@ -143,7 +143,7 @@ describe("/metadata endpoint", () => {
 
     beforeEach(() => {
       riseDisplayNetworkII.get = function (property) {
-        if (property == "proxy") {
+        if (property == "activeproxy") {
           return "http://localhost:8080";
         }
       };
@@ -212,7 +212,7 @@ describe("/metadata endpoint", () => {
 
       beforeEach(()=> {
         riseDisplayNetworkII.get = function (property) {
-          if (property == "proxy") {
+          if (property == "activeproxy") {
             return "http://localhost:8081";
           }
         };

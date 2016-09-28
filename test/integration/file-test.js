@@ -28,7 +28,7 @@ describe("/files endpoint", () => {
 
   let riseDisplayNetworkII = {
     get: function (property) {
-      if (property == "proxy") {
+      if (property == "activeproxy") {
         return "";
       }
     }
@@ -234,7 +234,7 @@ describe("/files endpoint", () => {
           .get("/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
-            expect(spy.getCall(0).args[0]).to.equal("Insufficient disk space");
+            expect(spy.calledWith("Insufficient disk space")).to.be.true;
             logger.info.restore();
 
             done();
@@ -277,7 +277,7 @@ describe("/files endpoint", () => {
       });
 
       riseDisplayNetworkII.get = function (property) {
-        if (property == "proxy") {
+        if (property == "activeproxy") {
           return "http://localhost:8080";
         }
       };
@@ -340,7 +340,7 @@ describe("/files endpoint", () => {
 
       beforeEach(()=> {
         riseDisplayNetworkII.get = function (property) {
-          if (property == "proxy") {
+          if (property == "activeproxy") {
             return "http://localhost:8081";
           }
         };
