@@ -105,13 +105,17 @@ module.exports = {
 
   cleanupLogFile: function() {
     fs.truncate(config.logFilePath, 0, (err) => {
-      if (err) console.error(err);
+      if (err && config.debugging) {
+        console.error(err);
+      }
     });
   },
 
   appendToLog: function(datetime, message) {
     fs.appendFile(config.logFilePath, datetime + " - " + message + "\n", (err) => {
-      if (err) console.error(err);
+      if (err && config.debugging) {
+        console.error(err);
+      }
     });
   }
 

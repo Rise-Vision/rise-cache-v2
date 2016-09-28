@@ -25,7 +25,12 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
           controller.getHeaders((err, headers) => {
 
             if (err) {
-              console.error(err, fileUrl);
+              logger.error(err, fileUrl);
+            }
+            else {
+              if (!headers) {
+                logger.error("No headers available", fileUrl);
+              }
             }
             res.setHeader("Access-Control-Allow-Origin", "*");
             res.setHeader("Cache-Control", "no-cache");
@@ -35,7 +40,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
           });
 
           // check if file is stale
-          controller.isStale(config.updateDuration, (err, stale) => {
+          controller.isStale(config.fileUpdateDuration, (err, stale) => {
 
             if (err) {
               console.error(err, fileUrl);
