@@ -24,7 +24,7 @@ describe("FileController", () => {
 
   let riseDisplayNetworkII = {
     get: function (property) {
-      if (property == "proxy") {
+      if (property == "activeproxy") {
         return "";
       }
     }
