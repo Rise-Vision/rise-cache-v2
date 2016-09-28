@@ -501,6 +501,28 @@ describe("/files endpoint", () => {
         });
     });
 
+    it("should log an error when headers are not available", (done) => {
+      let spy = sinon.spy(logger, "error");
+
+      mock({
+        [config.cachePath]: {
+          "cdf42c077fe6037681ae3c003550c2c5": "some content"
+        },
+        [config.headersDBPath]: ""
+      });
+
+      headerDB.db.loadDatabase();
+
+      chai.request("http://localhost:9494")
+        .get("/files")
+        .query({ url: "http://example.com/logo.png" })
+        .end(() => {
+          expect(spy.calledWith("No headers available", "http://example.com/logo.png"));
+          logger.error.restore();
+          done();
+        });
+    });
+
     it("should return an error if file exists but could not be read", (done) => {
       // Create file with no read permissions.
       mock({
