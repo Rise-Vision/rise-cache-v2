@@ -13,8 +13,7 @@ module.exports = {
       if (err) {
         console.log(err);
       } else if (typeof cb === "function") {
-          cb(descriptor);
-        }
+        cb(descriptor);
       }
     });
   },
@@ -46,10 +45,12 @@ module.exports = {
   /* Delete a file. */
   delete: function(path, cb) {
     fs.unlink(path, (err) => {
-      if (err) {
-        cb(err);
-      } else {
-        cb();
+      if (typeof cb === "function") {
+        if (err) {
+          cb(err);
+        } else {
+          cb();
+        }
       }
     });
   },

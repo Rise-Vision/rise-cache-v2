@@ -10,6 +10,8 @@ const ServerFactory = function(config, logger) {
     server = http.createServer(app);
 
   const start = () => {
+    fileSystem.delete(config.shutdownFilePath);
+
     server.on("error", (err) => {
       logger.error("Unable to start Rise Cache", JSON.stringify(err));
     });

@@ -8,6 +8,7 @@ const riseCachePath = path.join(rvplayerPath, "RiseCache");
 module.exports = {
   port: 9494,
   url: "localhost",
+  riseCachePath: riseCachePath,
   cachePath: path.join(riseCachePath,"cache"),
   downloadPath: path.join(riseCachePath,"download"),
   headersDBPath: path.join(riseCachePath,"database","headers.db"),
