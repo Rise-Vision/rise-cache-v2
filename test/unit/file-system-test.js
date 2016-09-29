@@ -7,6 +7,27 @@ const fs = require("fs"),
   config = require("../../config/config"),
   expect = chai.expect;
 
+describe("createFile", () => {
+
+  it("should create a file", (done) => {
+    mock({
+      "test": {}
+    });
+
+    fileSystem.createFile("test/test.txt", (descriptor) => {
+      fs.stat("test/test.txt", (err, stats) => {
+        expect(err).to.be.null;
+        expect(stats).to.not.be.null;
+        expect(stats.isFile()).to.be.true;
+
+        mock.restore();
+        done();
+      });
+    });
+  });
+
+});
+
 describe("fileExists", () => {
 
   it("should return true if file exists", () => {

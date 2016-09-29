@@ -1,12 +1,13 @@
 "use strict";
 
 const http = require("http"),
-  express = require("express");
+  express = require("express"),
+  fileSystem = require("./helpers/file-system");
 
 const ServerFactory = function(config, logger) {
 
   const app = express(),
-    server =  http.createServer(app);
+    server = http.createServer(app);
 
   const start = () => {
     server.on("error", (err) => {
@@ -19,9 +20,12 @@ const ServerFactory = function(config, logger) {
   };
 
   const stop = () => {
-    server.close();
+    server.close((err) => {
+      if (!err) {
+        fileSystem.createFile(config.shutdownFilePath);
+      }
+    });
   };
-
 
   return {
     start: start,

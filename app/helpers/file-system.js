@@ -8,6 +8,17 @@ const fs = require("fs-extra"),
 
 module.exports = {
 
+  createFile: function(filePath, cb) {
+    fs.open(filePath, "w", function (err, descriptor) {
+      if (err) {
+        console.log(err);
+      } else if (typeof cb === "function") {
+          cb(descriptor);
+        }
+      }
+    });
+  },
+
   // Create directory if it does not already exist.
   createDir: function(dir) {
     fs.mkdirs(dir, (err) => {

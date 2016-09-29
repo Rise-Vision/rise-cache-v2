@@ -14,6 +14,7 @@ module.exports = {
   metadataDBPath: path.join(riseCachePath,"database","metadata.db"),
   riseDisplayNetworkIIPath: path.join(rvplayerPath,"RiseDisplayNetworkII.ini"),
   logFilePath: path.join(riseCachePath,"risecache.log"),
+  shutdownFilePath: path.join(riseCachePath, "shutdown.txt"),
   diskThreshold: 500 * 1024 * 1024,  // 500 MB
   fileUpdateDuration: 1200000, // 20 minutes,
   debugging: process.argv.slice(1).join(" ").indexOf("debug") > -1,
