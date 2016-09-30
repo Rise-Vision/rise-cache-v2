@@ -10,7 +10,12 @@ const ServerFactory = function(config, logger) {
     server = http.createServer(app);
 
   const start = () => {
-    fileSystem.delete(config.shutdownFilePath);
+    fileSystem.delete(config.shutdownFilePath, (err) => {
+      if (err) {
+        // file doesn't exist, log ungraceful shutdown
+        logger.warn("Rise Cache did not shutdown gracefully");
+      }
+    });
 
     server.on("error", (err) => {
       logger.error("Unable to start Rise Cache", JSON.stringify(err));

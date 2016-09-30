@@ -14,6 +14,7 @@ describe("Server", function () {
   beforeEach(function() {
     logger = {
       info: function (details) {},
+      warn: function (details) {},
       error: function(details, errDetails) {}
     };
 
@@ -39,6 +40,20 @@ describe("Server", function () {
 
       done();
     });
+  });
+
+  it("should log a warning when ungraceful shutdown occurred", (done) => {
+    mock({
+      [config.riseCachePath]: {}
+    });
+
+    logger.warn = function (x) {
+      expect(x).to.equal("Rise Cache did not shutdown gracefully");
+      done();
+    };
+
+    serverFactory = require("../../app/server")(config, logger);
+    serverFactory.start();
   });
 
   it("should log info for server startup", (done) => {
