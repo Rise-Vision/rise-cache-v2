@@ -1,17 +1,14 @@
 "use strict";
 
 const http = require("http"),
-  express = require("express"),
-  fileSystem = require("./helpers/file-system");
+  express = require("express");
 
 const ServerFactory = function(config, logger) {
 
   const app = express(),
-    server = http.createServer(app);
+    server =  http.createServer(app);
 
   const start = () => {
-    fileSystem.delete(config.shutdownFilePath);
-
     server.on("error", (err) => {
       logger.error("Unable to start Rise Cache", JSON.stringify(err));
     });
@@ -22,12 +19,9 @@ const ServerFactory = function(config, logger) {
   };
 
   const stop = () => {
-    server.close((err) => {
-      if (!err) {
-        fileSystem.createFile(config.shutdownFilePath);
-      }
-    });
+    server.close();
   };
+
 
   return {
     start: start,
