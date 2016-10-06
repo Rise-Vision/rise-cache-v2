@@ -26,7 +26,7 @@
     "nedb": "^1.8.0",
     "properties-reader": "0.0.15",
     "request": "^2.74.0",
-    "rise-common-electron": "git://github.com/Rise-Vision/rise-common-electron.git#44ef377",
+    "rise-common-electron": "git://github.com/Rise-Vision/rise-common-electron.git",
     "send": "^0.14.1"
   },
   "devDependencies": {
