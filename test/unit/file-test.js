@@ -569,7 +569,7 @@ describe("FileController", () => {
 
     it("should return false for non-storage url", () => {
       let url = "http://test.com/images/test.jpg";
-      expect(fileController.isStorageFile()).to.be.false;
+      expect(fileController.isStorageFile(url)).to.be.false;
     });
 
   });

@@ -185,8 +185,9 @@ FileController.prototype.getUpdateHeaderField = function(cb) {
 };
 
 FileController.prototype.isStorageFile = function(url) {
-  return decodeURIComponent(url).indexOf("storage.googleapis.com") > -1 ||
-    decodeURIComponent(url).indexOf("googleapis.com/storage") > -1;
+  return url.indexOf("storage.googleapis.com") > -1 ||
+    url.indexOf("googleapis.com/storage") > -1 ||
+    url.indexOf("googleapis.com%2Fstorage") > -1;
 };
 
 FileController.prototype.getUrlWithDisplayID = function (url, displayId) {
