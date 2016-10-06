@@ -3,7 +3,7 @@
 const fs = require("fs-extra"),
   path = require("path"),
   crypto = require("crypto"),
-  diskusage = require("diskusage"),
+  platform = require("rise-common-electron").platform,
   config = require("../../config/config");
 
 module.exports = {
@@ -68,12 +68,10 @@ module.exports = {
 
   /* Get the available amount of disk space. */
   getAvailableSpace: function(cb) {
-    diskusage.check(config.cachePath, function (err, info) {
-      if (err) {
-        console.error(err);
-      } else {
-        cb(info.available);
-      }
+    platform.getFreeDiskSpace(config.cachePath).then((space) => {
+      cb(space);
+    }).catch((err) =>{
+      console.error(err);
     });
   },
 
