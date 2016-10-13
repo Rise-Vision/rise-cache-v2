@@ -22,10 +22,10 @@ describe("/spreadsheets endpoint", () => {
 
   before(() => {
     mock({
-      [config.spreadsheetDataDBPath]: ""
+      [config.spreadsheetsDBPath]: ""
     });
 
-    spreadsheetDB = new database(config.spreadsheetDataDBPath);
+    spreadsheetDB = new database(config.spreadsheetsDBPath);
     require("../../app/routes/spreadsheets")(server.app, spreadsheetDB.db);
   });
 

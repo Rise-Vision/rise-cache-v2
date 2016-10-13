@@ -38,7 +38,7 @@ const AppFactory = function() {
 
       const headerDB = new Database(config.headersDBPath);
       const metadataDB = new Database(config.metadataDBPath);
-      const spreadsheetDB = new Database(config.spreadsheetDataDBPath);
+      const spreadsheetDB = new Database(config.spreadsheetsDBPath);
       const cleanupJob = new CleanupJob(config, headerDB.db, metadataDB.db, logger);
 
       server = require("./server")(config, logger);
