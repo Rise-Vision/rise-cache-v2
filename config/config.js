@@ -12,6 +12,7 @@ module.exports = {
   downloadPath: path.join(riseCachePath,"download"),
   headersDBPath: path.join(riseCachePath,"database","headers.db"),
   metadataDBPath: path.join(riseCachePath,"database","metadata.db"),
+  spreadsheetsDBPath: path.join(riseCachePath, "database", "spreadsheets.db"),
   riseDisplayNetworkIIPath: path.join(rvplayerPath,"RiseDisplayNetworkII.ini"),
   logFilePath: path.join(riseCachePath,"risecache.log"),
   diskThreshold: 500 * 1024 * 1024,  // 500 MB

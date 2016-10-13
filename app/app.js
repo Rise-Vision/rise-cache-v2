@@ -38,6 +38,7 @@ const AppFactory = function() {
 
       const headerDB = new Database(config.headersDBPath);
       const metadataDB = new Database(config.metadataDBPath);
+      const spreadsheetDB = new Database(config.spreadsheetsDBPath);
       const cleanupJob = new CleanupJob(config, headerDB.db, metadataDB.db, logger);
 
       server = require("./server")(config, logger);
@@ -56,6 +57,7 @@ const AppFactory = function() {
       require("./routes/display")(server.app, displayId);
       require("./routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
       require("./routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII);
+      require("./routes/spreadsheets")(server.app, spreadsheetDB.db);
 
       server.app.use(error.handleError);
 
