@@ -6,12 +6,12 @@ const mock = require("mock-fs"),
   config = require("../../config/config"),
   error = require("../../app/middleware/error"),
   database = require("../../app/database"),
-  spreadsheetData = require("../data/spreadsheet-data.json"),
+  spreadsheetData = require("../data/spreadsheets.json"),
   expect = chai.expect;
 
 chai.use(chaiHttp);
 
-describe("/spreadsheet-data endpoint", () => {
+describe("/spreadsheets endpoint", () => {
   let logger = {
     info: function (x){},
     error: function (x){},
@@ -26,7 +26,7 @@ describe("/spreadsheet-data endpoint", () => {
     });
 
     spreadsheetDB = new database(config.spreadsheetDataDBPath);
-    require("../../app/routes/spreadsheet-data")(server.app, spreadsheetDB.db);
+    require("../../app/routes/spreadsheets")(server.app, spreadsheetDB.db);
   });
 
   after(() => {
@@ -44,7 +44,7 @@ describe("/spreadsheet-data endpoint", () => {
 
   it("should return an error if 'key' is not POSTed", function (done) {
     chai.request("http://localhost:9494")
-      .post("/spreadsheet-data")
+      .post("/spreadsheets")
       .send({
         "value": ""
       })
@@ -58,7 +58,7 @@ describe("/spreadsheet-data endpoint", () => {
 
   it("should return an error if 'value' is not POSTed", function (done) {
     chai.request("http://localhost:9494")
-      .post("/spreadsheet-data")
+      .post("/spreadsheets")
       .send({
         "key": ""
       })
@@ -72,7 +72,7 @@ describe("/spreadsheet-data endpoint", () => {
 
   it("should save data and return saved entity", function (done) {
     chai.request("http://localhost:9494")
-      .post("/spreadsheet-data")
+      .post("/spreadsheets")
       .send(spreadsheetData)
       .end((err, res) => {
         expect(res).to.have.status(201);

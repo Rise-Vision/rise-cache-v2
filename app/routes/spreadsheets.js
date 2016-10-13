@@ -5,9 +5,9 @@ const jsonParser = bodyParser.json();
 const Data = require("../models/data");
 const DataController = require("../controllers/data");
 
-const SpreadsheetDataRoute = function(app, db) {
+const SpreadsheetsRoute = function(app, db) {
 
-  app.post("/spreadsheet-data", jsonParser, (req, res, next) => {
+  app.post("/spreadsheets", jsonParser, (req, res, next) => {
     if (!("key" in req.body) || !("value" in req.body)) {
       res.statusCode = 400;
 
@@ -31,4 +31,4 @@ const SpreadsheetDataRoute = function(app, db) {
 
 };
 
-module.exports = SpreadsheetDataRoute;
+module.exports = SpreadsheetsRoute;
