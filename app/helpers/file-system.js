@@ -109,6 +109,14 @@ module.exports = {
     });
   },
 
+  cleanupDownloadFolder: function() {
+    fs.emptyDir(config.downloadPath, (err) =>{
+      if (err && config.debugging) {
+        console.error(err);
+      }
+    });
+  },
+
   appendToLog: function(datetime, message) {
     fs.appendFile(config.logFilePath, datetime + " - " + message + "\n", (err) => {
       if (err && config.debugging) {

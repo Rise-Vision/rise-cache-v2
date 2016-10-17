@@ -1,6 +1,6 @@
 "use strict";
 
-const fs = require("fs"),
+const fs = require("fs-extra"),
   chai = require("chai"),
   chaiHttp = require("chai-http"),
   expect = chai.expect,
@@ -23,7 +23,9 @@ describe("Ping", function () {
     mock({
       [config.headersDBPath]: "",
       [config.metadataDBPath]: "",
-      [config.downloadPath]: {},
+      [config.downloadPath]: {
+        "0e36e4d268b63fd0573185fe3a9e01f0": "some content"
+      },
       [config.cachePath]: {},
       [config.logFilePath]: "Some Content"
     });
@@ -78,6 +80,19 @@ describe("Ping", function () {
       expect(contents).to.not.equal("Some Content");
       done();
     });
+  });
+
+  it("should cleanup download folder on app start up", function (done) {
+
+    let items = [];
+    fs.walk(config.downloadPath)
+      .on('data', function (item) {
+        items.push(item.path)
+      })
+      .on('end', function () {
+        expect(items).to.deep.equal([config.downloadPath]);
+        done();
+      });
   });
 
 });

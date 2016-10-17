@@ -33,6 +33,7 @@ const AppFactory = function() {
 
       fileSystem.cleanupLogFile();
 
+      fileSystem.cleanupDownloadFolder();
       fileSystem.createDir(config.downloadPath);
       fileSystem.createDir(config.cachePath);
 
