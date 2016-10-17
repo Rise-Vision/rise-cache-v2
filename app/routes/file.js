@@ -108,6 +108,10 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
                     console.error(err, fileUrl, new Date());
                   });
 
+                  controller.on("delete-file-error", (err) => {
+                    console.error(err, fileUrl, new Date());
+                  });
+
                   controller.downloadFile();
                 } else {
                   logger.info("Insufficient disk space");
