@@ -67,11 +67,11 @@ module.exports = {
   },
 
   /* Get the available amount of disk space. */
-  getAvailableSpace: function(cb) {
+  getAvailableSpace: function(logger, cb) {
     platform.getFreeDiskSpace(config.cachePath).then((space) => {
       cb(space);
-    }).catch((err) =>{
-      console.error(err);
+    }).catch((err) => {
+      logger.error(err);
     });
   },
 
@@ -101,10 +101,10 @@ module.exports = {
     });
   },
 
-  cleanupLogFile: function() {
+  cleanupLogFile: function(logger) {
     fs.truncate(config.logFilePath, 0, (err) => {
-      if (err && config.debugging) {
-        console.error(err);
+      if (err) {
+        logger.error(err);
       }
     });
   },

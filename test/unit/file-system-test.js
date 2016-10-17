@@ -2,6 +2,7 @@
 
 const fs = require("fs"),
   mock = require("mock-fs"),
+  sinon = require("sinon"),
   chai = require("chai"),
   fileSystem = require("../../app/helpers/file-system"),
   config = require("../../config/config"),
@@ -288,14 +289,19 @@ describe("appendToLog", () => {
 });
 
 describe("cleanupLogFile", () => {
+  const logger = {
+    info: function (detail) {},
+    error: function (detail, errorDetail) {},
+    warn: function (detail) {}
+  };
 
-  it("should append to log", (done) => {
+  it("should clean up log", (done) => {
 
     mock({
       [config.logFilePath]: "2016/09/22 12:12:01 - INFO: Rise Cache is up and running on port: 9494"
     });
 
-    fileSystem.cleanupLogFile();
+    fileSystem.cleanupLogFile(logger);
 
     fs.readFile(config.logFilePath, 'utf8', function(err, contents) {
       expect(contents).to.equal("");
@@ -304,4 +310,22 @@ describe("cleanupLogFile", () => {
     });
 
   });
+
+  it("should log an error if the log could not be cleaned up", (done) => {
+    let spy = sinon.spy(logger, "error");
+
+    mock({
+      [config.logFilePath]: null
+    });
+
+    fileSystem.cleanupLogFile(logger);
+
+    setTimeout(function() {
+      expect(spy.callCount).to.equal(1);
+      logger.error.restore();
+      done();
+    }, 200);
+
+  });
+
 });

@@ -43,7 +43,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
           controller.isStale(config.fileUpdateDuration, (err, stale) => {
 
             if (err) {
-              console.error(err, fileUrl);
+              logger.error(err, fileUrl);
             }
 
             if (stale) {
@@ -54,18 +54,18 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
 
                   // get the appropriate header field for request
                   controller.getUpdateHeaderField((err, field) => {
-                    if (err) { console.error(err, fileUrl); }
+                    if (err) { logger.error(err, fileUrl); }
 
                     controller.on("downloaded", () => {
-                      console.info("Latest File Downloaded", fileUrl, new Date());
+                      logger.info("File downloaded - " + fileUrl);
                     });
 
                     controller.on("request-error", (err) => {
-                      console.error(err, fileUrl, new Date());
+                      logger.error(err, fileUrl);
                     });
 
                     controller.on("move-file-error", (err) => {
-                      console.error(err, fileUrl, new Date());
+                      logger.error(err, fileUrl);
                     });
 
                     // Make request to download file passing request header
@@ -84,11 +84,11 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
               sendDownloadingResponse(res, fileUrl);
             } else {
               // Check if there's enough disk space.
-              fileSystem.getAvailableSpace((availableSpace) => {
+              fileSystem.getAvailableSpace(logger, (availableSpace) => {
                 // Download the file.
                 if (availableSpace > config.diskThreshold) {
                   controller.on("downloaded", () => {
-                    console.info("File Downloaded", fileUrl, new Date());
+                    logger.info("File downloaded - " + fileUrl);
                   });
 
                   controller.on("downloading", () => {
@@ -100,16 +100,16 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
                   });
 
                   controller.on("request-error", (err) => {
-                    console.error(err, fileUrl, new Date());
+                    logger.error(err, fileUrl);
                     sendResponse(res, 504, "File's host server could not be reached", fileUrl);
                   });
 
                   controller.on("move-file-error", (err) => {
-                    console.error(err, fileUrl, new Date());
+                    logger.error(err, fileUrl);
                   });
 
                   controller.on("delete-file-error", (err) => {
-                    console.error(err, fileUrl, new Date());
+                    logger.error(err, fileUrl);
                   });
 
                   controller.downloadFile();
@@ -130,11 +130,11 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
 
   function getFromCache(req, res, controller, fileUrl, headers) {
     controller.streamFile(req, res, headers);
-    console.info("File exists in cache. Not downloading", fileUrl, new Date());
+    logger.info("File exists in cache. Not downloading - " + fileUrl);
   }
 
   function sendInvalidResponseResponse(res, fileUrl, statusCode) {
-    console.info("Invalid Response with status code: ", statusCode, fileUrl, new Date());
+    logger.info("Invalid response with status code " + statusCode + " - " + fileUrl);
 
     if (statusCode === 404) {
       sendResponse(res, 534, "File not found on the host server", fileUrl);
@@ -145,7 +145,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
 
   function sendDownloadingResponse(res, fileUrl) {
     sendResponse(res, 202, "File is downloading", fileUrl);
-    console.info("File is downloading", fileUrl, new Date());
+    logger.info("File is downloading - " + fileUrl);
   }
 
   function sendResponse(res, statusCode, message, fileUrl) {

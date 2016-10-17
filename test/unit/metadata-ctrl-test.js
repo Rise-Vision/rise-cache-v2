@@ -9,17 +9,17 @@ const chai = require("chai"),
 
 describe("MetadataController", () => {
   let metadataController,
-  metadata = {
-    save: function () {
-      return;
-    },
-    set: function () {
+    metadata = {
+      save: function () {
+        return;
+      },
+      set: function () {
 
-    },
-    findByKey: function (key,cb) {
-      cb(null, {data: {}});
-    }
-  };
+      },
+      findByKey: function (key,cb) {
+        cb(null, {data: {}});
+      }
+    };
 
   let riseDisplayNetworkII = {
     get: function (property) {
@@ -29,8 +29,12 @@ describe("MetadataController", () => {
     }
   };
 
+  let logger = {
+    error: function (detail, errorDetail) {}
+  };
+
   beforeEach(() => {
-    metadataController = new MetadataController("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F", metadata, riseDisplayNetworkII);
+    metadataController = new MetadataController("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F", metadata, riseDisplayNetworkII, logger);
   });
 
   describe("getMetadata", () => {
@@ -79,6 +83,18 @@ describe("MetadataController", () => {
         expect(true).to.be.true;
         done();
       });
+    });
+
+    it("should log error if metadata server responds with an error", (done) => {
+      let spy = sinon.spy(logger, "error");
+
+      metadataController.on("no-response", () => {
+        expect(spy.calledOnce).to.be.true;
+        logger.error.restore();
+        done();
+      });
+
+      metadataController.getMetadata();
     });
 
     it("should emit 'no-response' event if metadata server responds with an error", (done) => {
