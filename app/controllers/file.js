@@ -125,10 +125,8 @@ FileController.prototype.moveFileFromDownloadToCache = function() {
 FileController.prototype.deleteFileFromDownload = function() {
   fileSystem.fileExists(this.pathInDownload, (exists) =>{
     if (exists) {
-      console.log("hey");
       fileSystem.delete(this.pathInDownload, (err) => {
         if (err) this.emit("delete-file-error", err);
-        console.log("here");
       });
     }
   });
