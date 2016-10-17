@@ -60,6 +60,7 @@ FileController.prototype.downloadFile = function(opts) {
         }
       })
       .on("error", (err) => {
+        this.deleteFileFromDownload();
         this.emit("request-error", err);
       });
   }
@@ -119,6 +120,17 @@ FileController.prototype.moveFileFromDownloadToCache = function() {
   fileSystem.move(this.pathInDownload, this.pathInCache, (err) =>{
     if (err) this.emit("move-file-error", err);
   });
+};
+
+FileController.prototype.deleteFileFromDownload = function() {
+  fileSystem.fileExists(this.pathInDownload, (exists) =>{
+    if (exists) {
+      fileSystem.delete(this.pathInDownload, (err) => {
+        if (err) this.emit("delete-file-error", err);
+      });
+    }
+  });
+
 };
 
 FileController.prototype.saveHeaders = function(headers) {

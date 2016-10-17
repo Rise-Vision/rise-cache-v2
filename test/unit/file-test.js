@@ -144,6 +144,27 @@ describe("FileController", () => {
       });
     });
 
+    it("should delete incomplete file if file server responds with an error", (done) => {
+
+      mock({
+        [config.downloadPath]: {
+          "0e36e4d268b63fd0573185fe3a9e01f0": "some content"
+        }
+      });
+
+      fileController.downloadFile();
+
+      fileController.on("request-error", (err) => {
+        setTimeout(()=> {
+          const stats = fs.stat(config.downloadPath + "/0e36e4d268b63fd0573185fe3a9e01f0", (err, stats) => {
+            expect(err).to.not.be.null;
+            expect(stats).to.be.undefined;
+            done();
+          });
+        }, 1000)
+      });
+    });
+
   });
 
   describe("saveHeaders", () => {
