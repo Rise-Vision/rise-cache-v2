@@ -2,6 +2,7 @@
 
 const fs = require("fs"),
   request = require("request"),
+  config = require("../../config/config"),
   fileSystem = require("../helpers/file-system"),
   EventEmitter = require("events").EventEmitter,
   util = require("util"),
@@ -42,6 +43,8 @@ FileController.prototype.downloadFile = function(opts) {
     };
 
     options.proxy = (this.riseDisplayNetworkII) ? this.riseDisplayNetworkII.get("activeproxy"): null;
+
+    options.timeout = config.requestTimeout;
 
     if (opts) {
       Object.assign(options.headers, opts);
