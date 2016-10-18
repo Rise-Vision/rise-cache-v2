@@ -11,7 +11,12 @@ describe("DataController", () => {
       save: function(cb) {
         cb(null, spreadsheetData);
       },
-      set: function(name, value) {}
+      set: function(name, value) {},
+      findByKey: function(key, cb) {
+        cb(null,{
+          data: spreadsheetData
+        });
+      }
     };
 
   beforeEach(() => {
@@ -27,12 +32,12 @@ describe("DataController", () => {
         done();
       });
 
-      controller.saveData();
+      controller.saveData(spreadsheetData.key, spreadsheetData.value);
     });
 
     it("should emit 'save-data-error' event if data was not saved", (done) => {
       model.save = function (cb) {
-        cb(new Error("err"), spreadsheetData);
+        cb(new Error("err"));
       };
 
       controller.on("save-data-error", (err) => {
@@ -41,7 +46,35 @@ describe("DataController", () => {
         done();
       });
 
-      controller.saveData();
+      controller.saveData(spreadsheetData.key, spreadsheetData.value);
+    });
+
+  });
+
+  describe("getData", () => {
+
+    it("should emit 'get-data' event if data was found", (done) => {
+      controller.on("get-data", (data) => {
+        expect(data).to.deep.equal(spreadsheetData);
+
+        done();
+      });
+
+      controller.getData(spreadsheetData.key);
+    });
+
+    it("should emit 'get-data-error' event if data could not be retrieved", (done) => {
+      model.findByKey = function (key, cb) {
+        cb(new Error("err"));
+      };
+
+      controller.on("get-data-error", (err) => {
+        expect(err.message).to.equal("err");
+
+        done();
+      });
+
+      controller.getData(spreadsheetData.key);
     });
 
   });

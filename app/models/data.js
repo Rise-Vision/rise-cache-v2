@@ -20,4 +20,12 @@ Data.prototype.save = function(callback) {
 
 };
 
+Data.prototype.findByKey = function (key, callback) {
+  this.db.find({key: key}, (err, docs) => {
+    if (err) return callback(err);
+    let data = (docs.length > 0) ? docs[0] : {};
+    callback(null, new Data(data, this.db));
+  });
+};
+
 module.exports = Data;

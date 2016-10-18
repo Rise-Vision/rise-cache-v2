@@ -24,4 +24,21 @@ DataController.prototype.saveData = function(key, value) {
   });
 };
 
+DataController.prototype.getData = function(key) {
+
+  this.model.findByKey(key, (err, foundData) => {
+    if (err) {
+      return this.emit("get-data-error", err);
+    }
+    let data = foundData.data;
+
+    if (Object.keys(data).length === 0 && data.constructor === Object) {
+      data = null;
+    }
+
+    this.emit("get-data", data);
+  });
+};
+
+
 module.exports = DataController;

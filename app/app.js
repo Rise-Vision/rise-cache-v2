@@ -59,7 +59,7 @@ const AppFactory = function() {
       require("./routes/display")(server.app, displayId);
       require("./routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
       require("./routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII, logger);
-      require("./routes/spreadsheets")(server.app, spreadsheetDB.db);
+      require("./routes/spreadsheets")(server.app, spreadsheetDB.db, logger);
 
       server.app.use(error.handleError);
 
