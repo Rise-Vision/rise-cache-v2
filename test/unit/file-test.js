@@ -144,6 +144,51 @@ describe("FileController", () => {
       });
     });
 
+    it("should not emit 'request-error' event if connection delay timeout under 2 minutes", (done) => {
+
+      let spy = sinon.spy(fileController, "deleteFileFromDownload");
+
+      nock("http://abc123.com")
+        .get("/logo.png")
+        .socketDelay(60000) // 1 min
+        .replyWithFile(200, "/data/logo.png");
+
+      fileController.downloadFile();
+
+      fileController.on("downloaded", () => {
+        expect(true).to.be.true;
+        expect(spy.callCount).to.equal(0);
+        
+        fileController.deleteFileFromDownload.restore();
+
+        done();
+      });
+    });
+
+    it("should emit 'request-error' event if connection timeout surpasses 2 minutes", (done) => {
+
+      let spy = sinon.spy(fileController, "deleteFileFromDownload");
+
+      nock("http://abc123.com")
+        .get("/logo.png")
+        .socketDelay(180000) // 3 mins
+        .replyWithFile(200, "/data/logo.png");
+
+      fileController.downloadFile();
+
+      fileController.on("request-error", (err) => {
+        // checking just for ESOCKETTIMEDOUT because a ECONNRESET immediately follows it causing multiple done() calls
+        if (err.code === "ESOCKETTIMEDOUT") {
+          expect(err).to.not.be.null;
+          expect(spy.callCount).to.equal(1);
+
+          fileController.deleteFileFromDownload.restore();
+
+          done();
+        }
+      });
+    });
+
     it("should delete incomplete file if file server responds with an error", (done) => {
 
       mock({
