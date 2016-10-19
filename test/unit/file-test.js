@@ -144,13 +144,13 @@ describe("FileController", () => {
       });
     });
 
-    it("should not emit 'request-error' event if connection delay timeout under 20 minutes", (done) => {
+    it("should not emit 'request-error' event if connection delay timeout under 2 minutes", (done) => {
 
       let spy = sinon.spy(fileController, "deleteFileFromDownload");
 
       nock("http://abc123.com")
         .get("/logo.png")
-        .socketDelay(1080000) // 18 mins
+        .socketDelay(60000) // 1 min
         .replyWithFile(200, "/data/logo.png");
 
       fileController.downloadFile();
@@ -165,13 +165,13 @@ describe("FileController", () => {
       });
     });
 
-    it("should emit 'request-error' event if connection timeout surpasses 20 minutes", (done) => {
+    it("should emit 'request-error' event if connection timeout surpasses 2 minutes", (done) => {
 
       let spy = sinon.spy(fileController, "deleteFileFromDownload");
 
       nock("http://abc123.com")
         .get("/logo.png")
-        .socketDelay(1320000) // 22 mins
+        .socketDelay(180000) // 3 mins
         .replyWithFile(200, "/data/logo.png");
 
       fileController.downloadFile();

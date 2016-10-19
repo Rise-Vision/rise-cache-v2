@@ -17,7 +17,7 @@ module.exports = {
   logFilePath: path.join(riseCachePath,"risecache.log"),
   diskThreshold: 500 * 1024 * 1024,  // 500 MB
   fileUpdateDuration: 1200000, // 20 minutes,
-  requestTimeout: 1200000, // 20 minutes
+  requestTimeout: 120000, // 2 minutes
   debugging: process.argv.slice(1).join(" ").indexOf("debug") > -1,
   os: process.platform,
   bqProjectName: "client-side-events",
