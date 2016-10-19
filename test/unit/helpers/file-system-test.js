@@ -4,8 +4,8 @@ const fs = require("fs"),
   mock = require("mock-fs"),
   sinon = require("sinon"),
   chai = require("chai"),
-  fileSystem = require("../../app/helpers/file-system"),
-  config = require("../../config/config"),
+  fileSystem = require("../../../app/helpers/file-system"),
+  config = require("../../../config/config"),
   expect = chai.expect;
 
 describe("fileExists", () => {

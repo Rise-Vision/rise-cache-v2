@@ -1,7 +1,7 @@
 "use strict";
 
 const MetadataController = require("../controllers/metadata"),
-  Metadata = require("../models/metadata");
+  Data = require("../models/data");
 
 const MetadataRoute = function(app, metadataDB, riseDisplayNetworkII, logger) {
 
@@ -10,7 +10,7 @@ const MetadataRoute = function(app, metadataDB, riseDisplayNetworkII, logger) {
     const fileUrl = req.query.url;
 
     if (fileUrl) {
-      const metadata = new Metadata({}, metadataDB),
+      const metadata = new Data({}, metadataDB),
         controller = new MetadataController(fileUrl, metadata, riseDisplayNetworkII, logger);
 
       controller.on("response", (data) => {

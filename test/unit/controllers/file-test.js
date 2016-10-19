@@ -5,8 +5,8 @@ const fs = require("fs"),
   nock = require("nock"),
   mock = require("mock-fs"),
   sinon = require("sinon"),
-  config = require("../../config/config"),
-  FileController = require("../../app/controllers/file"),
+  config = require("../../../config/config"),
+  FileController = require("../../../app/controllers/file"),
   expect = chai.expect,
   httpMocks = require('node-mocks-http'),
   EventEmitter = require("events").EventEmitter;
@@ -158,7 +158,7 @@ describe("FileController", () => {
       fileController.on("downloaded", () => {
         expect(true).to.be.true;
         expect(spy.callCount).to.equal(0);
-        
+
         fileController.deleteFileFromDownload.restore();
 
         done();

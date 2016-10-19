@@ -1,8 +1,8 @@
 "use strict";
 
 const chai = require("chai"),
-  DataController = require("../../app/controllers/data"),
-  spreadsheetData = require("../data/spreadsheets.json"),
+  DataController = require("../../../app/controllers/data"),
+  spreadsheetData = require("../../data/spreadsheets.json"),
   expect = chai.expect;
 
 describe("DataController", () => {

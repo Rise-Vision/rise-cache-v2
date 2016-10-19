@@ -3,9 +3,9 @@
 const chai = require("chai"),
   nock = require("nock"),
   sinon = require("sinon"),
-  MetadataController = require("../../app/controllers/metadata"),
+  MetadataController = require("../../../app/controllers/metadata"),
   expect = chai.expect,
-  metadataResponse = require("../data/metadata.json");
+  metadataResponse = require("../../data/metadata.json");
 
 describe("MetadataController", () => {
   let metadataController,

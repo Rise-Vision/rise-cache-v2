@@ -3,14 +3,12 @@
 const fs = require("fs"),
   path = require("path"),
   fileSystem = require("../helpers/file-system"),
-  Header = require("../models/header"),
-  Metadata = require("../models/metadata");
-
+  Data = require("../models/data");
 
 const CleanupJob = function(config, headerDB, metadataDB, logger) {
   this.config = config;
-  this.header = new Header({}, headerDB);
-  this.metadata = new Metadata({}, metadataDB);
+  this.header = new Data({}, headerDB);
+  this.metadata = new Data({}, metadataDB);
   this.logger = logger;
 };
 
@@ -42,7 +40,7 @@ CleanupJob.prototype.run = function() {
 
             // delete headers
             this.header.set("key", file);
-            this.header.delete((err, numRemoved) => {
+            this.header.delete(file, (err, numRemoved) => {
               if (err) {
                 this.logger.error(err, filePath);
               } else if (numRemoved > 0) {
@@ -52,7 +50,7 @@ CleanupJob.prototype.run = function() {
 
             // delete metadata
             this.metadata.set("key", file);
-            this.metadata.delete((err, numRemoved) => {
+            this.metadata.delete(file, (err, numRemoved) => {
               if (err) {
                 this.logger.error(err, filePath);
               } else if (numRemoved > 0) {

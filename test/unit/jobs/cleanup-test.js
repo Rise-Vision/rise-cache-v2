@@ -5,11 +5,9 @@ const fs = require("fs"),
   sinon = require("sinon"),
   chai = require("chai"),
   expect = chai.expect,
-  config = require("../../config/config"),
-  CleanupJob = require("../../app/jobs/cleanup"),
-  Database = require("../../app/database"),
-  Header = require("../../app/models/header"),
-  Metadata = require("../../app/models/metadata");
+  config = require("../../../config/config"),
+  CleanupJob = require("../../../app/jobs/cleanup"),
+  Database = require("../../../app/database");
 
 describe("Delete unused files", () => {
   let cleanupJob, spy;
