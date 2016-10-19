@@ -106,4 +106,27 @@ describe("/spreadsheets endpoint", () => {
         done();
       });
   });
+
+  it("should delete data", function (done) {
+
+    chai.request("http://localhost:9494")
+      .delete("/spreadsheets/" + spreadsheetData.key)
+      .end((err, res) => {
+        expect(res).to.have.status(204);
+
+        done();
+      });
+  });
+
+  it("should return 404 if data to delete was not found", function (done) {
+
+    chai.request("http://localhost:9494")
+      .get("/spreadsheets/" + spreadsheetData.key)
+      .end((err, res) => {
+        expect(res).to.have.status(404);
+        expect(res.body).to.deep.equal({ status: 404, message: "Not found" });
+
+        done();
+      });
+  });
 });

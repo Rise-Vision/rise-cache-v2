@@ -40,5 +40,15 @@ DataController.prototype.getData = function(key) {
   });
 };
 
+DataController.prototype.deleteData = function(key) {
+  this.model.delete(key, (err, numRemoved) => {
+    if (err) {
+      return this.emit("delete-data-error", err);
+    }
+
+    this.emit("delete-data", numRemoved);
+
+  });
+};
 
 module.exports = DataController;

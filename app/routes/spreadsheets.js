@@ -55,6 +55,28 @@ const SpreadsheetsRoute = function(app, db, logger) {
     controller.getData(key);
   });
 
+  app.delete("/spreadsheets/:key", (req, res, next) => {
+    let key = req.params.key;
+
+    controller.on("delete-data", (numRemoved) => {
+      if (numRemoved > 0) {
+        res.status(204).json();
+      } else {
+        res.statusCode = 404;
+        next(new Error("Not found"));
+      }
+
+    });
+
+    controller.on("delete-data-error", (err) => {
+      logger.error("Could not delete spreadsheet data", key);
+      res.statusCode = 500;
+      next(err);
+    });
+
+    controller.deleteData(key);
+  });
+
 };
 
 module.exports = SpreadsheetsRoute;

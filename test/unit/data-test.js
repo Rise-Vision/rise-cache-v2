@@ -16,6 +16,9 @@ describe("DataController", () => {
         cb(null,{
           data: spreadsheetData
         });
+      },
+      delete: function(key, cb) {
+        cb(null, 1);
       }
     };
 
@@ -77,6 +80,46 @@ describe("DataController", () => {
       controller.getData(spreadsheetData.key);
     });
 
+  });
+
+  describe("deleteData", () => {
+    it("should emit 'delete-data' event if data was deleted", (done) => {
+      controller.on("delete-data", (numRemoved) => {
+        expect(numRemoved).to.equal(1);
+
+        done();
+      });
+
+      controller.deleteData(spreadsheetData.key);
+    });
+
+    it("should emit 'delete-data' event if no data was deleted", (done) => {
+      model.delete = function (key, cb) {
+        cb(null, 0);
+      };
+
+      controller.on("delete-data", (numRemoved) => {
+        expect(numRemoved).to.equal(0);
+
+        done();
+      });
+
+      controller.deleteData(spreadsheetData.key);
+    });
+
+    it("should emit 'delete-data-error' event if problem deleting the data", (done) => {
+      model.delete = function (key, cb) {
+        cb(new Error("err"));
+      };
+
+      controller.on("delete-data-error", (err) => {
+        expect(err.message).to.equal("err");
+
+        done();
+      });
+
+      controller.deleteData(spreadsheetData.key);
+    });
   });
 
 });

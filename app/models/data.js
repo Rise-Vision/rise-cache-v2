@@ -28,4 +28,11 @@ Data.prototype.findByKey = function (key, callback) {
   });
 };
 
+Data.prototype.delete = function (key, callback) {
+  this.db.remove({ key: key }, {}, (err, numRemoved) => {
+    if (err) return callback(err);
+    callback(null, numRemoved);
+  });
+};
+
 module.exports = Data;
