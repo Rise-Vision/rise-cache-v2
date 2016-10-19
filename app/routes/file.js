@@ -149,11 +149,13 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
   }
 
   function sendResponse(res, statusCode, message, fileUrl) {
-    res.status(statusCode)
-      .send({
-        status: statusCode,
-        message: message
-      });
+    if (!res.headersSent) {
+      res.status(statusCode)
+        .send({
+          status: statusCode,
+          message: message
+        });
+    }
   }
 };
 
