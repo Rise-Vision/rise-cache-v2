@@ -36,7 +36,7 @@ describe("/metadata endpoint", () => {
       [config.metadataDBPath]: ""
     });
     metadataDB = new Database(config.metadataDBPath);
-    require("../../app/routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII);
+    require("../../app/routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII, logger);
   });
 
   beforeEach(() => {

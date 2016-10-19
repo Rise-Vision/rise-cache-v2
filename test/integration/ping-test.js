@@ -47,7 +47,6 @@ describe("Ping", function () {
       expect(res.body).to.be.a('object');
       expect(res.body.name).to.be.equal(pkg.name);
       expect(res.body.version).to.be.equal(pkg.version);
-      expect(spy.calledWith("RiseDisplayNetworkIIPath.ini file not found.")).to.be.true;
 
       done();
     });

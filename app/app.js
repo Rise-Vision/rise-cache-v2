@@ -22,18 +22,19 @@ const AppFactory = function() {
 
       if (exists) {
         riseDisplayNetworkII = PropertiesReader(config.riseDisplayNetworkIIPath);
-      } else {
-        console.warn("RiseDisplayNetworkIIPath.ini file not found.");
       }
 
-      let displayId = (riseDisplayNetworkII) ? riseDisplayNetworkII.get("displayid") : null;
-      var bqClient = require("rise-common-electron").bqClient(config.bqProjectName, config.bqDataset);
+      const displayId = (riseDisplayNetworkII) ? riseDisplayNetworkII.get("displayid") : null;
+      const bqClient = require("rise-common-electron").bqClient(config.bqProjectName, config.bqDataset);
       const externalLogger = require("./helpers/logger/external-logger-bigquery")(bqClient, displayId, pkg.version, config.os);
       const logger = require("./helpers/logger/logger")(config.debugging, externalLogger, fileSystem);
 
-      fileSystem.cleanupLogFile();
+      if (!exists) {
+        logger.warn("RiseDisplayNetworkIIPath.ini file not found");
+      }
 
       fileSystem.cleanupDownloadFolder();
+      fileSystem.cleanupLogFile(logger);
       fileSystem.createDir(config.downloadPath);
       fileSystem.createDir(config.cachePath);
 
@@ -57,7 +58,7 @@ const AppFactory = function() {
       require("./routes/ping")(server.app, pkg);
       require("./routes/display")(server.app, displayId);
       require("./routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
-      require("./routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII);
+      require("./routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII, logger);
       require("./routes/spreadsheets")(server.app, spreadsheetDB.db);
 
       server.app.use(error.handleError);

@@ -5,13 +5,14 @@ const EventEmitter = require("events").EventEmitter,
   fileSystem = require("../helpers/file-system");
 
 
-const MetadataController = function(url, metadata, riseDisplayNetworkII) {
+const MetadataController = function(url, metadata, riseDisplayNetworkII, logger) {
   EventEmitter.call(this);
 
   this.url = url;
   this.fileName = fileSystem.getFileName(this.url);
   this.metadata = metadata;
   this.riseDisplayNetworkII = riseDisplayNetworkII;
+  this.logger = logger;
 };
 
 util.inherits(MetadataController, EventEmitter);
@@ -27,7 +28,9 @@ MetadataController.prototype.getMetadata = function() {
     };
 
     request(requestOptions, (err, res, body) => {
-      if (err) console.error(err, this.url);
+      if (err) {
+        this.logger.error(err, this.url);
+      }
 
       if (err || res.statusCode != 200) {
         this.getCachedMetadata( (err, cachedRes) => {

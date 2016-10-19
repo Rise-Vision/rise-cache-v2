@@ -46,7 +46,7 @@ describe("/files endpoint", () => {
 
     require("../../app/routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
 
-    fileSystem.getAvailableSpace = function(cb) {
+    fileSystem.getAvailableSpace = function(logger, cb) {
       cb(availableSpace);
     };
   });
@@ -544,6 +544,30 @@ describe("/files endpoint", () => {
             message: "EACCES, permission denied '" + config.cachePath + "/cdf42c077fe6037681ae3c003550c2c5'"
           });
 
+          done();
+        });
+    });
+
+    it("should log an error on request-error", (done) => {
+      let spy = sinon.spy(logger, "error");
+
+      nock("http://example.com")
+        .get("/logo.png")
+        .replyWithError({ "message": "something awful happened", "code": "AWFUL_ERROR" });
+
+      mock({
+        [config.headersDBPath]: "",
+        [config.downloadPath]: {},
+        [config.cachePath]: {}
+      });
+
+      chai.request("http://localhost:9494")
+        .get("/files")
+        .query({ url: "http://example.com/logo.png" })
+        .end((err, res) => {
+          expect(spy.callCount).to.equal(1);
+
+          logger.error.restore();
           done();
         });
     });
