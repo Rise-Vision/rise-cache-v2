@@ -53,6 +53,7 @@ FileController.prototype.downloadFile = function(opts) {
 
     request.get(options)
       .on("response", (res) => {
+        this.hasDownloadError = false;
         if (res.statusCode == 200) {
           this.writeFile(res);
           this.emit("downloading");
