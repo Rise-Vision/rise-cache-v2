@@ -18,6 +18,7 @@ const FileController = function(url, header, riseDisplayNetworkII) {
   this.pathInCache = fileSystem.getPathInCache(this.url);
   this.pathInDownload = fileSystem.getPathInDownload(this.url);
   this.riseDisplayNetworkII = riseDisplayNetworkII;
+  this.hasDownloadError = false;
 };
 
 util.inherits(FileController, EventEmitter);
@@ -52,6 +53,7 @@ FileController.prototype.downloadFile = function(opts) {
 
     request.get(options)
       .on("response", (res) => {
+        this.hasDownloadError = false;
         if (res.statusCode == 200) {
           this.writeFile(res);
           this.emit("downloading");
@@ -63,6 +65,7 @@ FileController.prototype.downloadFile = function(opts) {
         }
       })
       .on("error", (err) => {
+        this.hasDownloadError = true;
         this.deleteFileFromDownload();
         this.emit("request-error", err);
       });
@@ -106,9 +109,11 @@ FileController.prototype.writeFile = function(res) {
 
   file.on("finish", () => {
     file.close(() => {
-      this.saveHeaders(res.headers);
-      this.moveFileFromDownloadToCache();
-      this.emit("downloaded");
+      if (!this.hasDownloadError) {
+        this.saveHeaders(res.headers);
+        this.moveFileFromDownloadToCache();
+        this.emit("downloaded");
+      }
     });
   }).on("error", (err) => {
     fs.unlink(this.pathInDownload);
