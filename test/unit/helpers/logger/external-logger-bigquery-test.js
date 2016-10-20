@@ -17,7 +17,7 @@ describe("External Logger", () => {
   let bqClientInsertSpy;
 
   before( function () {
-    externalLogger = require("../../app/helpers/logger/external-logger-bigquery")(bqClient, displayId, version, os);
+    externalLogger = require("../../../../app/helpers/logger/external-logger-bigquery")(bqClient, displayId, version, os);
   });
 
   beforeEach(function () {

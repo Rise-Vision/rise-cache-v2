@@ -2,7 +2,7 @@
 
 const fileSystem = require("../helpers/file-system"),
   FileController = require("../controllers/file"),
-  Header = require("../models/header");
+  Data = require("../models/data");
 
 const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) {
 
@@ -10,7 +10,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
     const fileUrl = req.query.url;
 
     if (fileUrl) {
-      const header = new Header({}, headerDB),
+      const header = new Data({}, headerDB),
         controller = new FileController(fileUrl, header, riseDisplayNetworkII);
 
       controller.on("file-error", (err) => {

@@ -27,7 +27,7 @@ describe("Logger", () => {
 
     before( function () {
       debugging = true;
-      logger = require("../../app/helpers/logger/logger")(debugging, externalLogger, fileSystem);
+      logger = require("../../../../app/helpers/logger/logger")(debugging, externalLogger, fileSystem);
     });
 
     beforeEach(function () {
@@ -91,7 +91,7 @@ describe("Logger", () => {
 
     before( function () {
       debugging = false;
-      logger = require("../../app/helpers/logger/logger")(debugging, externalLogger, fileSystem);
+      logger = require("../../../../app/helpers/logger/logger")(debugging, externalLogger, fileSystem);
     });
 
     beforeEach(function () {
@@ -157,7 +157,7 @@ describe("Logger", () => {
     before( function () {
       debugging = false;
       let nullExternalLogging = null;
-      logger = require("../../app/helpers/logger/logger")(debugging, nullExternalLogging, fileSystem);
+      logger = require("../../../../app/helpers/logger/logger")(debugging, nullExternalLogging, fileSystem);
     });
 
     beforeEach(function () {
