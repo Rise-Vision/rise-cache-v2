@@ -129,4 +129,44 @@ describe("/spreadsheets endpoint", () => {
         done();
       });
   });
+
+  it("should return an error if 'key' is not PUTed", function (done) {
+    chai.request("http://localhost:9494")
+      .put("/spreadsheets/"+spreadsheetData.key)
+      .send({
+        "value": ""
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.deep.equal({ status: 400, message: "Missing POST data" });
+
+        done();
+      });
+  });
+
+  it("should return an error if 'value' is not PUTed", function (done) {
+    chai.request("http://localhost:9494")
+      .put("/spreadsheets/"+spreadsheetData.key)
+      .send({
+        "key": ""
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.deep.equal({ status: 400, message: "Missing POST data" });
+
+        done();
+      });
+  });
+
+  it("should update data and return saved entity", function (done) {
+    chai.request("http://localhost:9494")
+      .put("/spreadsheets/"+spreadsheetData.key)
+      .send(spreadsheetData)
+      .end((err, res) => {
+        expect(res).to.have.status(201);
+        expect(res.body).to.deep.equal(spreadsheetData);
+
+        done();
+      });
+  });
 });
