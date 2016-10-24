@@ -119,6 +119,35 @@ describe("getFileName", () => {
     expect(fileSystem.getFileName()).to.equal("");
   });
 
+  it("should return an encoded file name given a storage googleapis url", () => {
+    expect(fileSystem.getFileName("https://storage.googleapis.com/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/rodrigo/test.jpg")).to.equal("706f06b62284d45f46fbde678bcafbae");
+  });
+
+  it("should return an encoded file name given a googleapis url", () => {
+    expect(fileSystem.getFileName("https://www.googleapis.com/storage/v1/b/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/o/rodrigo%2Ftest.jpg")).to.equal("706f06b62284d45f46fbde678bcafbae");
+  });
+
+  it("should return an encoded file name given a storage api url", () => {
+    expect(fileSystem.getFileName("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013&file=rodrigo%2Ftest.jpg")).to.equal("706f06b62284d45f46fbde678bcafbae");
+  });
+
+  it("should return an encoded file name given a storage api url for folder", () => {
+    expect(fileSystem.getFileName("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013&folder=rodrigo%2F")).to.equal("e60886d7eab5d0affdbf2207d2a4a2f2");
+  });
+
+  it("should return same encoded file name given an url for getting the file metadata or for getting the file", () => {
+    let forFile = fileSystem.getFileName("https://storage.googleapis.com/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/rodrigo/test.jpg");
+    let forMetadata = fileSystem.getFileName("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013&file=rodrigo%2Ftest.jpg");
+
+    expect(forFile).to.equal(forMetadata);
+  });
+
+  it("should return same encoded file name given an url was escaped or not", () => {
+    let notEscaped = fileSystem.getFileName("https://storage.googleapis.com/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/rodrigo/test.jpg");
+    let escaped = fileSystem.getFileName("https://storage.googleapis.com/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/rodrigo%2Ftest.jpg");
+
+    expect(notEscaped).to.equal(escaped);
+  });
 });
 
 describe("getPathInDownload", () => {

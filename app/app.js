@@ -2,7 +2,6 @@
 
 const config = require("../config/config"),
   cors = require("cors"),
-  error = require("./middleware/error"),
   pkg = require("../package.json"),
   Database = require("./database"),
   PropertiesReader = require("properties-reader"),
@@ -12,7 +11,7 @@ const config = require("../config/config"),
 
 const AppFactory = function() {
 
-  let server;
+  let server, error;
 
   const start = function() {
 
@@ -60,6 +59,8 @@ const AppFactory = function() {
       require("./routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
       require("./routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII, logger);
       require("./routes/spreadsheets")(server.app, spreadsheetDB.db, logger);
+
+      error = require("./middleware/error")(logger);
 
       server.app.use(error.handleError);
 

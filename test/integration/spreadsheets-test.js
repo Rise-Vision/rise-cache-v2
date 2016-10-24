@@ -4,7 +4,6 @@ const mock = require("mock-fs"),
   chai = require("chai"),
   chaiHttp = require("chai-http"),
   config = require("../../config/config"),
-  error = require("../../app/middleware/error"),
   database = require("../../app/database"),
   spreadsheetData = require("../data/spreadsheets.json"),
   expect = chai.expect;
@@ -19,6 +18,7 @@ describe("/spreadsheets endpoint", () => {
   };
   let spreadsheetDB = null;
   let server = require("../../app/server")(config, logger);
+  let error = require("../../app/middleware/error")(logger);
 
   before(() => {
     mock({
