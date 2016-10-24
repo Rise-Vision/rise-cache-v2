@@ -4,7 +4,9 @@ const fs = require("fs-extra"),
   path = require("path"),
   crypto = require("crypto"),
   platform = require("rise-common-electron").platform,
-  config = require("../../config/config");
+  config = require("../../config/config"),
+  URL = require("url"),
+  querystring = require("querystring");
 
 module.exports = {
 
@@ -44,7 +46,29 @@ module.exports = {
   },
 
   getFileName: function(url) {
-    return url ? crypto.createHash("md5").update(url).digest("hex") : "";
+    if (!url) return "";
+
+    const STORAGE_API_HOST = "storage-dot-rvaserver2.appspot.com";
+    const STORAGE_GOOGLEAPIS_HOST = "storage.googleapis.com";
+    const GOOGLEAPIS_HOST = "www.googleapis.com";
+
+    let token = url;
+    let parsedUrlObj = URL.parse(url);
+
+    if (parsedUrlObj.host == STORAGE_API_HOST) {
+      let querystringObj = querystring.parse(parsedUrlObj.query);
+      if (querystringObj.file) {
+        token = querystringObj.file;
+      }
+    } else if (parsedUrlObj.host == STORAGE_GOOGLEAPIS_HOST) {
+      let positionOfSecondSlash = parsedUrlObj.path.indexOf("/", 1);
+      token = parsedUrlObj.path.substring(positionOfSecondSlash + 1);
+    } else if (parsedUrlObj.host == GOOGLEAPIS_HOST) {
+      let positionOfSlashBeforeFileName = parsedUrlObj.path.indexOf("/o/", 1);
+      token = parsedUrlObj.path.substring(positionOfSlashBeforeFileName + 3);
+    }
+
+    return crypto.createHash("md5").update(unescape(token)).digest("hex");
   },
 
   getPathInDownload: function(url) {

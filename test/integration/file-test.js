@@ -7,7 +7,6 @@ const fs = require("fs"),
   chai = require("chai"),
   chaiHttp = require("chai-http"),
   config = require("../../config/config"),
-  error = require("../../app/middleware/error"),
   fileSystem = require("../../app/helpers/file-system"),
   Database = require("../../app/database"),
   expect = chai.expect,
@@ -19,6 +18,7 @@ describe("/files endpoint", () => {
   let headers = {etag:"1a42b4479c62b39b93726d793a2295ca"};
   let headerDB = null;
   let server = null;
+  let error = null;
   let logger = {
     info: function (x){},
     error: function (x){},
@@ -36,6 +36,8 @@ describe("/files endpoint", () => {
 
   before(() => {
     server = require("../../app/server")(config, logger);
+    error = require("../../app/middleware/error")(logger);
+
     headerDB = new Database(config.headersDBPath);
 
     mock({

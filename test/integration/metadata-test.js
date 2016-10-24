@@ -5,7 +5,6 @@ const nock = require("nock"),
   chai = require("chai"),
   chaiHttp = require("chai-http"),
   config = require("../../config/config"),
-  error = require("../../app/middleware/error"),
   Database = require("../../app/database"),
   expect = chai.expect,
   metadataResponse = require("../data/metadata.json"),
@@ -21,7 +20,7 @@ describe("/metadata endpoint", () => {
     warn: function (x){}
   };
   let server = require("../../app/server")(config, logger);
-
+  let error = require("../../app/middleware/error")(logger);
 
   let riseDisplayNetworkII = {
     get: function (property) {

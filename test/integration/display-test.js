@@ -3,7 +3,6 @@
 const chai = require("chai"),
   chaiHttp = require("chai-http"),
   config = require("../../config/config"),
-  error = require("../../app/middleware/error"),
   expect = chai.expect;
 
 chai.use(chaiHttp);
@@ -15,6 +14,8 @@ describe("/displays endpoint", () => {
     warn: function (x){}
   };
   let server = require("../../app/server")(config, logger);
+  let error = require("../../app/middleware/error")(logger);
+
 
   let riseDisplayNetworkII = {
     get: function (property) {
