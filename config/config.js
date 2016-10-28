@@ -5,6 +5,13 @@ const rvplayerPath = (process.platform === "win32") ?
   path.join(os.homedir(), "rvplayer");
 const riseCachePath = path.join(rvplayerPath, "RiseCache");
 
+const getOS = function () {
+  if (process.platform === "win32") {
+    return (process.arch === "x64" || process.env.hasOwnProperty("PROCESSOR_ARCHITEW6432")) ? "win64" : process.platform
+  } else {
+    return process.platform;
+  }
+}
 module.exports = {
   port: 9494,
   url: "localhost",
@@ -19,7 +26,7 @@ module.exports = {
   fileUpdateDuration: 1200000, // 20 minutes,
   requestTimeout: 120000, // 2 minutes
   debugging: process.argv.slice(1).join(" ").indexOf("debug") > -1,
-  os: process.platform,
+  os: getOS(),
   bqProjectName: "client-side-events",
   bqDataset: "Rise_Cache_V2"
 };
