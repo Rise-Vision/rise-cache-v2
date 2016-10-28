@@ -34,7 +34,6 @@ const ExternalLoggerBigQuery = function (bqClient, displayId, cacheVersion, os, 
     return bqClient.insert("events", data, nowDate, getDateForTableName(nowDate))
       .catch((e)=> {
         let message = "Could not log to bq " + require("util").inspect(e, { depth: null });
-        console.log(logDatetime + message);
         fileSystem.appendToLog(logDatetime, message);
       });
   };

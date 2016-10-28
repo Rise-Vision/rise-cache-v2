@@ -68,7 +68,6 @@ describe("External Logger", () => {
       return Promise.reject('this promise will always be rejected');
     }
     bqClientInsertSpy = sinon.spy(bqClient, "insert");
-    let consoleLogSpy = sinon.spy(console, 'log');
 
     let date = new Date("09/20/2016");
     let data = {
@@ -88,7 +87,6 @@ describe("External Logger", () => {
 
     let expectedMessage = "Could not log to bq 'this promise will always be rejected'";
     setTimeout(function () {
-      expect(consoleLogSpy.calledWith(logDatetime+expectedMessage));
       expect(fileSystemAppendToLogSpy.calledWith(logDatetime, expectedMessage)).to.be.true;
       done();
     },100);
