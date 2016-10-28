@@ -19,27 +19,30 @@ const Logger = function (debugging, externalLogger, fileSystem) {
   };
 
   const error = function (detail, errorDetail) {
+    let logDatetime = getLogDatetime();
     let message = "ERROR: " + detail + " " + errorDetail;
-    if (debugging) console.error(getLogDatetime() + " - " + message);
+    if (debugging) console.error(logDatetime + " - " + message);
 
-    fileSystem.appendToLog(getLogDatetime(), message);
-    if (externalLogger) {externalLogger.log("error", detail, errorDetail);}
+    fileSystem.appendToLog(logDatetime, message);
+    if (externalLogger) {externalLogger.log("error", detail, errorDetail, null, logDatetime);}
   };
 
   const info = function (detail) {
+    let logDatetime = getLogDatetime();
     let message = "INFO: " + detail;
-    if (debugging) console.info(getLogDatetime() + " - " + message);
+    if (debugging) console.info(logDatetime + " - " + message);
 
-    fileSystem.appendToLog(getLogDatetime(), message);
-    if (externalLogger) {externalLogger.log("info", detail);}
+    fileSystem.appendToLog(logDatetime, message);
+    if (externalLogger) {externalLogger.log("info", detail, null, logDatetime);}
   };
 
   const warn = function (detail) {
+    let logDatetime = getLogDatetime();
     let message = "WARNING: " + detail;
-    if (debugging) console.warn(getLogDatetime() + " - " + message);
+    if (debugging) console.warn(logDatetime + " - " + message);
 
-    fileSystem.appendToLog(getLogDatetime(), message);
-    if (externalLogger) {externalLogger.log("warning", detail);}
+    fileSystem.appendToLog(logDatetime, message);
+    if (externalLogger) {externalLogger.log("warning", detail, null, logDatetime);}
   };
 
   return {

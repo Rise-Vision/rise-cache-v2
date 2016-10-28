@@ -25,7 +25,7 @@ const AppFactory = function() {
 
       const displayId = (riseDisplayNetworkII) ? riseDisplayNetworkII.get("displayid") : null;
       const bqClient = require("rise-common-electron").bqClient(config.bqProjectName, config.bqDataset);
-      const externalLogger = require("./helpers/logger/external-logger-bigquery")(bqClient, displayId, pkg.version, config.os);
+      const externalLogger = require("./helpers/logger/external-logger-bigquery")(bqClient, displayId, pkg.version, config.os, fileSystem);
       const logger = require("./helpers/logger/logger")(config.debugging, externalLogger, fileSystem);
 
       if (!exists) {

@@ -8,24 +8,29 @@ const chai = require("chai"),
 describe("External Logger", () => {
   let externalLogger;
   let bqClient = {
-    insert: function (table, data, date, suffix) { return { catch: function (){}}}
+    insert: function (table, data, date, suffix) { return { catch: function (cb){}}}
   };
   let displayId = "displayIdTest";
   let version = "1.0.0";
   let os = "win32";
 
-  let bqClientInsertSpy;
+  let bqClientInsertSpy, fileSystemAppendToLogSpy;
+  let fileSystem = {
+    appendToLog : function (logDatetime, message) { return;}
+  };
 
   before( function () {
-    externalLogger = require("../../../../app/helpers/logger/external-logger-bigquery")(bqClient, displayId, version, os);
+    externalLogger = require("../../../../app/helpers/logger/external-logger-bigquery")(bqClient, displayId, version, os, fileSystem);
   });
 
   beforeEach(function () {
+    fileSystemAppendToLogSpy = sinon.spy(fileSystem, "appendToLog");
     bqClientInsertSpy = sinon.spy(bqClient, "insert");
   });
 
   afterEach(function () {
     bqClientInsertSpy.restore();
+    fileSystemAppendToLogSpy.restore();
   });
 
   it("should log an event to BQ", () => {
@@ -55,6 +60,36 @@ describe("External Logger", () => {
       done();
     });
 
+  });
+
+  it("should log error to insert to BQ", (done) => {
+    bqClient.insert = function () {
+
+      return Promise.reject('this promise will always be rejected');
+    }
+    bqClientInsertSpy = sinon.spy(bqClient, "insert");
+
+    let date = new Date("09/20/2016");
+    let data = {
+      event: "info",
+      event_details: "Test Info" || "",
+      error_details: "",
+      display_id: displayId,
+      cache_version: version,
+      os: os,
+      ts: date.toISOString()
+    };
+    let logDatetime = "logDatetime";
+
+    externalLogger.log(data.event, data.event_details, data.error_details, date, logDatetime);
+
+    expect(bqClientInsertSpy.calledWith("events", data, date, "20160920")).to.be.true;
+
+    let expectedMessage = "Could not log to bq 'this promise will always be rejected'";
+    setTimeout(function () {
+      expect(fileSystemAppendToLogSpy.calledWith(logDatetime, expectedMessage)).to.be.true;
+      done();
+    },100);
   });
 
 });
