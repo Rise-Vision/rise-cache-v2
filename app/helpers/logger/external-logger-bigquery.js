@@ -2,7 +2,7 @@
 
 "use strict";
 
-const ExternalLoggerBigQuery = function (bqClient, displayId, cacheVersion, os) {
+const ExternalLoggerBigQuery = function (bqClient, displayId, cacheVersion, os, fileSystem) {
 
   const getDateForTableName = function (nowDate) {
     let year = nowDate.getUTCFullYear(),
@@ -15,7 +15,7 @@ const ExternalLoggerBigQuery = function (bqClient, displayId, cacheVersion, os) 
     return "" + year + month + day;
   };
 
-  const log = function (eventName, eventDetails, errorDetails, nowDate) {
+  const log = function (eventName, eventDetails, errorDetails, nowDate, logDatetime) {
     if (!eventName) {return Promise.reject("eventName is required");}
     if (!nowDate || !Date.prototype.isPrototypeOf(nowDate)) {
       nowDate = new Date();
@@ -32,8 +32,10 @@ const ExternalLoggerBigQuery = function (bqClient, displayId, cacheVersion, os) 
     };
 
     return bqClient.insert("events", data, nowDate, getDateForTableName(nowDate))
-      .catch((e)=>{
-        log.file("Could not log to bq " + require("util").inspect(e, { depth: null }));
+      .catch((e)=> {
+        let message = "Could not log to bq " + require("util").inspect(e, { depth: null });
+        console.log(logDatetime + message);
+        fileSystem.appendToLog(logDatetime, message);
       });
   };
 
