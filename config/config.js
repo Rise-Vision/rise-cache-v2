@@ -6,11 +6,13 @@ const rvplayerPath = (process.platform === "win32") ?
 const riseCachePath = path.join(rvplayerPath, "RiseCache");
 
 const getOS = function () {
+
   if (process.platform === "win32") {
-    return (process.arch === "x64" || process.env.hasOwnProperty("PROCESSOR_ARCHITEW6432")) ? "win64" : process.platform
+    return "win" + process.arch;
   } else {
-    return process.platform;
+    return process.platform + process.arch;
   }
+
 }
 module.exports = {
   port: 9494,
