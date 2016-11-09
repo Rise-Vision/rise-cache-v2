@@ -16,7 +16,8 @@ describe("External Logger", () => {
 
   let bqClientInsertSpy, fileSystemAppendToLogSpy;
   let fileSystem = {
-    appendToLog : function (logDatetime, message) { return;}
+    appendToLog : function (logDatetime, message) { return;},
+    getFileName: function (url) {return "";}
   };
 
   before( function () {
@@ -42,10 +43,12 @@ describe("External Logger", () => {
       display_id: displayId,
       cache_version: version,
       os: os,
-      ts: date.toISOString()
+      ts: date.toISOString(),
+      file_url: "",
+      file_name: ""
     };
 
-    externalLogger.log(data.event, data.event_details, data.error_details, date);
+    externalLogger.log(data.event, data.event_details, undefined, undefined, data.error_details, date);
 
     expect(bqClientInsertSpy.calledWith("events", data, date, "20160920")).to.be.true;
 
@@ -77,11 +80,13 @@ describe("External Logger", () => {
       display_id: displayId,
       cache_version: version,
       os: os,
-      ts: date.toISOString()
+      ts: date.toISOString(),
+      file_url: "",
+      file_name: ""
     };
     let logDatetime = "logDatetime";
 
-    externalLogger.log(data.event, data.event_details, data.error_details, date, logDatetime);
+    externalLogger.log(data.event, data.event_details, undefined, undefined, data.error_details, date, logDatetime);
 
     expect(bqClientInsertSpy.calledWith("events", data, date, "20160920")).to.be.true;
 

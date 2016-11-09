@@ -11,7 +11,8 @@ describe("Logger", () => {
     log: function (event, event_details, error_details, date) {}
   };
   let fileSystem = {
-    appendToLog: function (datetime, message) {}
+    appendToLog: function (datetime, message) {},
+    getFileName: function (url) {return "";}
   };
   let debugging = true;
   let dateString = "2016/09/20 00:00:00";
@@ -67,7 +68,7 @@ describe("Logger", () => {
 
       expect(consoleErrorSpy.calledWith(dateString + " - " + message)).to.be.true;
 
-      expect(externalLoggerLogSpy.calledWith("error", detail, errorDetails)).to.be.true;
+      expect(externalLoggerLogSpy.calledWith("error", detail, undefined, undefined, errorDetails)).to.be.true;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
@@ -131,7 +132,7 @@ describe("Logger", () => {
 
       expect(consoleErrorSpy.calledWith(dateString + " - " + message)).to.be.false;
 
-      expect(externalLoggerLogSpy.calledWith("error", detail, errorDetails)).to.be.true;
+      expect(externalLoggerLogSpy.calledWith("error", detail, undefined, undefined, errorDetails)).to.be.true;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
@@ -197,7 +198,7 @@ describe("Logger", () => {
 
       expect(consoleErrorSpy.calledWith(dateString + " - " + message)).to.be.false;
 
-      expect(externalLoggerLogSpy.calledWith("error", detail, errorDetails)).to.be.false;
+      expect(externalLoggerLogSpy.calledWith("error", detail, undefined, undefined, errorDetails)).to.be.false;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
