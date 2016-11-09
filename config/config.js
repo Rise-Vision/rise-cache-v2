@@ -13,7 +13,8 @@ const getOS = function () {
     return process.platform + process.arch;
   }
 
-}
+};
+
 module.exports = {
   port: 9494,
   url: "localhost",
