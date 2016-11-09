@@ -29,7 +29,7 @@ MetadataController.prototype.getMetadata = function() {
 
     request(requestOptions, (err, res, body) => {
       if (err) {
-        this.logger.error(err, this.url);
+        this.logger.error(err, null, this.url);
       }
 
       if (err || res.statusCode != 200) {

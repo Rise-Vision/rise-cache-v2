@@ -25,11 +25,11 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
           controller.getHeaders((err, headers) => {
 
             if (err) {
-              logger.error(err, fileUrl);
+              logger.error(err, null, fileUrl);
             }
             else {
               if (!headers) {
-                logger.error("No headers available", fileUrl);
+                logger.error("No headers available", null, fileUrl);
               }
             }
             res.setHeader("Access-Control-Allow-Origin", "*");
@@ -43,7 +43,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
           controller.isStale(config.fileUpdateDuration, (err, stale) => {
 
             if (err) {
-              logger.error(err, fileUrl);
+              logger.error(err, null, fileUrl);
             }
 
             if (stale) {
@@ -54,18 +54,18 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
 
                   // get the appropriate header field for request
                   controller.getUpdateHeaderField((err, field) => {
-                    if (err) { logger.error(err, fileUrl); }
+                    if (err) { logger.error(err, null, fileUrl); }
 
                     controller.on("downloaded", () => {
-                      logger.info("File downloaded - " + fileUrl);
+                      logger.info("File downloaded", fileUrl);
                     });
 
                     controller.on("request-error", (err) => {
-                      logger.error(err, fileUrl);
+                      logger.error(err, null, fileUrl);
                     });
 
                     controller.on("move-file-error", (err) => {
-                      logger.error(err, fileUrl);
+                      logger.error(err, null, fileUrl);
                     });
 
                     // Make request to download file passing request header
@@ -88,7 +88,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
                 // Download the file.
                 if (availableSpace > config.diskThreshold) {
                   controller.on("downloaded", () => {
-                    logger.info("File downloaded - " + fileUrl);
+                    logger.info("File downloaded", fileUrl);
                   });
 
                   controller.on("downloading", () => {
@@ -100,16 +100,16 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
                   });
 
                   controller.on("request-error", (err) => {
-                    logger.error(err, fileUrl);
+                    logger.error(err, null, fileUrl);
                     sendResponse(res, 504, "File's host server could not be reached", fileUrl);
                   });
 
                   controller.on("move-file-error", (err) => {
-                    logger.error(err, fileUrl);
+                    logger.error(err, null, fileUrl);
                   });
 
                   controller.on("delete-file-error", (err) => {
-                    logger.error(err, fileUrl);
+                    logger.error(err, null, fileUrl);
                   });
 
                   controller.downloadFile();
@@ -130,11 +130,11 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
 
   function getFromCache(req, res, controller, fileUrl, headers) {
     controller.streamFile(req, res, headers);
-    logger.info("File exists in cache. Not downloading - " + fileUrl);
+    logger.info("File exists in cache. Not downloading", fileUrl);
   }
 
   function sendInvalidResponseResponse(res, fileUrl, statusCode) {
-    logger.error("Invalid response with status code " + statusCode + " - " + fileUrl);
+    logger.error("Invalid response with status code " + statusCode, null, fileUrl);
 
     if (statusCode === 404) {
       sendResponse(res, 534, "File not found on the host server", fileUrl);
@@ -145,7 +145,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
 
   function sendDownloadingResponse(res, fileUrl) {
     sendResponse(res, 202, "File is downloading", fileUrl);
-    logger.info("File is downloading - " + fileUrl);
+    logger.info("File is downloading", fileUrl);
   }
 
   function sendResponse(res, statusCode, message, fileUrl) {
