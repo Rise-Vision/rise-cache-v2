@@ -114,7 +114,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
 
                   controller.downloadFile();
                 } else {
-                  logger.info("Insufficient disk space");
+                  logger.error("Insufficient disk space");
                   sendResponse(res, 507, "Insufficient disk space");
                 }
               });
@@ -134,7 +134,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
   }
 
   function sendInvalidResponseResponse(res, fileUrl, statusCode) {
-    logger.info("Invalid response with status code " + statusCode + " - " + fileUrl);
+    logger.error("Invalid response with status code " + statusCode + " - " + fileUrl);
 
     if (statusCode === 404) {
       sendResponse(res, 534, "File not found on the host server", fileUrl);
