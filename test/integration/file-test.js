@@ -206,6 +206,20 @@ describe("/files endpoint", () => {
           });
       });
 
+      it("should log an error if file server returns a 403", (done) => {
+        let spy = sinon.spy(logger, "error");
+
+        chai.request("http://localhost:9494")
+          .get("/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            expect(spy.calledWith("Invalid response with status code 403 - http://example.com/logo.png")).to.be.true;
+            logger.error.restore();
+
+            done();
+          });
+      });
+
       it("should return 502 when file server returns a status other than 200, 304, or 404", (done) => {
 
         chai.request("http://localhost:9494")
@@ -229,15 +243,15 @@ describe("/files endpoint", () => {
         availableSpace = 600000000;
       });
 
-      it("should log info when there is insufficient disk space", (done) => {
-        let spy = sinon.spy(logger, "info");
+      it("should log error when there is insufficient disk space", (done) => {
+        let spy = sinon.spy(logger, "error");
 
         chai.request("http://localhost:9494")
           .get("/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(spy.calledWith("Insufficient disk space")).to.be.true;
-            logger.info.restore();
+            logger.error.restore();
 
             done();
           });
