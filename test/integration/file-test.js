@@ -213,7 +213,7 @@ describe("/files endpoint", () => {
           .get("/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
-            expect(spy.calledWith("Invalid response with status code 403 - http://example.com/logo.png")).to.be.true;
+            expect(spy.calledWith("Invalid response with status code 403", null, "http://example.com/logo.png")).to.be.true;
             logger.error.restore();
 
             done();
@@ -533,7 +533,7 @@ describe("/files endpoint", () => {
         .get("/files")
         .query({ url: "http://example.com/logo.png" })
         .end(() => {
-          expect(spy.calledWith("No headers available", "http://example.com/logo.png"));
+          expect(spy.calledWith("No headers available", null, "http://example.com/logo.png"));
           logger.error.restore();
           done();
         });

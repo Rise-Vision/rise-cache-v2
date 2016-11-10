@@ -32,9 +32,9 @@ CleanupJob.prototype.run = function() {
 
             fileSystem.delete(filePath, (err) => {
               if (err) {
-                this.logger.error(err, filePath);
+                this.logger.error(err, null, filePath, file);
               } else {
-                this.logger.info("File deleted");
+                this.logger.info("File deleted", filePath, file);
               }
             });
 
@@ -42,9 +42,9 @@ CleanupJob.prototype.run = function() {
             this.header.set("key", file);
             this.header.delete(file, (err, numRemoved) => {
               if (err) {
-                this.logger.error(err, filePath);
+                this.logger.error(err, null, filePath, file);
               } else if (numRemoved > 0) {
-                this.logger.info("File headers deleted");
+                this.logger.info("File headers deleted", filePath, file);
               }
             });
 
@@ -52,9 +52,9 @@ CleanupJob.prototype.run = function() {
             this.metadata.set("key", file);
             this.metadata.delete(file, (err, numRemoved) => {
               if (err) {
-                this.logger.error(err, filePath);
+                this.logger.error(err, null, filePath, file);
               } else if (numRemoved > 0) {
-                this.logger.info("File metadata deleted");
+                this.logger.info("File metadata deleted", filePath, file);
               }
 
               fileCount++;

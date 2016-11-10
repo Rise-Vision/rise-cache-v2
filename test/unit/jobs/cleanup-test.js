@@ -149,6 +149,9 @@ describe("Delete unused files", () => {
     it("should log info when file deleted", (done) => {
       setTimeout(function() {
         expect(spy.getCall(1).args[0]).to.equal("File deleted");
+        expect(spy.getCall(1).args[1]).to.be.string;
+        expect(spy.getCall(1).args[1]).to.not.be.empty;
+        expect(spy.getCall(1).args[2]).to.equal("cdf42c077fe6037681ae3c003550c2c5");
 
         done();
       }, 200);
@@ -157,6 +160,9 @@ describe("Delete unused files", () => {
     it("should log info when file headers deleted", (done) => {
       setTimeout(function() {
         expect(spy.getCall(2).args[0]).to.equal("File headers deleted");
+        expect(spy.getCall(2).args[1]).to.be.string;
+        expect(spy.getCall(2).args[1]).to.not.be.empty;
+        expect(spy.getCall(2).args[2]).to.equal("cdf42c077fe6037681ae3c003550c2c5");
 
         done();
       }, 200);
@@ -165,6 +171,9 @@ describe("Delete unused files", () => {
     it("should log info when file metadata deleted", (done) => {
       setTimeout(function() {
         expect(spy.getCall(3).args[0]).to.equal("File metadata deleted");
+        expect(spy.getCall(3).args[1]).to.be.string;
+        expect(spy.getCall(3).args[1]).to.not.be.empty;
+        expect(spy.getCall(3).args[2]).to.equal("cdf42c077fe6037681ae3c003550c2c5");
 
         done();
       }, 200);
