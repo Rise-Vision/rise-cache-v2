@@ -28,6 +28,10 @@ const AppFactory = function() {
       const externalLogger = require("./helpers/logger/external-logger-bigquery")(bqClient, displayId, pkg.version, config.os, fileSystem);
       const logger = require("./helpers/logger/logger")(config.debugging, externalLogger, fileSystem);
 
+      process.on("uncaughtException", (err) => {
+        logger.error("Uncaught exception", err.message);
+      });
+
       if (!exists) {
         logger.warn("RiseDisplayNetworkIIPath.ini file not found");
       }
