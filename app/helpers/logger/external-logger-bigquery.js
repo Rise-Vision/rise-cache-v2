@@ -15,7 +15,7 @@ const ExternalLoggerBigQuery = function (bqClient, displayId, cacheVersion, os, 
     return "" + year + month + day;
   };
 
-  const log = function (eventName, eventDetails, fileUrl, fileName, errorDetails, nowDate, logDatetime) {
+  const log = function (eventName, eventDetails, fileUrl = "", fileName = fileSystem.getFileName(fileUrl), errorDetails, nowDate, logDatetime) {
     if (!eventName) {return Promise.reject("eventName is required");}
     if (!nowDate || !Date.prototype.isPrototypeOf(nowDate)) {
       nowDate = new Date();
@@ -29,8 +29,8 @@ const ExternalLoggerBigQuery = function (bqClient, displayId, cacheVersion, os, 
       cache_version: cacheVersion || "no-risecache",
       os: os,
       ts: nowDate.toISOString(),
-      file_name: fileName || fileSystem.getFileName(fileUrl),
-      file_url: fileUrl || ""
+      file_name: fileName,
+      file_url: fileUrl
     };
 
     return bqClient.insert("events", data, nowDate, getDateForTableName(nowDate))
