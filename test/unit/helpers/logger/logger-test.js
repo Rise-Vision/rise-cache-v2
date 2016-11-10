@@ -47,7 +47,7 @@ describe("Logger", () => {
       consoleWarnSpy.restore();
     });
 
-    it("should log an info event", () => {
+    it("should log an info event with no file details", () => {
       let detail = "test info";
       let message = "INFO: " + detail;
       logger.info(detail);
@@ -60,7 +60,23 @@ describe("Logger", () => {
 
     });
 
-    it("should log an error event", () => {
+    it("should log an info event with file details", () => {
+      let detail = "test info";
+      let url = "http://test.com/image.jpg";
+      let name = "cdf42c077fe6037681ae3c003550c2c5";
+      let message = `INFO: ${detail} ${url} ${name}`;
+
+      logger.info(detail, url, name);
+
+      expect(consoleInfoSpy.calledWith(dateString + " - " + message)).to.be.true;
+
+      expect(externalLoggerLogSpy.calledWith("info", detail, url, name)).to.be.true;
+
+      expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
+
+    });
+
+    it("should log an error event with no file details", () => {
       let detail = "test error";
       let errorDetails = "exception 1";
       let message = "ERROR: " + detail + " " + errorDetails;
@@ -74,7 +90,24 @@ describe("Logger", () => {
 
     });
 
-    it("should log a warn event", () => {
+    it("should log an error event with file details", () => {
+      let detail = "test error";
+      let errorDetails = "exception 1";
+      let url = "http://test.com/image.jpg";
+      let name = "cdf42c077fe6037681ae3c003550c2c5";
+      let message = `ERROR: ${detail} ${errorDetails} ${url} ${name}`;
+
+      logger.error(detail, errorDetails, url, name);
+
+      expect(consoleErrorSpy.calledWith(dateString + " - " + message)).to.be.true;
+
+      expect(externalLoggerLogSpy.calledWith("error", detail, url, name, errorDetails)).to.be.true;
+
+      expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
+
+    });
+
+    it("should log a warn event with no file details", () => {
       let detail = "test warn";
       let message = "WARNING: " + detail;
       logger.warn(detail);
@@ -82,6 +115,22 @@ describe("Logger", () => {
       expect(consoleWarnSpy.calledWith(dateString + " - " + message)).to.be.true;
 
       expect(externalLoggerLogSpy.calledWith("warning", detail)).to.be.true;
+
+      expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
+
+    });
+
+    it("should log a warn event with file details", () => {
+      let detail = "test warn";
+      let url = "http://test.com/image.jpg";
+      let name = "cdf42c077fe6037681ae3c003550c2c5";
+      let message = `WARNING: ${detail} ${url} ${name}`;
+
+      logger.warn(detail, url, name);
+
+      expect(consoleWarnSpy.calledWith(dateString + " - " + message)).to.be.true;
+
+      expect(externalLoggerLogSpy.calledWith("warning", detail, url, name)).to.be.true;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 

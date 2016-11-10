@@ -18,14 +18,13 @@ const Logger = function (debugging, externalLogger, fileSystem) {
 
   };
 
-  const getMessage = function (type, detail, fileUrl) {
-    let file = (fileUrl) ? `- ${fileUrl}` : "";
-    return `${type}: ${detail}${file}`;
+  const getMessage = function (type, detail, fileUrl = "", fileName = fileSystem.getFileName(fileUrl)) {
+    return (fileUrl) ? `${type}: ${detail} ${fileUrl} ${fileName}` : `${type}: ${detail}`;
   };
 
   const error = function (detail, errorDetail, fileUrl, fileName) {
     let logDatetime = getLogDatetime();
-    let message = getMessage("ERROR", `${detail} ${errorDetail}`, fileUrl);
+    let message = getMessage("ERROR", `${detail} ${errorDetail}`, fileUrl, fileName);
     if (debugging) console.error(`${logDatetime} - ${message}`);
 
     fileSystem.appendToLog(logDatetime, message);
@@ -34,7 +33,7 @@ const Logger = function (debugging, externalLogger, fileSystem) {
 
   const info = function (detail, fileUrl, fileName) {
     let logDatetime = getLogDatetime();
-    let message = getMessage("INFO", detail, fileUrl);
+    let message = getMessage("INFO", detail, fileUrl, fileName);
     if (debugging) console.info(`${logDatetime} - ${message}`);
 
     fileSystem.appendToLog(logDatetime, message);
@@ -43,7 +42,7 @@ const Logger = function (debugging, externalLogger, fileSystem) {
 
   const warn = function (detail, fileUrl, fileName) {
     let logDatetime = getLogDatetime();
-    let message = getMessage("WARNING", detail, fileUrl);
+    let message = getMessage("WARNING", detail, fileUrl, fileName);
     if (debugging) console.warn(`${logDatetime} - ${message}`);
 
     fileSystem.appendToLog(logDatetime, message);
