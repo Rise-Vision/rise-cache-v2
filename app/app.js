@@ -71,8 +71,12 @@ const AppFactory = function() {
     });
   };
 
-  const stop = function() {
-    server.stop();
+  const stop = (cb) => {
+    server.stop(() => {
+      if (cb) {
+        cb();
+      }
+    });
   };
 
   return {
