@@ -368,7 +368,6 @@ describe("FileController", () => {
 
       handler = (err) => {
         expect(err).to.not.be.null;
-        expect(err.code).to.equal("ENOENT");  // No such file or directory.
 
         fileController.removeListener("file-error", handler);
         done();

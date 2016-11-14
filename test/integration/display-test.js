@@ -38,8 +38,10 @@ describe("/displays endpoint", () => {
     server.app.use(error.handleError);
   });
 
-  afterEach(() => {
-    server.stop();
+  afterEach((done) => {
+    server.stop(() => {
+      done();
+    });
   });
 
   it("should return displayId", function (done) {

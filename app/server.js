@@ -18,8 +18,12 @@ const ServerFactory = function(config, logger) {
     });
   };
 
-  const stop = () => {
-    server.close();
+  const stop = (cb) => {
+    server.close(() => {
+      if (cb) {
+        cb();
+      }
+    });
   };
 
 

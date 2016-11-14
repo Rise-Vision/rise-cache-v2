@@ -58,8 +58,10 @@ describe("/files endpoint", () => {
     server.app.use(error.handleError);
   });
 
-  afterEach(() => {
-    server.stop();
+  afterEach((done) => {
+    server.stop(() => {
+      done();
+    });
   });
 
   after(() => {
