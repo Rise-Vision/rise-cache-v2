@@ -29,11 +29,15 @@ describe("Ping", function () {
       [config.cachePath]: {},
       [config.logFilePath]: "Some Content"
     });
+
     app.start();
   });
 
-  after(() => {
-    app.stop();
+  after((done) => {
+    app.stop(() => {
+      done();
+    });
+
     mock.restore();
     spy.restore();
   });

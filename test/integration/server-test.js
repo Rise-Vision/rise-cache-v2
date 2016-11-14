@@ -9,8 +9,10 @@ describe("Server", function () {
 
   let serverFactory;
 
-  afterEach(function () {
-    serverFactory.stop();
+  afterEach(function (done) {
+    serverFactory.stop(() => {
+      done();
+    });
   });
 
   it("should log info for server startup", (done) => {
