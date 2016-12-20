@@ -59,8 +59,9 @@ FileController.prototype.downloadFile = function(opts) {
           this.emit("downloading");
         }
         else if (res.statusCode == 304) {
-          this.saveHeaders(res.headers);
-        } else {
+          this.updateTimestamp();
+        }
+        else {
           this.emit("invalid-response", res.statusCode);
         }
       })
@@ -165,6 +166,19 @@ FileController.prototype.getTimestampData = function(cb) {
       createdAt: newHeader.data.createdAt,
       updatedAt: newHeader.data.updatedAt
     });
+  });
+};
+
+FileController.prototype.updateTimestamp = function() {
+  this.header.set("key", this.fileName);
+
+  // Update the key field to automatically trigger a timestamp update.
+  this.header.update({ "key": this.fileName }, (err, numAffected) => {
+    if (err) {
+      return this.emit("timestamp-error", err);
+    }
+
+    this.emit("timestamp-updated", numAffected);
   });
 };
 
