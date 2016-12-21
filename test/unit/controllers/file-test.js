@@ -109,14 +109,12 @@ describe("FileController", () => {
       });
     });
 
-    it("should save headers when response is 304", (done) => {
+    it("should update timestamp when response is 304", (done) => {
       let header = {
-        save: function (cb) {
-          cb(null, {});
+        update: function (field, cb) {
+          cb(null, 1);
         },
-        set: function () {
-
-        }
+        set: function () {}
       };
 
       fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
@@ -127,8 +125,8 @@ describe("FileController", () => {
 
       fileController.downloadFile();
 
-      fileController.on("headers", () => {
-        expect(true).to.be.true;
+      fileController.on("timestamp-updated", (numAffected) => {
+        expect(numAffected).to.equal(1);
         done();
       });
 

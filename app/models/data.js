@@ -31,6 +31,17 @@ Data.prototype.save = function(callback) {
   });
 };
 
+/* Update a particular field of the document. */
+Data.prototype.update = function(field, callback) {
+  this.db.update({ key: this.data.key }, { $set: field }, {}, (err, numAffected) => {
+    if (err) {
+      return callback(err);
+    }
+
+    callback(null, numAffected);
+  });
+};
+
 Data.prototype.delete = function (key, callback) {
   this.db.remove({ key: key }, {}, (err, numRemoved) => {
     if (err) {
