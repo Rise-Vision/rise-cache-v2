@@ -33,6 +33,21 @@ const FinancialRoute = function(app, db, logger) {
     _next(err);
   });
 
+  controller.on("get-data", (data) => {
+    if (data) {
+      _res.status(200).json(data);
+    } else  {
+      _res.statusCode = 404;
+      _next(new Error("Not found"));
+    }
+  });
+
+  controller.on("get-data-error", (err) => {
+    logger.error("Could not get financial data", _key);
+    _res.statusCode = 500;
+    _next(err);
+  });
+
   app.post("/financial", jsonParser, (req, res, next) => {
 
     _res = res;
@@ -42,6 +57,15 @@ const FinancialRoute = function(app, db, logger) {
     _key = req.body.key;
 
     controller.saveData(_key, req.body.value);
+  });
+
+  app.get("/financial/:key", (req, res, next) => {
+
+    _res = res;
+    _next = next;
+    _key = req.params.key;
+
+    controller.getData(_key);
   });
 
 };
