@@ -1,0 +1,43 @@
+{
+  "key": "risefinancial_xxx",
+  "value": {
+    "data": {
+      "table": {
+        "cols": [
+          {
+            "id": "lastPrice",
+            "label": "Last Price",
+            "pattern": "",
+            "type": "number"
+          },
+          {
+            "id": "netChange",
+            "label": "Change",
+            "pattern": "",
+            "type": "number"
+          }
+        ],
+        "rows": [
+          {
+            "c": [
+              {
+                "v": 12.3
+              },
+              {
+                "v": 12.3
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "instruments": {
+      "?DJI": {
+        "order": "0",
+        "category": "World Indexes",
+        "name": "DJ",
+        "symbol": ".DJI"
+      }
+    }
+  }
+}
