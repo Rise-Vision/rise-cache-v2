@@ -91,6 +91,21 @@ const FinancialRoute = function(app, db, logger) {
     controller.getData(_key);
   });
 
+  app.put( "/financial/:key", jsonParser, ( req, res, next ) => {
+    if ( !( "value" in req.body ) ) {
+      res.statusCode = 400;
+      next( new Error( "Missing PUT data" ) );
+
+      return;
+    }
+
+    _res = res;
+    _next = next;
+    _key = req.params.key;
+
+    controller.saveData( _key, req.body.value );
+  } );
+
 };
 
 module.exports = FinancialRoute;

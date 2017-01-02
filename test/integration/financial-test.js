@@ -108,6 +108,7 @@ describe("/financial endpoint", () => {
   });
 
   describe( "DELETE", () => {
+
     it( "should delete data", ( done ) => {
       chai.request( "http://localhost:9494" )
         .delete( "/financial/" + financialData.key )
@@ -120,7 +121,7 @@ describe("/financial endpoint", () => {
 
     it( "should return 404 if data to delete was not found", ( done ) => {
       chai.request( "http://localhost:9494" )
-        .get( "/financial/" + financialData.key )
+        .delete( "/financial/" + financialData.key )
         .end( ( err, res ) => {
           expect( res ).to.have.status( 404 );
           expect( res.body ).to.deep.equal( { status: 404, message: "Not found" } );
@@ -128,6 +129,37 @@ describe("/financial endpoint", () => {
           done();
         } );
     } );
+
+  } );
+
+  describe( "PUT", () => {
+
+    it( "should return 400 if data was not sent", ( done ) => {
+      chai.request( "http://localhost:9494" )
+        .put( "/financial/" + financialData.key )
+        .end( ( err, res ) => {
+          expect( res ).to.have.status( 400 );
+          expect( res.body ).to.deep.equal( {
+            status: 400,
+            message: "Missing PUT data"
+          } );
+
+          done();
+        } );
+    } );
+
+    it( "should update data and return saved entity", ( done ) => {
+      chai.request( "http://localhost:9494" )
+        .put( "/financial/" + financialData.key )
+        .send( financialData )
+        .end( ( err, res ) => {
+          expect( res ).to.have.status( 201 );
+          expect( res.body ).to.deep.equal( financialData );
+
+          done();
+        } );
+    } );
+
   } );
 
 });
