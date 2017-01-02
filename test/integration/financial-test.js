@@ -107,4 +107,27 @@ describe("/financial endpoint", () => {
       });
   });
 
+  describe( "DELETE", () => {
+    it( "should delete data", ( done ) => {
+      chai.request( "http://localhost:9494" )
+        .delete( "/financial/" + financialData.key )
+        .end( ( err, res ) => {
+          expect( res ).to.have.status( 204 );
+
+          done();
+        } );
+    } );
+
+    it( "should return 404 if data to delete was not found", ( done ) => {
+      chai.request( "http://localhost:9494" )
+        .get( "/financial/" + financialData.key )
+        .end( ( err, res ) => {
+          expect( res ).to.have.status( 404 );
+          expect( res.body ).to.deep.equal( { status: 404, message: "Not found" } );
+
+          done();
+        } );
+    } );
+  } );
+
 });
