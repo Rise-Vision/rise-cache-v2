@@ -22,6 +22,21 @@ const FinancialRoute = function(app, db, logger) {
     return true;
   }
 
+  controller.on( "delete-data", ( numRemoved ) => {
+    if ( numRemoved > 0 ) {
+      _res.status( 204 ).json();
+    } else {
+      _res.statusCode = 404;
+      _next( new Error( "Not found" ) );
+    }
+  } );
+
+  controller.on( "delete-data-error", ( err ) => {
+    logger.error( "Could not delete financial data", _key );
+    _res.statusCode = 500;
+    _next( err );
+  } );
+
   controller.on("save-data", (data) => {
     _res.location("/financial/" + _key);
     _res.status(201).json(data);
@@ -47,6 +62,14 @@ const FinancialRoute = function(app, db, logger) {
     _res.statusCode = 500;
     _next(err);
   });
+
+  app.delete( "/financial/:key", ( req, res, next ) => {
+    _res = res;
+    _next = next;
+    _key = req.params.key;
+
+    controller.deleteData( _key );
+  } );
 
   app.post("/financial", jsonParser, (req, res, next) => {
 
