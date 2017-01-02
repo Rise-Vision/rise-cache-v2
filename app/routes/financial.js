@@ -13,6 +13,12 @@ const FinancialRoute = function(app, db, logger) {
   let _next = null;
   let _key = null;
 
+  function initVars( key, res, next ) {
+    _key = key;
+    _res = res;
+    _next = next;
+  }
+
   function isBodyValid(req) {
     if (!("key" in req.body) || !("value" in req.body)) {
       _res.statusCode = 400;
@@ -64,30 +70,20 @@ const FinancialRoute = function(app, db, logger) {
   });
 
   app.delete( "/financial/:key", ( req, res, next ) => {
-    _res = res;
-    _next = next;
-    _key = req.params.key;
-
+    initVars( req.params.key, res, next );
     controller.deleteData( _key );
   } );
 
   app.post("/financial", jsonParser, (req, res, next) => {
+    initVars( req.body.key, res, next );
 
-    _res = res;
-    _next = next;
-    if(!isBodyValid(req)) return;
-
-    _key = req.body.key;
+    if (!isBodyValid(req)) return;
 
     controller.saveData(_key, req.body.value);
   });
 
   app.get("/financial/:key", (req, res, next) => {
-
-    _res = res;
-    _next = next;
-    _key = req.params.key;
-
+    initVars( req.params.key, res, next );
     controller.getData(_key);
   });
 
@@ -99,10 +95,7 @@ const FinancialRoute = function(app, db, logger) {
       return;
     }
 
-    _res = res;
-    _next = next;
-    _key = req.params.key;
-
+    initVars( req.params.key, res, next );
     controller.saveData( _key, req.body.value );
   } );
 
