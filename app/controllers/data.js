@@ -11,24 +11,24 @@ const DataController = function(model) {
 
 util.inherits(DataController, EventEmitter);
 
-DataController.prototype.saveData = function(key, value) {
+DataController.prototype.saveData = function(key, value, res, next) {
   this.model.set("key", key);
   this.model.set("value", value);
 
   this.model.save((err, newData) => {
     if (err) {
-      return this.emit("save-data-error", err);
+      return this.emit("save-data-error", err, key, res, next);
     }
 
-    this.emit("save-data", newData);
+    this.emit("save-data", newData, key, res);
   });
 };
 
-DataController.prototype.getData = function(key) {
+DataController.prototype.getData = function(key, res, next) {
 
   this.model.findByKey(key, (err, foundData) => {
     if (err) {
-      return this.emit("get-data-error", err);
+      return this.emit("get-data-error", err, key, res, next);
     }
     let data = foundData.data;
 
@@ -36,17 +36,17 @@ DataController.prototype.getData = function(key) {
       data = null;
     }
 
-    this.emit("get-data", data);
+    this.emit("get-data", data, res, next);
   });
 };
 
-DataController.prototype.deleteData = function(key) {
+DataController.prototype.deleteData = function(key, res, next) {
   this.model.delete(key, (err, numRemoved) => {
     if (err) {
-      return this.emit("delete-data-error", err);
+      return this.emit("delete-data-error", err, key, res, next);
     }
 
-    this.emit("delete-data", numRemoved);
+    this.emit("delete-data", numRemoved, res, next);
 
   });
 };
