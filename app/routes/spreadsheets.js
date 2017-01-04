@@ -61,7 +61,7 @@ const SpreadsheetsRoute = function(app, db, logger) {
   }
 
   app.post("/spreadsheets", jsonParser, (req, res, next) => {
-    if(!isBodyValid(req)) return;
+    if(!isBodyValid(req, res, next)) return;
 
     controller.saveData(req.body.key, req.body.value, res, next);
   });
@@ -75,7 +75,7 @@ const SpreadsheetsRoute = function(app, db, logger) {
   });
 
   app.put("/spreadsheets/:key", jsonParser, (req, res, next) => {
-    if(!isBodyValid(req)) return;
+    if(!isBodyValid(req, res, next)) return;
 
     controller.saveData(req.params.key, req.body.value, res, next);
   });
