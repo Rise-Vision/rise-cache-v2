@@ -9,82 +9,71 @@ const FinancialRoute = function(app, db, logger) {
 
   const model = new Data({}, db);
   const controller = new DataController(model);
-  let _res = null;
-  let _next = null;
-  let _key = null;
 
-  function initVars( key, res, next ) {
-    _key = key;
-    _res = res;
-    _next = next;
-  }
-
-  function isBodyValid(req) {
+  function isBodyValid(req, res, next) {
     if (!("key" in req.body) || !("value" in req.body)) {
-      _res.statusCode = 400;
-      _next(new Error("Missing POST data"));
+      res.statusCode = 400;
+      next(new Error("Missing POST data"));
       return false;
     }
     return true;
   }
 
-  controller.on( "delete-data", ( numRemoved ) => {
+  controller.on( "delete-data", ( numRemoved, res, next ) => {
     if ( numRemoved > 0 ) {
-      _res.status( 204 ).json();
+      res.status( 204 ).json();
     } else {
-      _res.statusCode = 404;
-      _next( new Error( "Not found" ) );
+      res.statusCode = 404;
+      next( new Error( "Not found" ) );
     }
   } );
 
-  controller.on( "delete-data-error", ( err ) => {
-    logger.error( "Could not delete financial data", _key );
-    _res.statusCode = 500;
-    _next( err );
+  controller.on( "delete-data-error", ( err, key, res, next ) => {
+    logger.error( "Could not delete financial data", key );
+    res.statusCode = 500;
+    next( err );
   } );
 
-  controller.on("save-data", (data) => {
-    _res.location("/financial/" + _key);
-    _res.status(201).json(data);
+  controller.on("save-data", (data, key, res) => {
+    res.location("/financial/" + key);
+    res.status(201).json(data);
   });
 
-  controller.on("save-data-error", (err) => {
-    logger.error("Could not save financial data", _key);
-    _res.statusCode = 500;
-    _next(err);
+  controller.on("save-data-error", (err, key, res, next) => {
+    logger.error("Could not save financial data", key);
+    res.statusCode = 500;
+    next(err);
   });
 
-  controller.on("get-data", (data) => {
+  controller.on("get-data", (data, res, next) => {
     if (data) {
-      _res.status(200).json(data);
+      res.status(200).json(data);
     } else  {
-      _res.statusCode = 404;
-      _next(new Error("Not found"));
+      res.statusCode = 404;
+      next(new Error("Not found"));
     }
   });
 
-  controller.on("get-data-error", (err) => {
-    logger.error("Could not get financial data", _key);
-    _res.statusCode = 500;
-    _next(err);
+  controller.on("get-data-error", (err, key, res, next) => {
+    logger.error("Could not get financial data", key);
+    res.statusCode = 500;
+    next(err);
   });
 
   app.delete( "/financial/:key", ( req, res, next ) => {
-    initVars( req.params.key, res, next );
-    controller.deleteData( _key );
+    controller.deleteData( req.params.key, res, next );
   } );
 
   app.post("/financial", jsonParser, (req, res, next) => {
-    initVars( req.body.key, res, next );
+    if ( !isBodyValid( req, res, next ) ) {
+      return;
+    }
 
-    if (!isBodyValid(req)) return;
-
-    controller.saveData(_key, req.body.value);
+    controller.saveData( req.body.key, req.body.value, res, next );
   });
 
   app.get("/financial/:key", (req, res, next) => {
-    initVars( req.params.key, res, next );
-    controller.getData(_key);
+    controller.getData( req.params.key, res, next );
   });
 
   app.put( "/financial/:key", jsonParser, ( req, res, next ) => {
@@ -95,8 +84,7 @@ const FinancialRoute = function(app, db, logger) {
       return;
     }
 
-    initVars( req.params.key, res, next );
-    controller.saveData( _key, req.body.value );
+    controller.saveData( req.params.key, req.body.value, res, next );
   } );
 
 };
