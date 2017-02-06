@@ -117,7 +117,7 @@ FileController.prototype.writeFile = function(res) {
       }
     });
   }).on("error", (err) => {
-    fs.unlink(this.pathInDownload);
+    this.deleteFileFromDownload();
     this.emit("file-error", err);
   });
 
