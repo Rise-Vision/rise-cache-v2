@@ -592,4 +592,38 @@ describe("/files endpoint", () => {
 
   });
 
+  describe("downloading, cannot save headers", () => {
+
+    it("should log an error on headers-error", (done) => {
+
+      let spy = sinon.spy(logger, "error");
+
+      // Mock the file system.
+      mock({
+        [config.downloadPath]: {},
+        [config.cachePath]: {},
+        [config.headersDBPath]: mock.file({
+          content: "some content",
+          mode: "0000"
+        }),
+        "../data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
+      });
+
+      nock("http://example.com")
+        .get("/logo.png")
+        .replyWithFile(200, "../data/logo.png", headers);
+
+      chai.request("http://localhost:9494")
+        .get("/files")
+        .query({ url: "http://example.com/logo.png" })
+        .end((err, res) => {
+          expect(spy.callCount).to.equal(1);
+          logger.error.restore();
+
+          done();
+        });
+    });
+
+  });
+
 });

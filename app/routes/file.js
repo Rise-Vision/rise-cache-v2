@@ -56,6 +56,10 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
                   controller.getUpdateHeaderField((err, field) => {
                     if (err) { logger.error(err, null, fileUrl); }
 
+                    controller.on("headers-error", (err) => {
+                      logger.error("Could not save headers", err, fileUrl);
+                    });
+
                     controller.on("downloaded", () => {
                       logger.info("File downloaded", fileUrl);
                     });
@@ -87,6 +91,11 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
               fileSystem.getAvailableSpace(logger, (availableSpace) => {
                 // Download the file.
                 if (availableSpace > config.diskThreshold) {
+
+                  controller.on("headers-error", (err) => {
+                    logger.error("Could not save headers", err, fileUrl);
+                  });
+
                   controller.on("downloaded", () => {
                     logger.info("File downloaded", fileUrl);
                   });
