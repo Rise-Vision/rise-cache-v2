@@ -44,6 +44,7 @@ const AppFactory = function() {
       const headerDB = new Database(config.headersDBPath);
       const metadataDB = new Database(config.metadataDBPath);
       const spreadsheetDB = new Database(config.spreadsheetsDBPath);
+      const rssDB = new Database(config.rssDBPath);
       const financialDB = new Database(config.financialDBPath);
       const cleanupJob = new CleanupJob(config, headerDB.db, metadataDB.db, logger);
 
@@ -64,6 +65,7 @@ const AppFactory = function() {
       require("./routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
       require("./routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII, logger);
       require("./routes/spreadsheets")(server.app, spreadsheetDB.db, logger);
+      require("./routes/rss")(server.app, rssDB.db, logger);
       require("./routes/financial")(server.app, financialDB.db, logger);
 
       error = require("./middleware/error")(logger);
