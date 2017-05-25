@@ -2,15 +2,15 @@
 
 const nock = require("nock"),
   mock = require("mock-fs"),
-  chai = require("chai"),
-  chaiHttp = require("chai-http"),
+  expect = require('chai').expect,
   config = require("../../config/config"),
   Database = require("../../app/database"),
-  expect = chai.expect,
   metadataResponse = require("../data/metadata.json"),
-  httpProxy = require('http-proxy');
+  httpProxy = require('http-proxy'),
+  cert = config.httpsOptions.cert;
 
-chai.use(chaiHttp);
+let request = require("superagent");
+request = request.agent({ca: cert});
 
 describe("/metadata endpoint", () => {
   let metadataDB = null;
@@ -65,11 +65,10 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(200, metadataResponse);
 
-      chai.request("http://localhost:9494")
-        .get("/metadata")
+      request.get("https://localhost:9494/metadata")
         .query({ url: "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
-          expect(res).to.have.status(200);
+          expect(res.status).to.equal(200);
           expect(res.body).to.deep.equal(metadataResponse);
 
           done();
@@ -77,10 +76,9 @@ describe("/metadata endpoint", () => {
     });
 
     it("should return error if url parameter is missing", (done) => {
-      chai.request("http://localhost:9494")
-        .get("/metadata")
+      request.get("https://localhost:9494/metadata")
         .end((err, res) => {
-          expect(res).to.have.status(400);
+          expect(res.status).to.equal(400);
           expect(res.body).to.deep.equal({ status: 400, message: "Missing url parameter" });
 
           done();
@@ -93,11 +91,10 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(404);
 
-      chai.request("http://localhost:9494")
-        .get("/metadata")
+      request.get("https://localhost:9494/metadata")
         .query({ url: "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
-          expect(res).to.have.status(200);
+          expect(res.status).to.equal(200);
           expect(res.body).to.deep.equal(metadataResponse);
 
           done();
@@ -116,11 +113,10 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(404);
 
-      chai.request("http://localhost:9494")
-        .get("/metadata")
+      request.get("https://localhost:9494/metadata")
         .query({ url: "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
-          expect(res).to.have.status(502);
+          expect(res.status).to.equal(502);
           expect(res.body).to.deep.equal({
             status: 502,
             message: "Could not get metadata from storage server"
@@ -155,11 +151,10 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(200, metadataResponse);
 
-      chai.request("http://localhost:9494")
-        .get("/metadata")
+      request.get("https://localhost:9494/metadata")
         .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
-          expect(res).to.have.status(200);
+          expect(res.status).to.equal(200);
           expect(res.body).to.deep.equal(metadataResponse);
 
           done();
@@ -172,11 +167,10 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(404);
 
-      chai.request("http://localhost:9494")
-        .get("/metadata")
+      request.get("https://localhost:9494/metadata")
         .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
-          expect(res).to.have.status(200);
+          expect(res.status).to.equal(200);
           expect(res.body).to.deep.equal(metadataResponse);
 
           done();
@@ -195,11 +189,10 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(404);
 
-      chai.request("http://localhost:9494")
-        .get("/metadata")
+      request.get("https://localhost:9494/metadata")
         .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
-          expect(res).to.have.status(502);
+          expect(res.status).to.equal(502);
           expect(res.body).to.deep.equal({
             status: 502,
             message: "Could not get metadata from storage server"
@@ -221,11 +214,10 @@ describe("/metadata endpoint", () => {
 
       it("should not get metadata if proxy server can't be reached", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/metadata")
+        request.get("https://localhost:9494/metadata")
           .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
           .end((err, res) => {
-            expect(res).to.have.status(502);
+            expect(res.status).to.equal(502);
             expect(res.body).to.deep.equal({
               status: 502,
               message: "Could not get metadata from storage server"

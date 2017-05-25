@@ -1,14 +1,14 @@
 "use strict";
 
 const mock = require("mock-fs"),
-  chai = require("chai"),
-  chaiHttp = require("chai-http"),
+  expect = require('chai').expect,
   config = require("../../config/config"),
   database = require("../../app/database"),
   spreadsheetData = require("../data/spreadsheets.json"),
-  expect = chai.expect;
+  cert = config.httpsOptions.cert;
 
-chai.use(chaiHttp);
+let request = require("superagent");
+request = request.agent({ca: cert});
 
 describe("/spreadsheets endpoint", () => {
   let logger = {
@@ -43,13 +43,12 @@ describe("/spreadsheets endpoint", () => {
   });
 
   it("should return an error if 'key' is not POSTed", function (done) {
-    chai.request("http://localhost:9494")
-      .post("/spreadsheets")
+    request.post("https://localhost:9494/spreadsheets")
       .send({
         "value": ""
       })
       .end((err, res) => {
-        expect(res).to.have.status(400);
+        expect(res.status).to.equal(400);
         expect(res.body).to.deep.equal({ status: 400, message: "Missing POST data" });
 
         done();
@@ -57,13 +56,12 @@ describe("/spreadsheets endpoint", () => {
   });
 
   it("should return an error if 'value' is not POSTed", function (done) {
-    chai.request("http://localhost:9494")
-      .post("/spreadsheets")
+    request.post("https://localhost:9494/spreadsheets")
       .send({
         "key": ""
       })
       .end((err, res) => {
-        expect(res).to.have.status(400);
+        expect(res.status).to.equal(400);
         expect(res.body).to.deep.equal({ status: 400, message: "Missing POST data" });
 
         done();
@@ -71,11 +69,10 @@ describe("/spreadsheets endpoint", () => {
   });
 
   it("should save data and return saved entity", function (done) {
-    chai.request("http://localhost:9494")
-      .post("/spreadsheets")
+    request.post("https://localhost:9494/spreadsheets")
       .send(spreadsheetData)
       .end((err, res) => {
-        expect(res).to.have.status(201);
+        expect(res.status).to.equal(201);
         expect(res.body).to.deep.equal(spreadsheetData);
 
         done();
@@ -84,10 +81,9 @@ describe("/spreadsheets endpoint", () => {
 
   it("should get data", function (done) {
 
-    chai.request("http://localhost:9494")
-      .get("/spreadsheets/" + spreadsheetData.key)
+    request.get("https://localhost:9494/spreadsheets/" + spreadsheetData.key)
       .end((err, res) => {
-        expect(res).to.have.status(200);
+        expect(res.status).to.equal(200);
         expect(res.body.key).to.deep.equal(spreadsheetData.key);
         expect(res.body.value).to.deep.equal(spreadsheetData.value);
 
@@ -97,10 +93,9 @@ describe("/spreadsheets endpoint", () => {
 
   it("should return 404 if data is not found", function (done) {
 
-    chai.request("http://localhost:9494")
-      .get("/spreadsheets/1")
+    request.get("https://localhost:9494/spreadsheets/1")
       .end((err, res) => {
-        expect(res).to.have.status(404);
+        expect(res.status).to.equal(404);
         expect(res.body).to.deep.equal({ status: 404, message: "Not found" });
 
         done();
@@ -109,10 +104,9 @@ describe("/spreadsheets endpoint", () => {
 
   it("should delete data", function (done) {
 
-    chai.request("http://localhost:9494")
-      .delete("/spreadsheets/" + spreadsheetData.key)
+    request.delete("https://localhost:9494/spreadsheets/" + spreadsheetData.key)
       .end((err, res) => {
-        expect(res).to.have.status(204);
+        expect(res.status).to.equal(204);
 
         done();
       });
@@ -120,10 +114,9 @@ describe("/spreadsheets endpoint", () => {
 
   it("should return 404 if data to delete was not found", function (done) {
 
-    chai.request("http://localhost:9494")
-      .get("/spreadsheets/" + spreadsheetData.key)
+    request.get("https://localhost:9494/spreadsheets/" + spreadsheetData.key)
       .end((err, res) => {
-        expect(res).to.have.status(404);
+        expect(res.status).to.equal(404);
         expect(res.body).to.deep.equal({ status: 404, message: "Not found" });
 
         done();
@@ -131,13 +124,12 @@ describe("/spreadsheets endpoint", () => {
   });
 
   it("should return an error if 'key' is not PUTed", function (done) {
-    chai.request("http://localhost:9494")
-      .put("/spreadsheets/"+spreadsheetData.key)
+    request.put("https://localhost:9494/spreadsheets/"+spreadsheetData.key)
       .send({
         "value": ""
       })
       .end((err, res) => {
-        expect(res).to.have.status(400);
+        expect(res.status).to.equal(400);
         expect(res.body).to.deep.equal({ status: 400, message: "Missing POST data" });
 
         done();
@@ -145,13 +137,12 @@ describe("/spreadsheets endpoint", () => {
   });
 
   it("should return an error if 'value' is not PUTed", function (done) {
-    chai.request("http://localhost:9494")
-      .put("/spreadsheets/"+spreadsheetData.key)
+    request.put("https://localhost:9494/spreadsheets/"+spreadsheetData.key)
       .send({
         "key": ""
       })
       .end((err, res) => {
-        expect(res).to.have.status(400);
+        expect(res.status).to.equal(400);
         expect(res.body).to.deep.equal({ status: 400, message: "Missing POST data" });
 
         done();
@@ -159,11 +150,10 @@ describe("/spreadsheets endpoint", () => {
   });
 
   it("should update data and return saved entity", function (done) {
-    chai.request("http://localhost:9494")
-      .put("/spreadsheets/"+spreadsheetData.key)
+    request.put("https://localhost:9494/spreadsheets/"+spreadsheetData.key)
       .send(spreadsheetData)
       .end((err, res) => {
-        expect(res).to.have.status(201);
+        expect(res.status).to.equal(201);
         expect(res.body).to.deep.equal(spreadsheetData);
 
         done();
