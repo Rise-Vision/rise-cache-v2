@@ -11,9 +11,20 @@ gulp.task("lint", (cb) => {
     .pipe(eslint.failAfterError());
 });
 
-gulp.task("test", ["lint"], () =>
-  gulp.src("test/**/*-test.js", {read: false})
+gulp.task("test-unit", ["lint"], () =>
+  gulp.src("test/unit/**/*-test.js", {read: false})
     .pipe(mocha({reporter: "spec"}))
 );
+
+gulp.task("test-integration", ["lint"], () =>
+    gulp.src("test/integration/**/*-test.js", {read: false})
+      .pipe(mocha({reporter: "spec"}))
+);
+
+gulp.task("test", ["test-unit", "test-integration"], () =>
+    gulp.src("test/integration/**/*-test.js", {read: false})
+      .pipe(mocha({reporter: "spec"}))
+);
+
 
 gulp.task("default", ["test"]);

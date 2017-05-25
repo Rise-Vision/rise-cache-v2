@@ -36,22 +36,15 @@ describe("/metadata endpoint", () => {
     });
     metadataDB = new Database(config.metadataDBPath);
     require("../../app/routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII, logger);
-  });
-
-  beforeEach(() => {
     server.start();
     server.app.use(error.handleError);
   });
 
-  afterEach((done) => {
+  after((done) => {
+    mock.restore();
     server.stop(() => {
       done();
     });
-  });
-
-  after(() => {
-    mock.restore();
-    nock.cleanAll();
   });
 
   describe("get metadata", () => {

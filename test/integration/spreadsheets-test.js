@@ -27,20 +27,18 @@ describe("/spreadsheets endpoint", () => {
 
     spreadsheetDB = new database(config.spreadsheetsDBPath);
     require("../../app/routes/spreadsheets")(server.app, spreadsheetDB.db);
-  });
 
-  after(() => {
-    mock.restore();
-  });
-
-  beforeEach(() => {
     server.start();
     server.app.use(error.handleError);
   });
 
-  afterEach(() => {
-    server.stop();
+  after((done) => {
+    mock.restore();
+    server.stop(() => {
+      done();
+    });
   });
+
 
   it("should return an error if 'key' is not POSTed", function (done) {
     request.post("https://localhost:9494/spreadsheets")

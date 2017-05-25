@@ -31,14 +31,11 @@ describe("/displays endpoint", () => {
 
   before(() => {
     require("../../app/routes/display")(server.app, riseDisplayNetworkII.get("displayid"));
-  });
-
-  beforeEach(() => {
     server.start();
     server.app.use(error.handleError);
   });
 
-  afterEach((done) => {
+  after((done) => {
     server.stop(() => {
       done();
     });

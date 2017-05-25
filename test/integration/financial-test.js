@@ -27,19 +27,15 @@ describe("/financial endpoint", () => {
 
     financialDB = new database(config.financialDBPath);
     require("../../app/routes/financial")(server.app, financialDB.db);
-  });
-
-  after(() => {
-    mock.restore();
-  });
-
-  beforeEach(() => {
     server.start();
     server.app.use(error.handleError);
   });
 
-  afterEach(() => {
-    server.stop();
+  after((done) => {
+    mock.restore();
+    server.stop(() => {
+      done();
+    });
   });
 
   it("should return an error if 'key' is not POSTed", function (done) {

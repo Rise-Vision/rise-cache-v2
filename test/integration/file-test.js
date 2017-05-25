@@ -51,22 +51,16 @@ describe("/files endpoint", () => {
     fileSystem.getAvailableSpace = function(logger, cb) {
       cb(availableSpace);
     };
-  });
-
-  beforeEach(() => {
     server.start();
     server.app.use(error.handleError);
   });
 
-  afterEach((done) => {
+  after((done) => {
+    mock.restore();
+    nock.cleanAll();
     server.stop(() => {
       done();
     });
-  });
-
-  after(() => {
-    mock.restore();
-    nock.cleanAll();
   });
 
   describe("download file", () => {
