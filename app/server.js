@@ -1,12 +1,12 @@
 "use strict";
 
-const http = require("http"),
+const https = require("https"),
   express = require("express");
 
 const ServerFactory = function(config, logger) {
 
   const app = express(),
-    server =  http.createServer(app);
+    server =  https.createServer(config.httpsOptions, app);
 
   const start = () => {
     server.on("error", (err) => {
