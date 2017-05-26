@@ -19,18 +19,6 @@ describe("Ping", function () {
 
   before(function () {
     spy = sinon.spy(console, "warn");
-
-    mock({
-      [config.headersDBPath]: "",
-      [config.metadataDBPath]: "",
-      [config.downloadPath]: {
-        "0e36e4d268b63fd0573185fe3a9e01f0": "some content"
-      },
-      [config.cachePath]: {},
-      [config.logFilePath]: "Some Content",
-      [config.riseDisplayNetworkIIPath]: "displayid=HXXHCTR5AQFQ"
-    });
-
     app.start();
   });
 
@@ -57,13 +45,6 @@ describe("Ping", function () {
   });
 
   it("should return name and version with RiseDisplayNetworkII.ini file", function (done) {
-    mock({
-      [config.headersDBPath]: "",
-      [config.metadataDBPath]: "",
-      [config.downloadPath]: {},
-      [config.cachePath]: {},
-      [config.riseDisplayNetworkIIPath]: ""
-    });
 
     request.get('https://localhost:9494/')
       .end(function(err, res) {

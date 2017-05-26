@@ -21,9 +21,6 @@ describe("/spreadsheets endpoint", () => {
   let error = require("../../app/middleware/error")(logger);
 
   before(() => {
-    mock({
-      [config.spreadsheetsDBPath]: ""
-    });
 
     spreadsheetDB = new database(config.spreadsheetsDBPath);
     require("../../app/routes/spreadsheets")(server.app, spreadsheetDB.db);

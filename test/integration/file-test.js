@@ -16,6 +16,10 @@ request = request.agent({ca: cert});
 
 describe("/files endpoint", () => {
   let headers = {etag:"1a42b4479c62b39b93726d793a2295ca"};
+  let now = new Date();
+  headers.createdAt = now.getTime();
+  headers.updatedAt = headers.createdAt;
+
   let headerDB = null;
   let server = null;
   let error = null;
@@ -40,13 +44,13 @@ describe("/files endpoint", () => {
 
     headerDB = new Database(config.headersDBPath);
 
+    require("../../app/routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
+
     mock({
       [config.headersDBPath]: "",
       [config.downloadPath]: {},
       [config.cachePath]: {}
     });
-
-    require("../../app/routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
 
     fileSystem.getAvailableSpace = function(logger, cb) {
       cb(availableSpace);
@@ -61,6 +65,11 @@ describe("/files endpoint", () => {
     server.stop(() => {
       done();
     });
+  });
+
+  afterEach(() => {
+    mock.restore();
+    nock.cleanAll();
   });
 
   describe("download file", () => {
@@ -266,6 +275,12 @@ describe("/files endpoint", () => {
 
     after(() => {
       proxy.close();
+
+      riseDisplayNetworkII.get = function (property) {
+        if (property == "activeproxy") {
+          return "";
+        }
+      };
     });
 
     beforeEach(() => {
@@ -413,18 +428,18 @@ describe("/files endpoint", () => {
 
     it("should return 202 with message if the file is already being downloaded", (done) => {
       // Mock the file system.
+      mock.restore();
       mock({
         [config.downloadPath]: {
-          "cdf42c077fe6037681ae3c003550c2c5": "some content"
+          "cdf42c077fe6037681ae3c003550c2c5": mock.file({
+            content: "some content"
+          })
         },
         [config.cachePath]: {},
-        [config.headersDBPath]: "",
-        "../data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
+        [config.headersDBPath]: mock.file({
+          content: JSON.stringify(headers)
+        })
       });
-
-      nock("http://example.com")
-        .get("/logo.png")
-        .replyWithFile(200, "../data/logo.png", headers);
 
       request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
@@ -444,8 +459,13 @@ describe("/files endpoint", () => {
       // Create file on mock file system.
       mock({
         [config.cachePath]: {
-          "cdf42c077fe6037681ae3c003550c2c5": "some content"
-        }
+          "cdf42c077fe6037681ae3c003550c2c5": mock.file({
+            content: "some content"
+          })
+        },
+        [config.headersDBPath]: mock.file({
+          content: JSON.stringify(headers)
+        })
       });
 
       request.get("https://localhost:9494/files")
@@ -459,6 +479,17 @@ describe("/files endpoint", () => {
     });
 
     it("should return headers saved on DB", (done) => {
+
+      mock({
+        [config.cachePath]: {
+          "cdf42c077fe6037681ae3c003550c2c5": mock.file({
+            content: "some content"
+          })
+        },
+        [config.headersDBPath]: mock.file({
+          content: JSON.stringify(headers)
+        })
+      });
 
       request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
@@ -585,11 +616,20 @@ describe("/files endpoint", () => {
       request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
-          expect(spy.callCount).to.equal(1);
-          logger.error.restore();
-
-          done();
         });
+
+      setTimeout(()=>{
+        request.get("https://localhost:9494/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            console.log(res.status)
+            expect(spy.callCount).to.equal(1);
+            logger.error.restore();
+
+            done();
+          });
+      }, 1000);
+
     });
 
   });

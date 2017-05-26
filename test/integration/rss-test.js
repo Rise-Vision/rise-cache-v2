@@ -21,14 +21,12 @@ describe("/rss endpoint", () => {
   let error = require("../../app/middleware/error")(logger);
 
   before(() => {
-    mock({
-      [config.rssDBPath]: ""
-    });
 
     rssDB = new database(config.rssDBPath);
     require("../../app/routes/rss")(server.app, rssDB.db);
     server.start();
     server.app.use(error.handleError);
+
   });
 
   after((done) => {

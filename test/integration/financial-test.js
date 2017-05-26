@@ -21,12 +21,10 @@ describe("/financial endpoint", () => {
   let error = require("../../app/middleware/error")(logger);
 
   before(() => {
-    mock({
-      [config.financialDBPath]: ""
-    });
 
-    financialDB = new database(config.financialDBPath);
+    financialDB = new database("");
     require("../../app/routes/financial")(server.app, financialDB.db);
+
     server.start();
     server.app.use(error.handleError);
   });

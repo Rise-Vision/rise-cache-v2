@@ -37,7 +37,7 @@
     "gulp-spawn-mocha": "^3.1.0",
     "http-proxy": "^1.14.0",
     "mocha": "^3.0.2",
-    "mock-fs": "^3.5.0",
+    "mock-fs": "^4.3.0",
     "nock": "^8.0.0",
     "node-mocks-http": "https://github.com/Rise-Vision/node-mocks-http.git",
     "publish": "^0.6.0",
