@@ -1,3 +1,4 @@
+const fs = require("fs-extra");
 const os = require("os");
 const path = require("path");
 const rvplayerPath = (process.platform === "win32") ?
@@ -13,6 +14,11 @@ const getOS = function () {
     return process.platform + process.arch;
   }
 
+};
+
+const httpsOptions  = {
+  key: fs.readFileSync(path.join(__dirname,"../","ssl","server.key")),
+  cert: fs.readFileSync(path.join(__dirname,"../","ssl","server.crt"))
 };
 
 module.exports = {
@@ -33,5 +39,6 @@ module.exports = {
   debugging: process.argv.slice(1).join(" ").indexOf("debug") > -1,
   os: getOS(),
   bqProjectName: "client-side-events",
-  bqDataset: "Rise_Cache_V2"
+  bqDataset: "Rise_Cache_V2",
+  httpsOptions: httpsOptions
 };

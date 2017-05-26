@@ -1,21 +1,25 @@
 "use strict";
 
-const fs = require("fs"),
+const fs = require('fs'),
+  expect = require('chai').expect,
   nock = require("nock"),
   mock = require("mock-fs"),
   sinon = require("sinon"),
-  chai = require("chai"),
-  chaiHttp = require("chai-http"),
   config = require("../../config/config"),
   fileSystem = require("../../app/helpers/file-system"),
   Database = require("../../app/database"),
-  expect = chai.expect,
-  httpProxy = require("http-proxy");
+  httpProxy = require("http-proxy"),
+  cert = config.httpsOptions.cert;
 
-chai.use(chaiHttp);
+let request = require("superagent");
+request = request.agent({ca: cert});
 
 describe("/files endpoint", () => {
   let headers = {etag:"1a42b4479c62b39b93726d793a2295ca"};
+  let now = new Date();
+  headers.createdAt = now.getTime();
+  headers.updatedAt = headers.createdAt;
+
   let headerDB = null;
   let server = null;
   let error = null;
@@ -40,31 +44,30 @@ describe("/files endpoint", () => {
 
     headerDB = new Database(config.headersDBPath);
 
+    require("../../app/routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
+
     mock({
       [config.headersDBPath]: "",
       [config.downloadPath]: {},
       [config.cachePath]: {}
     });
 
-    require("../../app/routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
-
     fileSystem.getAvailableSpace = function(logger, cb) {
       cb(availableSpace);
     };
-  });
-
-  beforeEach(() => {
     server.start();
     server.app.use(error.handleError);
   });
 
-  afterEach((done) => {
+  after((done) => {
+    mock.restore();
+    nock.cleanAll();
     server.stop(() => {
       done();
     });
   });
 
-  after(() => {
+  afterEach(() => {
     mock.restore();
     nock.cleanAll();
   });
@@ -86,11 +89,10 @@ describe("/files endpoint", () => {
         .get("/logo.png")
         .replyWithFile(200, "../data/logo.png", headers);
 
-      chai.request("http://localhost:9494")
-        .get("/files")
+      request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
-          expect(res).to.have.status(202);
+          expect(res.status).to.equal(202);
           expect(res.body).to.deep.equal({ status: 202, message: "File is downloading" });
 
           done();
@@ -98,10 +100,9 @@ describe("/files endpoint", () => {
     });
 
     it("should return error if url parameter is missing", (done) => {
-      chai.request("http://localhost:9494")
-        .get("/files")
+      request.get("https://localhost:9494/files")
         .end((err, res) => {
-          expect(res).to.have.status(400);
+          expect(err.status).to.equal(400);
           expect(res.body).to.deep.equal({ status: 400, message: "Missing url parameter" });
 
           done();
@@ -118,8 +119,7 @@ describe("/files endpoint", () => {
 
       it("should not save file if file server returns a 404", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -135,8 +135,7 @@ describe("/files endpoint", () => {
 
       it("should return 534 when file is not found on the server", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(res.statusCode).to.equal(534);
@@ -155,8 +154,7 @@ describe("/files endpoint", () => {
 
       it("should not save file if file server can't be reached", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -172,11 +170,10 @@ describe("/files endpoint", () => {
 
       it("should return a 504 status code if file server is not reachable", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
-            expect(res.statusCode).to.equal(504);
+            expect(err.status).to.equal(504);
             done();
           });
       });
@@ -193,8 +190,7 @@ describe("/files endpoint", () => {
 
       it("should not save file if file server returns a status other than 200, 304, or 404", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -211,8 +207,7 @@ describe("/files endpoint", () => {
       it("should log an error if file server returns a 403", (done) => {
         let spy = sinon.spy(logger, "error");
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(spy.calledWith("Invalid response with status code 403", null, "http://example.com/logo.png")).to.be.true;
@@ -224,8 +219,7 @@ describe("/files endpoint", () => {
 
       it("should return 502 when file server returns a status other than 200, 304, or 404", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(res.statusCode).to.equal(502);
@@ -248,8 +242,7 @@ describe("/files endpoint", () => {
       it("should log error when there is insufficient disk space", (done) => {
         let spy = sinon.spy(logger, "error");
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(spy.calledWith("Insufficient disk space")).to.be.true;
@@ -260,8 +253,7 @@ describe("/files endpoint", () => {
       });
 
       it("should return 507 when there is insufficient disk space", (done) => {
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(res.statusCode).to.equal(507);
@@ -283,6 +275,12 @@ describe("/files endpoint", () => {
 
     after(() => {
       proxy.close();
+
+      riseDisplayNetworkII.get = function (property) {
+        if (property == "activeproxy") {
+          return "";
+        }
+      };
     });
 
     beforeEach(() => {
@@ -306,11 +304,10 @@ describe("/files endpoint", () => {
         .get("/logo.png")
         .replyWithFile(200, "../data/logo.png", headers);
 
-      chai.request("http://localhost:9494")
-        .get("/files")
+      request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
-          expect(res).to.have.status(202);
+          expect(res.status).to.equal(202);
           expect(res.body).to.deep.equal({ status: 202, message: "File is downloading" });
 
           done();
@@ -327,8 +324,7 @@ describe("/files endpoint", () => {
 
       it("should not save file if file server returns a 404", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -344,8 +340,7 @@ describe("/files endpoint", () => {
 
       it("should return 534 when file is not found on the server through proxy", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(res.statusCode).to.equal(534);
@@ -366,8 +361,7 @@ describe("/files endpoint", () => {
 
       it("should not save file if proxy server can't be reached", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -383,8 +377,7 @@ describe("/files endpoint", () => {
 
       it("should return a 504 status code if proxy server is not reachable", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(res.statusCode).to.equal(504);
@@ -403,8 +396,7 @@ describe("/files endpoint", () => {
 
       it("should not save file if proxy server returns a status other than 200, 304, or 404", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -420,11 +412,10 @@ describe("/files endpoint", () => {
 
       it("should return 502 when proxy server returns a status other than 200, 304, or 404", (done) => {
 
-        chai.request("http://localhost:9494")
-          .get("/files")
+        request.get("https://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
-            expect(res.statusCode).to.equal(502);
+            expect(res.status).to.equal(502);
             done();
           });
       });
@@ -437,24 +428,23 @@ describe("/files endpoint", () => {
 
     it("should return 202 with message if the file is already being downloaded", (done) => {
       // Mock the file system.
+      mock.restore();
       mock({
         [config.downloadPath]: {
-          "cdf42c077fe6037681ae3c003550c2c5": "some content"
+          "cdf42c077fe6037681ae3c003550c2c5": mock.file({
+            content: "some content"
+          })
         },
         [config.cachePath]: {},
-        [config.headersDBPath]: "",
-        "../data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
+        [config.headersDBPath]: mock.file({
+          content: JSON.stringify(headers)
+        })
       });
 
-      nock("http://example.com")
-        .get("/logo.png")
-        .replyWithFile(200, "../data/logo.png", headers);
-
-      chai.request("http://localhost:9494")
-        .get("/files")
+      request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
-          expect(res).to.have.status(202);
+          expect(res.status).to.equal(202);
           expect(res.body).to.deep.equal({ status: 202, message: "File is downloading" });
 
           done();
@@ -469,16 +459,20 @@ describe("/files endpoint", () => {
       // Create file on mock file system.
       mock({
         [config.cachePath]: {
-          "cdf42c077fe6037681ae3c003550c2c5": "some content"
-        }
+          "cdf42c077fe6037681ae3c003550c2c5": mock.file({
+            content: "some content"
+          })
+        },
+        [config.headersDBPath]: mock.file({
+          content: JSON.stringify(headers)
+        })
       });
 
-      chai.request("http://localhost:9494")
-        .get("/files")
+      request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(err).to.be.null;
-          expect(res).to.have.status(200);
+          expect(res.status).to.equal(200);
 
           done();
         });
@@ -486,12 +480,22 @@ describe("/files endpoint", () => {
 
     it("should return headers saved on DB", (done) => {
 
-      chai.request("http://localhost:9494")
-        .get("/files")
+      mock({
+        [config.cachePath]: {
+          "cdf42c077fe6037681ae3c003550c2c5": mock.file({
+            content: "some content"
+          })
+        },
+        [config.headersDBPath]: mock.file({
+          content: JSON.stringify(headers)
+        })
+      });
+
+      request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(err).to.be.null;
-          expect(res).to.have.status(200);
+          expect(res.status).to.equal(200);
           expect(res.headers.etag).to.deep.equal(headers.etag);
           done();
         });
@@ -508,12 +512,11 @@ describe("/files endpoint", () => {
 
       headerDB.db.loadDatabase();
 
-      chai.request("http://localhost:9494")
-        .get("/files")
+      request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(err).to.be.null;
-          expect(res).to.have.status(200);
+          expect(res.status).to.equal(200);
           expect(res.headers.etag).to.be.undefined;
           done();
         });
@@ -531,8 +534,7 @@ describe("/files endpoint", () => {
 
       headerDB.db.loadDatabase();
 
-      chai.request("http://localhost:9494")
-        .get("/files")
+      request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end(() => {
           expect(spy.calledWith("No headers available", null, "http://example.com/logo.png"));
@@ -552,11 +554,10 @@ describe("/files endpoint", () => {
         }
       });
 
-      chai.request("http://localhost:9494")
-        .get("/files")
+      request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
-          expect(res).to.have.status(500);
+          expect(res.status).to.equal(500);
           expect(res.body).to.deep.equal({
             status: 500,
             message: "EACCES, permission denied '" + config.cachePath + "/cdf42c077fe6037681ae3c003550c2c5'"
@@ -579,8 +580,7 @@ describe("/files endpoint", () => {
         [config.cachePath]: {}
       });
 
-      chai.request("http://localhost:9494")
-        .get("/files")
+      request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(spy.callCount).to.equal(1);
@@ -613,15 +613,23 @@ describe("/files endpoint", () => {
         .get("/logo.png")
         .replyWithFile(200, "../data/logo.png", headers);
 
-      chai.request("http://localhost:9494")
-        .get("/files")
+      request.get("https://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
-          expect(spy.callCount).to.equal(1);
-          logger.error.restore();
-
-          done();
         });
+
+      setTimeout(()=>{
+        request.get("https://localhost:9494/files")
+          .query({ url: "http://example.com/logo.png" })
+          .end((err, res) => {
+            console.log(res.status)
+            expect(spy.callCount).to.equal(1);
+            logger.error.restore();
+
+            done();
+          });
+      }, 1000);
+
     });
 
   });

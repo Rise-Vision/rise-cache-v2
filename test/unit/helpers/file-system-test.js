@@ -10,6 +10,10 @@ const fs = require("fs"),
 
 describe("fileExists", () => {
 
+  after(function () {
+    mock.restore();
+  });
+
   it("should return true if file exists", () => {
     mock({
       "test": {

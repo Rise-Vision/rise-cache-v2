@@ -1,35 +1,24 @@
 "use strict";
 
 const fs = require("fs-extra"),
-  chai = require("chai"),
-  chaiHttp = require("chai-http"),
-  expect = chai.expect,
+  expect = require('chai').expect,
   mock = require("mock-fs"),
-  sinon = require("sinon");
+  sinon = require("sinon"),
+  config = require("../../config/config"),
+  cert = config.httpsOptions.cert;
 
+
+let request = require("superagent");
+request = request.agent({ca: cert});
 
 const app = require("../../app/app")();
-const config = require("../../config/config");
 const pkg = require("../../package.json");
-
-chai.use(chaiHttp);
 
 describe("Ping", function () {
   let spy;
 
   before(function () {
     spy = sinon.spy(console, "warn");
-
-    mock({
-      [config.headersDBPath]: "",
-      [config.metadataDBPath]: "",
-      [config.downloadPath]: {
-        "0e36e4d268b63fd0573185fe3a9e01f0": "some content"
-      },
-      [config.cachePath]: {},
-      [config.logFilePath]: "Some Content"
-    });
-
     app.start();
   });
 
@@ -43,10 +32,9 @@ describe("Ping", function () {
   });
 
   it("should return name and version without RiseDisplayNetworkII.ini file", (done) => {
-    chai.request('http://localhost:9494')
-    .get('/')
+    request.get('https://localhost:9494/')
     .end(function(err, res) {
-      expect(res).to.have.status(200);
+      expect(res.status).to.equal(200);
       expect(res).to.be.json;
       expect(res.body).to.be.a('object');
       expect(res.body.name).to.be.equal(pkg.name);
@@ -57,18 +45,10 @@ describe("Ping", function () {
   });
 
   it("should return name and version with RiseDisplayNetworkII.ini file", function (done) {
-    mock({
-      [config.headersDBPath]: "",
-      [config.metadataDBPath]: "",
-      [config.downloadPath]: {},
-      [config.cachePath]: {},
-      [config.riseDisplayNetworkIIPath]: ""
-    });
 
-    chai.request('http://localhost:9494')
-      .get('/')
+    request.get('https://localhost:9494/')
       .end(function(err, res) {
-        expect(res).to.have.status(200);
+        expect(res.status).to.equal(200);
         expect(res).to.be.json;
         expect(res.body).to.be.a('object');
         expect(res.body.name).to.be.equal(pkg.name);

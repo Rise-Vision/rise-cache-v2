@@ -1,14 +1,14 @@
 "use strict";
 
 const mock = require("mock-fs"),
-  chai = require("chai"),
-  chaiHttp = require("chai-http"),
+  expect = require('chai').expect,
   config = require("../../config/config"),
   database = require("../../app/database"),
   rssData = require("../data/rss.json"),
-  expect = chai.expect;
+  cert = config.httpsOptions.cert;
 
-chai.use(chaiHttp);
+let request = require("superagent");
+request = request.agent({ca: cert});
 
 describe("/rss endpoint", () => {
   let logger = {
@@ -21,35 +21,28 @@ describe("/rss endpoint", () => {
   let error = require("../../app/middleware/error")(logger);
 
   before(() => {
-    mock({
-      [config.rssDBPath]: ""
-    });
 
     rssDB = new database(config.rssDBPath);
     require("../../app/routes/rss")(server.app, rssDB.db);
-  });
-
-  after(() => {
-    mock.restore();
-  });
-
-  beforeEach(() => {
     server.start();
     server.app.use(error.handleError);
+
   });
 
-  afterEach(() => {
-    server.stop();
+  after((done) => {
+    mock.restore();
+    server.stop(() => {
+      done();
+    });
   });
 
   it("should return an error if 'key' is not POSTed", function (done) {
-    chai.request("http://localhost:9494")
-      .post("/rss")
+    request.post("https://localhost:9494/rss")
       .send({
         "value": ""
       })
       .end((err, res) => {
-        expect(res).to.have.status(400);
+        expect(res.status).to.equal(400);
         expect(res.body).to.deep.equal({ status: 400, message: "Missing POST data" });
 
         done();
@@ -57,13 +50,12 @@ describe("/rss endpoint", () => {
   });
 
   it("should return an error if 'value' is not POSTed", function (done) {
-    chai.request("http://localhost:9494")
-      .post("/rss")
+    request.post("https://localhost:9494/rss")
       .send({
         "key": ""
       })
       .end((err, res) => {
-        expect(res).to.have.status(400);
+        expect(res.status).to.equal(400);
         expect(res.body).to.deep.equal({ status: 400, message: "Missing POST data" });
 
         done();
@@ -71,11 +63,10 @@ describe("/rss endpoint", () => {
   });
 
   it("should save data and return saved entity", function (done) {
-    chai.request("http://localhost:9494")
-      .post("/rss")
+    request.post("https://localhost:9494/rss")
       .send(rssData)
       .end((err, res) => {
-        expect(res).to.have.status(201);
+        expect(res.status).to.equal(201);
         expect(res.body).to.deep.equal(rssData);
 
         done();
@@ -84,10 +75,9 @@ describe("/rss endpoint", () => {
 
   it("should get data", function (done) {
 
-    chai.request("http://localhost:9494")
-      .get("/rss/" + rssData.key)
+    request.get("https://localhost:9494/rss/" + rssData.key)
       .end((err, res) => {
-        expect(res).to.have.status(200);
+        expect(res.status).to.equal(200);
         expect(res.body.key).to.deep.equal(rssData.key);
         expect(res.body.value).to.deep.equal(rssData.value);
 
@@ -97,10 +87,9 @@ describe("/rss endpoint", () => {
 
   it("should return 404 if data is not found", function (done) {
 
-    chai.request("http://localhost:9494")
-      .get("/rss/1")
+    request.get("https://localhost:9494/rss/1")
       .end((err, res) => {
-        expect(res).to.have.status(404);
+        expect(res.status).to.equal(404);
         expect(res.body).to.deep.equal({ status: 404, message: "Not found" });
 
         done();
@@ -109,10 +98,9 @@ describe("/rss endpoint", () => {
 
   it("should delete data", function (done) {
 
-    chai.request("http://localhost:9494")
-      .delete("/rss/" + rssData.key)
+    request.delete("https://localhost:9494/rss/" + rssData.key)
       .end((err, res) => {
-        expect(res).to.have.status(204);
+        expect(res.status).to.equal(204);
 
         done();
       });
@@ -120,10 +108,9 @@ describe("/rss endpoint", () => {
 
   it("should return 404 if data to delete was not found", function (done) {
 
-    chai.request("http://localhost:9494")
-      .get("/rss/" + rssData.key)
+    request.get("https://localhost:9494/rss/" + rssData.key)
       .end((err, res) => {
-        expect(res).to.have.status(404);
+        expect(res.status).to.equal(404);
         expect(res.body).to.deep.equal({ status: 404, message: "Not found" });
 
         done();
@@ -131,13 +118,12 @@ describe("/rss endpoint", () => {
   });
 
   it("should return an error if 'key' is not PUTed", function (done) {
-    chai.request("http://localhost:9494")
-      .put("/rss/"+rssData.key)
+    request.put("https://localhost:9494/rss/" + rssData.key)
       .send({
         "value": ""
       })
       .end((err, res) => {
-        expect(res).to.have.status(400);
+        expect(res.status).to.equal(400);
         expect(res.body).to.deep.equal({ status: 400, message: "Missing POST data" });
 
         done();
@@ -145,13 +131,12 @@ describe("/rss endpoint", () => {
   });
 
   it("should return an error if 'value' is not PUTed", function (done) {
-    chai.request("http://localhost:9494")
-      .put("/rss/"+rssData.key)
+    request.put("https://localhost:9494/rss/" + rssData.key)
       .send({
         "key": ""
       })
       .end((err, res) => {
-        expect(res).to.have.status(400);
+        expect(res.status).to.equal(400);
         expect(res.body).to.deep.equal({ status: 400, message: "Missing POST data" });
 
         done();
@@ -159,11 +144,10 @@ describe("/rss endpoint", () => {
   });
 
   it("should update data and return saved entity", function (done) {
-    chai.request("http://localhost:9494")
-      .put("/rss/"+rssData.key)
+    request.put("https://localhost:9494/rss/" + rssData.key)
       .send(rssData)
       .end((err, res) => {
-        expect(res).to.have.status(201);
+        expect(res.status).to.equal(201);
         expect(res.body).to.deep.equal(rssData);
 
         done();

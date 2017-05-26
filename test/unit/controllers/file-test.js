@@ -30,6 +30,11 @@ describe("FileController", () => {
     }
   };
 
+  after(() => {
+    nock.cleanAll();
+    mock.restore();
+  });
+
   beforeEach(() => {
     fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
   });

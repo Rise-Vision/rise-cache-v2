@@ -1,14 +1,14 @@
 "use strict";
 
 const mock = require("mock-fs"),
-  chai = require("chai"),
-  chaiHttp = require("chai-http"),
+  expect = require('chai').expect,
   config = require("../../config/config"),
   database = require("../../app/database"),
   financialData = require("../data/financial.json"),
-  expect = chai.expect;
+  cert = config.httpsOptions.cert;
 
-chai.use(chaiHttp);
+let request = require("superagent");
+request = request.agent({ca: cert});
 
 describe("/financial endpoint", () => {
   let logger = {
@@ -21,35 +21,28 @@ describe("/financial endpoint", () => {
   let error = require("../../app/middleware/error")(logger);
 
   before(() => {
-    mock({
-      [config.financialDBPath]: ""
-    });
 
-    financialDB = new database(config.financialDBPath);
+    financialDB = new database("");
     require("../../app/routes/financial")(server.app, financialDB.db);
-  });
 
-  after(() => {
-    mock.restore();
-  });
-
-  beforeEach(() => {
     server.start();
     server.app.use(error.handleError);
   });
 
-  afterEach(() => {
-    server.stop();
+  after((done) => {
+    mock.restore();
+    server.stop(() => {
+      done();
+    });
   });
 
   it("should return an error if 'key' is not POSTed", function (done) {
-    chai.request("http://localhost:9494")
-      .post("/financial")
+    request.post("https://localhost:9494/financial")
       .send({
         "value": ""
       })
       .end((err, res) => {
-        expect(res).to.have.status(400);
+        expect(res.status).to.equal(400);
         expect(res.body).to.deep.equal({ status: 400, message: "Missing POST data" });
 
         done();
@@ -57,13 +50,12 @@ describe("/financial endpoint", () => {
   });
 
   it("should return an error if 'value' is not POSTed", function (done) {
-    chai.request("http://localhost:9494")
-      .post("/financial")
+    request.post("https://localhost:9494/financial")
       .send({
         "key": ""
       })
       .end((err, res) => {
-        expect(res).to.have.status(400);
+        expect(res.status).to.equal(400);
         expect(res.body).to.deep.equal({ status: 400, message: "Missing POST data" });
 
         done();
@@ -71,11 +63,10 @@ describe("/financial endpoint", () => {
   });
 
   it("should save data and return saved entity", function (done) {
-    chai.request("http://localhost:9494")
-      .post("/financial")
+    request.post("https://localhost:9494/financial")
       .send(financialData)
       .end((err, res) => {
-        expect(res).to.have.status(201);
+        expect(res.status).to.equal(201);
         expect(res.body).to.deep.equal(financialData);
 
         done();
@@ -84,10 +75,9 @@ describe("/financial endpoint", () => {
 
   it("should get data", function (done) {
 
-    chai.request("http://localhost:9494")
-      .get("/financial/" + financialData.key)
+    request.get("https://localhost:9494/financial/" + financialData.key)
       .end((err, res) => {
-        expect(res).to.have.status(200);
+        expect(res.status).to.equal(200);
         expect(res.body.key).to.deep.equal(financialData.key);
         expect(res.body.value).to.deep.equal(financialData.value);
 
@@ -97,10 +87,9 @@ describe("/financial endpoint", () => {
 
   it("should return 404 if data is not found", function (done) {
 
-    chai.request("http://localhost:9494")
-      .get("/financial/1")
+    request.get("https://localhost:9494/financial/1")
       .end((err, res) => {
-        expect(res).to.have.status(404);
+        expect(res.status).to.equal(404);
         expect(res.body).to.deep.equal({ status: 404, message: "Not found" });
 
         done();
@@ -110,20 +99,18 @@ describe("/financial endpoint", () => {
   describe( "DELETE", () => {
 
     it( "should delete data", ( done ) => {
-      chai.request( "http://localhost:9494" )
-        .delete( "/financial/" + financialData.key )
+      request.delete( "https://localhost:9494/financial/" + financialData.key )
         .end( ( err, res ) => {
-          expect( res ).to.have.status( 204 );
+          expect( res.status ).to.equal( 204 );
 
           done();
         } );
     } );
 
     it( "should return 404 if data to delete was not found", ( done ) => {
-      chai.request( "http://localhost:9494" )
-        .delete( "/financial/" + financialData.key )
+      request.delete( "https://localhost:9494/financial/" + financialData.key )
         .end( ( err, res ) => {
-          expect( res ).to.have.status( 404 );
+          expect( res.status ).to.equal( 404 );
           expect( res.body ).to.deep.equal( { status: 404, message: "Not found" } );
 
           done();
@@ -135,10 +122,9 @@ describe("/financial endpoint", () => {
   describe( "PUT", () => {
 
     it( "should return 400 if data was not sent", ( done ) => {
-      chai.request( "http://localhost:9494" )
-        .put( "/financial/" + financialData.key )
+      request.put( "https://localhost:9494/financial/" + financialData.key )
         .end( ( err, res ) => {
-          expect( res ).to.have.status( 400 );
+          expect( res.status ).to.equal( 400 );
           expect( res.body ).to.deep.equal( {
             status: 400,
             message: "Missing PUT data"
@@ -149,11 +135,10 @@ describe("/financial endpoint", () => {
     } );
 
     it( "should update data and return saved entity", ( done ) => {
-      chai.request( "http://localhost:9494" )
-        .put( "/financial/" + financialData.key )
+      request.put( "https://localhost:9494/financial/" + financialData.key )
         .send( financialData )
         .end( ( err, res ) => {
-          expect( res ).to.have.status( 201 );
+          expect( res.status ).to.equal( 201 );
           expect( res.body ).to.deep.equal( financialData );
 
           done();

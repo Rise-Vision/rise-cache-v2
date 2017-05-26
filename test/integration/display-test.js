@@ -1,11 +1,11 @@
 "use strict";
 
-const chai = require("chai"),
-  chaiHttp = require("chai-http"),
+const fs = require('fs'),
+  expect = require('chai').expect,
+  request = require("superagent"),
   config = require("../../config/config"),
-  expect = chai.expect;
+  cert = config.httpsOptions.cert;
 
-chai.use(chaiHttp);
 
 describe("/displays endpoint", () => {
   let logger = {
@@ -31,24 +31,21 @@ describe("/displays endpoint", () => {
 
   before(() => {
     require("../../app/routes/display")(server.app, riseDisplayNetworkII.get("displayid"));
-  });
-
-  beforeEach(() => {
     server.start();
     server.app.use(error.handleError);
   });
 
-  afterEach((done) => {
+  after((done) => {
     server.stop(() => {
       done();
     });
   });
 
   it("should return displayId", function (done) {
-    chai.request('http://localhost:9494')
-      .get('/displays')
+    request.get('https://localhost:9494/displays')
+      .ca(cert)
       .end(function(err, res) {
-        expect(res).to.have.status(200);
+        expect(res.status).to.be.equal(200);
         expect(res).to.be.json;
         expect(res.body).to.be.a('object');
         expect(res.body.displayId).to.be.equal("abc123");
