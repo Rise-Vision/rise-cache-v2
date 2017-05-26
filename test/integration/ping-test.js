@@ -31,6 +31,29 @@ describe("Ping", function () {
     spy.restore();
   });
 
+  it("should return Access Control entries on the headers for all origin", (done) => {
+    request.get('https://localhost:9494/')
+      .end(function(err, res) {
+        expect(res.status).to.equal(200);
+        expect(res.headers["access-control-allow-origin"]).to.be.equal("*");
+        expect(res.headers["access-control-allow-credentials"]).to.be.equal("true");
+        expect(res.headers["cache-control"]).to.be.equal("no-cache");
+        done();
+      });
+  });
+
+  it("should return Access Control entries on the headers for request origin", (done) => {
+    request.get('https://localhost:9494/')
+      .set('origin', 'http://localhost:8080')
+      .end(function(err, res) {
+        expect(res.status).to.equal(200);
+        expect(res.headers["access-control-allow-origin"]).to.be.equal("http://localhost:8080");
+        expect(res.headers["access-control-allow-credentials"]).to.be.equal("true");
+        expect(res.headers["cache-control"]).to.be.equal("no-cache");
+        done();
+      });
+  });
+
   it("should return name and version without RiseDisplayNetworkII.ini file", (done) => {
     request.get('https://localhost:9494/')
     .end(function(err, res) {
