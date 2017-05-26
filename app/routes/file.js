@@ -32,8 +32,6 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
                 logger.error("No headers available", null, fileUrl);
               }
             }
-            res.setHeader("Access-Control-Allow-Origin", "*");
-            res.setHeader("Cache-Control", "no-cache");
 
             getFromCache(req, res, controller, fileUrl, headers);
 

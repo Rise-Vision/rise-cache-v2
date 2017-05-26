@@ -11,7 +11,7 @@ const config = require("../config/config"),
 
 const AppFactory = function() {
 
-  let server, error;
+  let server, error, headers;
 
   const start = function() {
 
@@ -60,6 +60,9 @@ const AppFactory = function() {
 
       server.start();
 
+      headers = require("./middleware/headers")();
+      server.app.use(headers.setHeaders);
+
       require("./routes/ping")(server.app, pkg);
       require("./routes/display")(server.app, displayId);
       require("./routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
@@ -69,7 +72,6 @@ const AppFactory = function() {
       require("./routes/financial")(server.app, financialDB.db, logger);
 
       error = require("./middleware/error")(logger);
-
       server.app.use(error.handleError);
 
     });
