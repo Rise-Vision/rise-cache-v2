@@ -56,7 +56,7 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(200, metadataResponse);
 
-      request.get("https://localhost:9494/metadata")
+      request.get("http://localhost:9494/metadata")
         .query({ url: "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -67,7 +67,7 @@ describe("/metadata endpoint", () => {
     });
 
     it("should return error if url parameter is missing", (done) => {
-      request.get("https://localhost:9494/metadata")
+      request.get("http://localhost:9494/metadata")
         .end((err, res) => {
           expect(res.status).to.equal(400);
           expect(res.body).to.deep.equal({ status: 400, message: "Missing url parameter" });
@@ -82,7 +82,7 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(404);
 
-      request.get("https://localhost:9494/metadata")
+      request.get("http://localhost:9494/metadata")
         .query({ url: "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -104,7 +104,7 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(404);
 
-      request.get("https://localhost:9494/metadata")
+      request.get("http://localhost:9494/metadata")
         .query({ url: "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
           expect(res.status).to.equal(502);
@@ -142,7 +142,7 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(200, metadataResponse);
 
-      request.get("https://localhost:9494/metadata")
+      request.get("http://localhost:9494/metadata")
         .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -158,7 +158,7 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(404);
 
-      request.get("https://localhost:9494/metadata")
+      request.get("http://localhost:9494/metadata")
         .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
           expect(res.status).to.equal(200);
@@ -180,7 +180,7 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(404);
 
-      request.get("https://localhost:9494/metadata")
+      request.get("http://localhost:9494/metadata")
         .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
         .end((err, res) => {
           expect(res.status).to.equal(502);
@@ -205,7 +205,7 @@ describe("/metadata endpoint", () => {
 
       it("should not get metadata if proxy server can't be reached", (done) => {
 
-        request.get("https://localhost:9494/metadata")
+        request.get("http://localhost:9494/metadata")
           .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
           .end((err, res) => {
             expect(res.status).to.equal(502);

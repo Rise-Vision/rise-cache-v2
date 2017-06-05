@@ -89,7 +89,7 @@ describe("/files endpoint", () => {
         .get("/logo.png")
         .replyWithFile(200, "../data/logo.png", headers);
 
-      request.get("https://localhost:9494/files")
+      request.get("http://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(res.status).to.equal(202);
@@ -100,7 +100,7 @@ describe("/files endpoint", () => {
     });
 
     it("should return error if url parameter is missing", (done) => {
-      request.get("https://localhost:9494/files")
+      request.get("http://localhost:9494/files")
         .end((err, res) => {
           expect(err.status).to.equal(400);
           expect(res.body).to.deep.equal({ status: 400, message: "Missing url parameter" });
@@ -119,7 +119,7 @@ describe("/files endpoint", () => {
 
       it("should not save file if file server returns a 404", (done) => {
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -135,7 +135,7 @@ describe("/files endpoint", () => {
 
       it("should return 534 when file is not found on the server", (done) => {
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(res.statusCode).to.equal(534);
@@ -154,7 +154,7 @@ describe("/files endpoint", () => {
 
       it("should not save file if file server can't be reached", (done) => {
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -170,7 +170,7 @@ describe("/files endpoint", () => {
 
       it("should return a 504 status code if file server is not reachable", (done) => {
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(err.status).to.equal(504);
@@ -190,7 +190,7 @@ describe("/files endpoint", () => {
 
       it("should not save file if file server returns a status other than 200, 304, or 404", (done) => {
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -207,7 +207,7 @@ describe("/files endpoint", () => {
       it("should log an error if file server returns a 403", (done) => {
         let spy = sinon.spy(logger, "error");
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(spy.calledWith("Invalid response with status code 403", null, "http://example.com/logo.png")).to.be.true;
@@ -219,7 +219,7 @@ describe("/files endpoint", () => {
 
       it("should return 502 when file server returns a status other than 200, 304, or 404", (done) => {
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(res.statusCode).to.equal(502);
@@ -242,7 +242,7 @@ describe("/files endpoint", () => {
       it("should log error when there is insufficient disk space", (done) => {
         let spy = sinon.spy(logger, "error");
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(spy.calledWith("Insufficient disk space")).to.be.true;
@@ -253,7 +253,7 @@ describe("/files endpoint", () => {
       });
 
       it("should return 507 when there is insufficient disk space", (done) => {
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(res.statusCode).to.equal(507);
@@ -304,7 +304,7 @@ describe("/files endpoint", () => {
         .get("/logo.png")
         .replyWithFile(200, "../data/logo.png", headers);
 
-      request.get("https://localhost:9494/files")
+      request.get("http://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(res.status).to.equal(202);
@@ -324,7 +324,7 @@ describe("/files endpoint", () => {
 
       it("should not save file if file server returns a 404", (done) => {
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -340,7 +340,7 @@ describe("/files endpoint", () => {
 
       it("should return 534 when file is not found on the server through proxy", (done) => {
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(res.statusCode).to.equal(534);
@@ -361,7 +361,7 @@ describe("/files endpoint", () => {
 
       it("should not save file if proxy server can't be reached", (done) => {
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -377,7 +377,7 @@ describe("/files endpoint", () => {
 
       it("should return a 504 status code if proxy server is not reachable", (done) => {
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(res.statusCode).to.equal(504);
@@ -396,7 +396,7 @@ describe("/files endpoint", () => {
 
       it("should not save file if proxy server returns a status other than 200, 304, or 404", (done) => {
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
@@ -412,7 +412,7 @@ describe("/files endpoint", () => {
 
       it("should return 502 when proxy server returns a status other than 200, 304, or 404", (done) => {
 
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             expect(res.status).to.equal(502);
@@ -441,7 +441,7 @@ describe("/files endpoint", () => {
         })
       });
 
-      request.get("https://localhost:9494/files")
+      request.get("http://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(res.status).to.equal(202);
@@ -468,7 +468,7 @@ describe("/files endpoint", () => {
         })
       });
 
-      request.get("https://localhost:9494/files")
+      request.get("http://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(err).to.be.null;
@@ -491,7 +491,7 @@ describe("/files endpoint", () => {
         })
       });
 
-      request.get("https://localhost:9494/files")
+      request.get("http://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(err).to.be.null;
@@ -512,7 +512,7 @@ describe("/files endpoint", () => {
 
       headerDB.db.loadDatabase();
 
-      request.get("https://localhost:9494/files")
+      request.get("http://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(err).to.be.null;
@@ -534,7 +534,7 @@ describe("/files endpoint", () => {
 
       headerDB.db.loadDatabase();
 
-      request.get("https://localhost:9494/files")
+      request.get("http://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end(() => {
           expect(spy.calledWith("No headers available", null, "http://example.com/logo.png"));
@@ -554,7 +554,7 @@ describe("/files endpoint", () => {
         }
       });
 
-      request.get("https://localhost:9494/files")
+      request.get("http://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(res.status).to.equal(500);
@@ -580,7 +580,7 @@ describe("/files endpoint", () => {
         [config.cachePath]: {}
       });
 
-      request.get("https://localhost:9494/files")
+      request.get("http://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
           expect(spy.callCount).to.equal(1);
@@ -613,13 +613,13 @@ describe("/files endpoint", () => {
         .get("/logo.png")
         .replyWithFile(200, "../data/logo.png", headers);
 
-      request.get("https://localhost:9494/files")
+      request.get("http://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
         });
 
       setTimeout(()=>{
-        request.get("https://localhost:9494/files")
+        request.get("http://localhost:9494/files")
           .query({ url: "http://example.com/logo.png" })
           .end((err, res) => {
             console.log(res.status)

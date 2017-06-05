@@ -37,7 +37,7 @@ describe("/financial endpoint", () => {
   });
 
   it("should return an error if 'key' is not POSTed", function (done) {
-    request.post("https://localhost:9494/financial")
+    request.post("http://localhost:9494/financial")
       .send({
         "value": ""
       })
@@ -50,7 +50,7 @@ describe("/financial endpoint", () => {
   });
 
   it("should return an error if 'value' is not POSTed", function (done) {
-    request.post("https://localhost:9494/financial")
+    request.post("http://localhost:9494/financial")
       .send({
         "key": ""
       })
@@ -63,7 +63,7 @@ describe("/financial endpoint", () => {
   });
 
   it("should save data and return saved entity", function (done) {
-    request.post("https://localhost:9494/financial")
+    request.post("http://localhost:9494/financial")
       .send(financialData)
       .end((err, res) => {
         expect(res.status).to.equal(201);
@@ -75,7 +75,7 @@ describe("/financial endpoint", () => {
 
   it("should get data", function (done) {
 
-    request.get("https://localhost:9494/financial/" + financialData.key)
+    request.get("http://localhost:9494/financial/" + financialData.key)
       .end((err, res) => {
         expect(res.status).to.equal(200);
         expect(res.body.key).to.deep.equal(financialData.key);
@@ -87,7 +87,7 @@ describe("/financial endpoint", () => {
 
   it("should return 404 if data is not found", function (done) {
 
-    request.get("https://localhost:9494/financial/1")
+    request.get("http://localhost:9494/financial/1")
       .end((err, res) => {
         expect(res.status).to.equal(404);
         expect(res.body).to.deep.equal({ status: 404, message: "Not found" });
@@ -99,7 +99,7 @@ describe("/financial endpoint", () => {
   describe( "DELETE", () => {
 
     it( "should delete data", ( done ) => {
-      request.delete( "https://localhost:9494/financial/" + financialData.key )
+      request.delete( "http://localhost:9494/financial/" + financialData.key )
         .end( ( err, res ) => {
           expect( res.status ).to.equal( 204 );
 
@@ -108,7 +108,7 @@ describe("/financial endpoint", () => {
     } );
 
     it( "should return 404 if data to delete was not found", ( done ) => {
-      request.delete( "https://localhost:9494/financial/" + financialData.key )
+      request.delete( "http://localhost:9494/financial/" + financialData.key )
         .end( ( err, res ) => {
           expect( res.status ).to.equal( 404 );
           expect( res.body ).to.deep.equal( { status: 404, message: "Not found" } );
@@ -122,7 +122,7 @@ describe("/financial endpoint", () => {
   describe( "PUT", () => {
 
     it( "should return 400 if data was not sent", ( done ) => {
-      request.put( "https://localhost:9494/financial/" + financialData.key )
+      request.put( "http://localhost:9494/financial/" + financialData.key )
         .end( ( err, res ) => {
           expect( res.status ).to.equal( 400 );
           expect( res.body ).to.deep.equal( {
@@ -135,7 +135,7 @@ describe("/financial endpoint", () => {
     } );
 
     it( "should update data and return saved entity", ( done ) => {
-      request.put( "https://localhost:9494/financial/" + financialData.key )
+      request.put( "http://localhost:9494/financial/" + financialData.key )
         .send( financialData )
         .end( ( err, res ) => {
           expect( res.status ).to.equal( 201 );

@@ -22,7 +22,8 @@ const httpsOptions  = {
 };
 
 module.exports = {
-  port: 9494,
+  httpPort: 9494,
+  httpsPort: 9495,
   url: "localhost",
   cachePath: path.join(riseCachePath,"cache"),
   downloadPath: path.join(riseCachePath,"download"),

@@ -42,7 +42,7 @@ describe("/displays endpoint", () => {
   });
 
   it("should return displayId", function (done) {
-    request.get('https://localhost:9494/displays')
+    request.get('http://localhost:9494/displays')
       .ca(cert)
       .end(function(err, res) {
         expect(res.status).to.be.equal(200);
