@@ -1,27 +1,44 @@
 "use strict";
 
-const https = require("https"),
+const http = require("http"),
+  https = require("https"),
   express = require("express");
 
 const ServerFactory = function(config, logger) {
 
   const app = express(),
-    server =  https.createServer(config.httpsOptions, app);
+    serverHttps =  https.createServer(config.httpsOptions, app),
+    serverHttp =  http.createServer(app);
 
   const start = () => {
-    server.on("error", (err) => {
-      logger.error("Unable to start Rise Cache", JSON.stringify(err));
+
+    serverHttp.on("error", (err) => {
+      logger.error("Unable to start Rise Cache HTTP", JSON.stringify(err));
     });
 
-    return server.listen(config.port, config.url, () => {
-      logger.info("Rise Cache is up and running on port: " + config.port);
+    serverHttp.listen(config.httpPort, config.url, () => {
+      logger.info("Rise Cache HTTP is up and running on port: " + config.httpPort);
+    });
+
+    serverHttps.on("error", (err) => {
+      logger.error("Unable to start Rise Cache HTTPS", JSON.stringify(err));
+    });
+
+    serverHttps.listen(config.httpsPort, config.url, () => {
+      logger.info("Rise Cache HTTPS is up and running on port: " + config.httpsPort);
     });
   };
 
-  const stop = (cb) => {
-    server.close(() => {
-      if (cb) {
-        cb();
+  const stop = (cbHttp, cbHttps) => {
+    serverHttp.close(() => {
+      if (cbHttp) {
+        cbHttp();
+      }
+    });
+
+    serverHttps.close(() => {
+      if (cbHttps) {
+        cbHttps();
       }
     });
   };
@@ -31,7 +48,8 @@ const ServerFactory = function(config, logger) {
     start: start,
     stop: stop,
     app: app,
-    server: server
+    serverHttp: serverHttp,
+    serverHttps: serverHttps
   };
 };
 

@@ -77,12 +77,8 @@ const AppFactory = function() {
     });
   };
 
-  const stop = (cb) => {
-    server.stop(() => {
-      if (cb) {
-        cb();
-      }
-    });
+  const stop = (cbHttp, cbHttps) => {
+    server.stop(cbHttp, cbHttps);
   };
 
   return {
