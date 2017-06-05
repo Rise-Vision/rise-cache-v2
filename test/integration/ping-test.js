@@ -24,6 +24,7 @@ describe("Ping", function () {
 
   after((done) => {
     app.stop(() => {
+    }, () => {
       done();
     });
 
@@ -32,7 +33,7 @@ describe("Ping", function () {
   });
 
   it("should return Access Control entries on the headers for all origin", (done) => {
-    request.get('https://localhost:9494/')
+    request.get('http://localhost:9494/')
       .end(function(err, res) {
         expect(res.status).to.equal(200);
         expect(res.headers["access-control-allow-origin"]).to.be.equal("*");
@@ -43,7 +44,7 @@ describe("Ping", function () {
   });
 
   it("should return Access Control entries on the headers for request origin", (done) => {
-    request.get('https://localhost:9494/')
+    request.get('http://localhost:9494/')
       .set('origin', 'http://localhost:8080')
       .end(function(err, res) {
         expect(res.status).to.equal(200);
@@ -55,7 +56,7 @@ describe("Ping", function () {
   });
 
   it("should return name and version without RiseDisplayNetworkII.ini file", (done) => {
-    request.get('https://localhost:9494/')
+    request.get('http://localhost:9494/')
     .end(function(err, res) {
       expect(res.status).to.equal(200);
       expect(res).to.be.json;
@@ -67,9 +68,23 @@ describe("Ping", function () {
     });
   });
 
-  it("should return name and version with RiseDisplayNetworkII.ini file", function (done) {
+  it("should return name and version with RiseDisplayNetworkII.ini file for HTTP", function (done) {
 
-    request.get('https://localhost:9494/')
+    request.get('http://localhost:9494/')
+      .end(function(err, res) {
+        expect(res.status).to.equal(200);
+        expect(res).to.be.json;
+        expect(res.body).to.be.a('object');
+        expect(res.body.name).to.be.equal(pkg.name);
+        expect(res.body.version).to.be.equal(pkg.version);
+        expect(spy.calledTwice).to.be.false;
+        done();
+      });
+  });
+
+  it("should return name and version with RiseDisplayNetworkII.ini file for HTTPS", function (done) {
+
+    request.get('https://localhost:9495/')
       .end(function(err, res) {
         expect(res.status).to.equal(200);
         expect(res).to.be.json;

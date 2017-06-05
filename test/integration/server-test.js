@@ -16,10 +16,16 @@ describe("Server", function () {
   });
 
   it("should log info for server startup", (done) => {
+    let called = false;
     let logger = {
       info: function (x) {
-        expect(x).to.equal("Rise Cache is up and running on port: 9494");
-        done();
+        if ( !called ) {
+          expect(x).to.equal("Rise Cache HTTP is up and running on port: 9494");
+          called = true;
+        } else {
+          expect(x).to.equal("Rise Cache HTTPS is up and running on port: 9495");
+          done();
+        }
       }
     };
 
@@ -29,10 +35,10 @@ describe("Server", function () {
 
   });
 
-  it("should log an error if unable to start server", (done) => {
+  it("should log an error if unable to start server HTTP", (done) => {
     let logger = {
       error: function (detail, errorDetail) {
-        expect(detail).to.equal("Unable to start Rise Cache");
+        expect(detail).to.equal("Unable to start Rise Cache HTTP");
         expect(errorDetail).to.equal('{"code":"EADDRINUSE"}');
         done();
       },
@@ -41,7 +47,22 @@ describe("Server", function () {
 
     serverFactory = require("../../app/server")(config, logger);
     serverFactory.start();
-    serverFactory.server.emit("error", { code: "EADDRINUSE" });
+    serverFactory.serverHttp.emit("error", { code: "EADDRINUSE" });
+  });
+
+  it("should log an error if unable to start server HTTPS", (done) => {
+    let logger = {
+      error: function (detail, errorDetail) {
+        expect(detail).to.equal("Unable to start Rise Cache HTTPS");
+        expect(errorDetail).to.equal('{"code":"EADDRINUSE"}');
+        done();
+      },
+      info: function(detail) {}
+    };
+
+    serverFactory = require("../../app/server")(config, logger);
+    serverFactory.start();
+    serverFactory.serverHttps.emit("error", { code: "EADDRINUSE" });
   });
 
 });
