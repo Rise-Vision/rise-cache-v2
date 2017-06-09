@@ -4,14 +4,14 @@ const EventEmitter = require("events").EventEmitter,
   request = require("request"),
   fileSystem = require("../helpers/file-system");
 
-
-const MetadataController = function(url, metadata, riseDisplayNetworkII, logger) {
+const MetadataController = function(url, metadata, riseDisplayNetworkII, gcsListener, logger) {
   EventEmitter.call(this);
 
   this.url = url;
   this.fileName = fileSystem.getFileName(this.url);
   this.metadata = metadata;
   this.riseDisplayNetworkII = riseDisplayNetworkII;
+  this.gcsListener = gcsListener;
   this.logger = logger;
 };
 
@@ -27,27 +27,28 @@ MetadataController.prototype.getMetadata = function() {
       proxy: (this.riseDisplayNetworkII) ? this.riseDisplayNetworkII.get("activeproxy"): null
     };
 
-    request(requestOptions, (err, res, body) => {
-      if (err) {
-        this.logger.error(err, null, this.url);
+    this.getCachedMetadata((err, cachedRes) => {
+      if(err) {
+        this.emit("no-response");
+        return this.emit("metadata-error", err);
       }
+      else if (cachedRes) {
+        this.logger.info("Using cached version of", this.url);
+        this.emit("response", cachedRes);
+      }
+      else {
+        this.logger.info("Loading new version of", this.url);
+        this.gcsListener.registerPath(this.url);
 
-      if (err || res.statusCode != 200) {
-        this.getCachedMetadata( (err, cachedRes) => {
-          if(err) {
+        request(requestOptions, (err, res, body) => {
+          if (err) {
+            this.logger.error(err, null, this.url);
             this.emit("no-response");
-            return this.emit("metadata-error", err);
-          }
-
-          if (cachedRes) {
-            this.emit("response", cachedRes);
           } else {
-            this.emit("no-response");
+            this.saveMetadata(body);
+            this.emit("response", body);
           }
         });
-      } else {
-        this.saveMetadata(body);
-        this.emit("response", body);
       }
     });
   }
@@ -55,7 +56,6 @@ MetadataController.prototype.getMetadata = function() {
 
 /* Save metadata to DB. */
 MetadataController.prototype.saveMetadata = function(data) {
-
   this.metadata.set("key", this.fileName);
   this.metadata.set("metadata", data);
 

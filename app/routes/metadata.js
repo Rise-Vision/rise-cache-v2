@@ -3,7 +3,7 @@
 const MetadataController = require("../controllers/metadata"),
   Data = require("../models/data");
 
-const MetadataRoute = function(app, metadataDB, riseDisplayNetworkII, logger) {
+const MetadataRoute = function(app, metadataDB, riseDisplayNetworkII, gcsListener, logger) {
 
   app.get("/metadata", (req, res, next) => {
 
@@ -11,7 +11,7 @@ const MetadataRoute = function(app, metadataDB, riseDisplayNetworkII, logger) {
 
     if (fileUrl) {
       const metadata = new Data({}, metadataDB),
-        controller = new MetadataController(fileUrl, metadata, riseDisplayNetworkII, logger);
+        controller = new MetadataController(fileUrl, metadata, riseDisplayNetworkII, gcsListener, logger);
 
       controller.on("response", (data) => {
         res.json(data);

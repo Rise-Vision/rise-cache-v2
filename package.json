@@ -28,7 +28,9 @@
     "properties-reader": "0.0.15",
     "request": "^2.74.0",
     "rise-common-electron": "git://github.com/Rise-Vision/rise-common-electron.git",
-    "send": "^0.14.1"
+    "send": "^0.14.1",
+    "primus": "^6.0.1",
+    "ws": "^1.1.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",

@@ -6,7 +6,8 @@ const config = require("../config/config"),
   Database = require("./database"),
   PropertiesReader = require("properties-reader"),
   CleanupJob = require("./jobs/cleanup"),
-  fileSystem = require("./helpers/file-system");
+  fileSystem = require("./helpers/file-system"),
+  GcsListener = require("./middleware/gcs-listener");
 
 
 const AppFactory = function() {
@@ -24,6 +25,8 @@ const AppFactory = function() {
       }
 
       const displayId = (riseDisplayNetworkII) ? riseDisplayNetworkII.get("displayid") : null;
+      const machineId = (riseDisplayNetworkII) ? riseDisplayNetworkII.get("machineid") : null;
+      const gcsMessagingUrl = (riseDisplayNetworkII) ? riseDisplayNetworkII.get("gcsmessagingurl") : null;
       const bqClient = require("rise-common-electron").bqClient(config.bqProjectName, config.bqDataset);
       const externalLogger = require("./helpers/logger/external-logger-bigquery")(bqClient, displayId, pkg.version, config.os, fileSystem);
       const logger = require("./helpers/logger/logger")(config.debugging, externalLogger, fileSystem);
@@ -42,11 +45,13 @@ const AppFactory = function() {
       fileSystem.createDir(config.cachePath);
 
       const headerDB = new Database(config.headersDBPath);
-      const metadataDB = new Database(config.metadataDBPath);
+      const metadataDB = new Database(config.metadataDBPath, true);
       const spreadsheetDB = new Database(config.spreadsheetsDBPath);
       const rssDB = new Database(config.rssDBPath);
       const financialDB = new Database(config.financialDBPath);
       const cleanupJob = new CleanupJob(config, headerDB.db, metadataDB.db, logger);
+      const gcsListener = new GcsListener(displayId, machineId, gcsMessagingUrl, metadataDB.db, logger);
+      gcsListener.start();
 
       server = require("./server")(config, logger);
 
@@ -66,14 +71,13 @@ const AppFactory = function() {
       require("./routes/ping")(server.app, pkg);
       require("./routes/display")(server.app, displayId);
       require("./routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
-      require("./routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII, logger);
+      require("./routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII, gcsListener, logger);
       require("./routes/spreadsheets")(server.app, spreadsheetDB.db, logger);
       require("./routes/rss")(server.app, rssDB.db, logger);
       require("./routes/financial")(server.app, financialDB.db, logger);
 
       error = require("./middleware/error")(logger);
       server.app.use(error.handleError);
-
     });
   };
 
