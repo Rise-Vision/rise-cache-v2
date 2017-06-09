@@ -147,6 +147,18 @@ module.exports = {
         console.error(err);
       }
     });
-  }
+  },
 
+  deleteFromCache: function(url, cb) {
+    let path = this.getPathInCache(url);
+
+    this.fileExists(path, (exists) => {
+      if(exists) {
+        this.delete(path, cb);
+      }
+      else {
+        cb();
+      }
+    });
+  }
 };

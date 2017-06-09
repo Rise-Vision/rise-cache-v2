@@ -3,7 +3,7 @@
 const { URL } = require("url");
 const Messaging = require("./messaging");
 const Data = require("../models/data");
-const  fileSystem = require("../helpers/file-system");
+const fileSystem = require("../helpers/file-system");
 
 const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metadataDB, logger) {
   const messaging = new Messaging(displayId, machineId, gcsMessagingUrl, logger);
@@ -22,6 +22,14 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
     messaging.on("gcs", function(message) {
       if(message.msg == "gcs") {
         self.removeMetadata(registeredPaths[message.resource]);
+
+        if(message.eventType === "uploaded" || message.eventType === "deleted") {
+          fileSystem.deleteFromCache(message.selfLink + "?alt=media", (err)=>{
+            if(err) {
+              logger.error("Error deleting file from cache", err);
+            }
+          });
+        }
       }
     });
 
@@ -62,7 +70,7 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
 
     metadata.save((err, newMetadata) => {
       if (err) {
-        logger.info("Error removing metadata", err);
+        logger.error("Error removing metadata", err);
       }
     });
   };

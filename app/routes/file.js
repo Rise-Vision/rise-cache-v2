@@ -19,7 +19,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
       });
 
       // Check if the file is cached.
-      fileSystem.isCached(fileUrl, (cached) => {
+        fileSystem.isCached(fileUrl, (cached) => {
         if (cached) {
           // Get file from disk and stream to client.
           controller.getHeaders((err, headers) => {
@@ -36,49 +36,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
             getFromCache(req, res, controller, fileUrl, headers);
 
           });
-
-          // check if file is stale
-          controller.isStale(config.fileUpdateDuration, (err, stale) => {
-
-            if (err) {
-              logger.error(err, null, fileUrl);
-            }
-
-            if (stale) {
-
-              // Check if the file is downloading.
-              fileSystem.isDownloading(fileUrl, (downloading) => {
-                if (!downloading) {
-
-                  // get the appropriate header field for request
-                  controller.getUpdateHeaderField((err, field) => {
-                    if (err) { logger.error(err, null, fileUrl); }
-
-                    controller.on("headers-error", (err) => {
-                      logger.error("Could not save headers", err, fileUrl);
-                    });
-
-                    controller.on("downloaded", () => {
-                      logger.info("File downloaded", fileUrl);
-                    });
-
-                    controller.on("request-error", (err) => {
-                      logger.error(err, null, fileUrl);
-                    });
-
-                    controller.on("move-file-error", (err) => {
-                      logger.error(err, null, fileUrl);
-                    });
-
-                    // Make request to download file passing request header
-                    controller.downloadFile(field);
-                  });
-
-                }
-              });
-            }
-          });
-
+          
         } else {
           // Check if the file is downloading.
           fileSystem.isDownloading(fileUrl, (downloading) => {
