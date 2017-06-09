@@ -41,9 +41,10 @@ MetadataController.prototype.getMetadata = function() {
         this.gcsListener.registerPath(this.url);
 
         request(requestOptions, (err, res, body) => {
-          if (err) {
+          if (err || res.statusCode != 200) {
             this.logger.error(err, null, this.url);
             this.emit("no-response");
+            return this.emit("metadata-error", err);
           } else {
             this.saveMetadata(body);
             this.emit("response", body);

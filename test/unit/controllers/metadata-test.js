@@ -30,11 +30,16 @@ describe("MetadataController", () => {
   };
 
   let logger = {
-    error: function (detail, errorDetail) {}
+    error: function (detail, errorDetail) {},
+    info: function (detail, errorDetail) {}
+  };
+
+  let gcsListener = {
+    registerPath: function(path) {}
   };
 
   beforeEach(() => {
-    metadataController = new MetadataController("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F", metadata, riseDisplayNetworkII, logger);
+    metadataController = new MetadataController("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F", metadata, riseDisplayNetworkII, gcsListener, logger);
   });
 
   describe("getMetadata", () => {
@@ -58,7 +63,7 @@ describe("MetadataController", () => {
     });
 
     it("should get metadata without RiseDisplayNetworkII.ini file", (done) => {
-      var controller = new MetadataController("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F", metadata, null);
+      var controller = new MetadataController("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F", metadata, null, gcsListener, logger);
 
       nock("https://storage-dot-rvaserver2.appspot.com")
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
@@ -98,21 +103,6 @@ describe("MetadataController", () => {
     });
 
     it("should emit 'no-response' event if metadata server responds with an error", (done) => {
-      metadataController.getMetadata();
-
-      metadataController.on("no-response", () => {
-        expect(true).to.be.true;
-
-        done();
-      });
-    });
-
-    it("should emit 'no-response' event if metadata server responds status code different than 200", (done) => {
-
-      nock("https://storage-dot-rvaserver2.appspot.com")
-        .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
-        .reply(404);
-
       metadataController.getMetadata();
 
       metadataController.on("no-response", () => {

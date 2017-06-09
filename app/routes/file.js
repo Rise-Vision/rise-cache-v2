@@ -19,7 +19,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
       });
 
       // Check if the file is cached.
-        fileSystem.isCached(fileUrl, (cached) => {
+      fileSystem.isCached(fileUrl, (cached) => {
         if (cached) {
           // Get file from disk and stream to client.
           controller.getHeaders((err, headers) => {

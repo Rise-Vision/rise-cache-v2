@@ -85,7 +85,7 @@ const MessagingFactory = function(displayId, machineId, messagingUrl, logger) {
     handlers.forEach((handler)=>{
       handler(data);
     });
-  }  
+  };
 };
 
 module.exports = MessagingFactory;

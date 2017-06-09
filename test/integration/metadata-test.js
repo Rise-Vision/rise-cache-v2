@@ -19,6 +19,9 @@ describe("/metadata endpoint", () => {
     error:function (x){},
     warn: function (x){}
   };
+  let gcsListener = {
+    registerPath: function(path) {}
+  };
   let server = require("../../app/server")(config, logger);
   let error = require("../../app/middleware/error")(logger);
 
@@ -33,7 +36,7 @@ describe("/metadata endpoint", () => {
   before(() => {
 
     metadataDB = new Database(config.metadataDBPath);
-    require("../../app/routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII, logger);
+    require("../../app/routes/metadata")(server.app, metadataDB.db, riseDisplayNetworkII, gcsListener, logger);
     server.start();
     server.app.use(error.handleError);
   });
@@ -92,7 +95,7 @@ describe("/metadata endpoint", () => {
         });
     });
 
-    it("should return 502 with no metadata found when there is no metadata cached and it cannot also be got from storage", (done) => {
+    it.only("should return 502 with no metadata found when there is no metadata cached and it cannot also be got from storage", (done) => {
 
       mock({
         [config.metadataDBPath]: ""
