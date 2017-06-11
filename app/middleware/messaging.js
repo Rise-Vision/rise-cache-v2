@@ -12,7 +12,7 @@ const MessagingFactory = function(displayId, machineId, messagingUrl, logger) {
   let connection;
 
   this.init = function() {
-    let serverUrl = (messagingUrl || "https://display-messaging.risevision.com") + "?displayId=" + displayId + "&machineId=" + machineId;
+    let serverUrl = (messagingUrl || "https://storage-notifier.risevision.com") + "?displayId=" + displayId + "&machineId=" + machineId;
 
     self.disconnect();
 
