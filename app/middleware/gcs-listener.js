@@ -23,7 +23,7 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
       if(message.msg == "gcs") {
         self.removeMetadata(registeredPaths[message.resource]);
 
-        if(message.eventType === "uploaded" || message.eventType === "deleted") {
+        if(["uploaded", "deleted", "permissionsUpdated"].indexOf(message.eventType) >= 0) {
           fileSystem.deleteFromCache(message.selfLink + "?alt=media", (err)=>{
             if(err) {
               logger.error("Error deleting file from cache", err);
