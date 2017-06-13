@@ -95,7 +95,7 @@ describe("/metadata endpoint", () => {
         });
     });
 
-    it.only("should return 502 with no metadata found when there is no metadata cached and it cannot also be got from storage", (done) => {
+    it("should return 502 with no metadata found when there is no metadata cached and it cannot also be got from storage", (done) => {
 
       mock({
         [config.metadataDBPath]: ""
