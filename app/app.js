@@ -45,16 +45,16 @@ const AppFactory = function() {
       fileSystem.createDir(config.cachePath);
 
       const headerDB = new Database(config.headersDBPath);
-      const metadataDB = new Database(config.metadataDBPath);
+      const metadataDB = new Database(config.metadataDBPath, true);
       const spreadsheetDB = new Database(config.spreadsheetsDBPath);
       const rssDB = new Database(config.rssDBPath);
       const financialDB = new Database(config.financialDBPath);
       const cleanupJob = new CleanupJob(config, headerDB.db, metadataDB.db, logger);
       const gcsListener = new GcsListener(displayId, machineId, gcsMessagingUrl, metadataDB.db, logger);
-
       gcsListener.start();
 
       server = require("./server")(config, logger);
+
       server.app.use(cors());
 
       fileSystem.fileExists(config.cachePath, (exists) => {
