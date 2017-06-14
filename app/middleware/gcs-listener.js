@@ -12,6 +12,8 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
   const self = this;
 
   this.start = function() {
+    self.invalidateMetadata();
+
     messaging.onEvent("connected", function() {
       // If the connection was lost, register again with server
       Object.keys(registeredPaths).forEach(function(path) {
@@ -21,7 +23,7 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
 
     messaging.on("gcs", function(message) {
       if(message.msg == "gcs") {
-        self.removeMetadata(registeredPaths[message.resource]);
+        self.invalidateResourceMetadata(registeredPaths[message.resource]);
 
         if(["uploaded", "deleted", "permissionsUpdated"].indexOf(message.eventType) >= 0) {
           fileSystem.deleteFromCache(message.selfLink + "?alt=media", (err)=>{
@@ -63,14 +65,21 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
     });
   };
 
-  /* Remove metadata from DB. */
-  this.removeMetadata = function(path) {
-    metadata.set("key", path);
-    metadata.set("metadata", null);
-
-    metadata.save((err, newMetadata) => {
+  // Reset "latest" field for all metadata documents
+  this.invalidateMetadata = function(path) {
+    metadata.update({}, { "latest": false }, (err, numAffected) => {
       if (err) {
         logger.error("Error removing metadata", err);
+      }
+    });
+  };
+
+  /* Reset "latest" field for the given document */
+  this.invalidateResourceMetadata = function(path) {
+    metadata.set("key", path);
+    metadata.update({ "latest": false }, (err, numAffected) => {
+      if (err) {
+        logger.error("Error updating metadata", err);
       }
     });
   };

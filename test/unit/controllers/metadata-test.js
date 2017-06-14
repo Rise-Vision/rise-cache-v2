@@ -187,9 +187,9 @@ describe("MetadataController", () => {
 
       let metadataFindByKeySpy = sinon.spy(metadata, "findByKey");
 
-      metadataController.getCachedMetadata( (err, foundMetadata) => {
+      metadataController.getCachedMetadata( (err, resp) => {
         expect(metadataFindByKeySpy.calledOnce).to.be.true;
-        expect(foundMetadata).to.deep.equal(newMetadata.data.metadata);
+        expect(resp.metadata).to.deep.equal(newMetadata.data.metadata);
         done();
       });
     });
