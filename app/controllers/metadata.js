@@ -32,9 +32,9 @@ MetadataController.prototype.getMetadata = function() {
         this.emit("no-response");
         return this.emit("metadata-error", err);
       }
-      else if (cachedRes) {
+      else if (cachedRes.metadata && cachedRes.latest) {
         this.logger.info("Using cached version of", this.url);
-        this.emit("response", cachedRes);
+        this.emit("response", cachedRes.metadata);
       }
       else {
         this.logger.info("Loading new version of", this.url);
@@ -43,8 +43,15 @@ MetadataController.prototype.getMetadata = function() {
         request(requestOptions, (err, res, body) => {
           if (err || res.statusCode != 200) {
             this.logger.error(err, null, this.url);
-            this.emit("no-response");
-            return this.emit("metadata-error", err);
+
+            if(cachedRes.metadata) {
+              this.logger.info("Using cached version (after failure) of", this.url);
+              this.emit("response", cachedRes.metadata);
+            }
+            else {
+              this.emit("no-response");
+              this.emit("metadata-error", err);
+            }
           } else {
             this.saveMetadata(body);
             this.emit("response", body);
@@ -59,6 +66,7 @@ MetadataController.prototype.getMetadata = function() {
 MetadataController.prototype.saveMetadata = function(data) {
   this.metadata.set("key", this.fileName);
   this.metadata.set("metadata", data);
+  this.metadata.set("latest", true);
 
   this.metadata.save((err, newMetadata) => {
     if (err) return this.emit("metadata-error", err);
@@ -70,7 +78,7 @@ MetadataController.prototype.saveMetadata = function(data) {
 MetadataController.prototype.getCachedMetadata = function(cb) {
   this.metadata.findByKey(this.fileName, (err, metadata) => {
     if (err) return cb(err);
-    cb(null, metadata.data.metadata);
+    cb(null, metadata.data);
   });
 };
 

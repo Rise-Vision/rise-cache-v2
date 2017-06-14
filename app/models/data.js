@@ -42,6 +42,16 @@ Data.prototype.update = function(field, callback) {
   });
 };
 
+Data.prototype.updateBy = function(criteria, field, callback) {
+  this.db.update(criteria, { $set: field }, {}, (err, numAffected) => {
+    if (err) {
+      return callback(err);
+    }
+
+    callback(null, numAffected);
+  });
+};
+
 Data.prototype.delete = function (key, callback) {
   this.db.remove({ key: key }, {}, (err, numRemoved) => {
     if (err) {

@@ -189,7 +189,7 @@ describe("MetadataController", () => {
 
       metadataController.getCachedMetadata( (err, foundMetadata) => {
         expect(metadataFindByKeySpy.calledOnce).to.be.true;
-        expect(foundMetadata).to.deep.equal(newMetadata.data.metadata);
+        expect(foundMetadata.metadata).to.deep.equal(newMetadata.data.metadata);
         done();
       });
     });
