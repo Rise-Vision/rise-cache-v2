@@ -439,9 +439,9 @@ describe("FileController", () => {
 
       let headerFindByKeySpy = sinon.spy(header, "findByKey");
 
-      fileController.getHeaders( (err, headers) => {
+      fileController.getHeaders( (err, resp) => {
         expect(headerFindByKeySpy.calledOnce).to.be.true;
-        expect(headers).to.deep.equal(newHeader.data.headers);
+        expect(resp.headers).to.deep.equal(newHeader.data.headers);
         done();
       });
     });

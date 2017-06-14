@@ -22,7 +22,8 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
       fileSystem.isCached(fileUrl, (cached) => {
         if (cached) {
           // Get file from disk and stream to client.
-          controller.getHeaders((err, headers) => {
+          controller.getHeaders((err, resp) => {
+            let headers = resp.headers;
 
             if (err) {
               logger.error(err, null, fileUrl);
@@ -35,8 +36,41 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
 
             getFromCache(req, res, controller, fileUrl, headers);
 
+            if (!resp.latest) {
+
+              // Check if the file is downloading.
+              fileSystem.isDownloading(fileUrl, (downloading) => {
+                if (!downloading) {
+
+                  // get the appropriate header field for request
+                  controller.getUpdateHeaderField((err, field) => {
+                    if (err) { logger.error(err, null, fileUrl); }
+
+                    controller.on("headers-error", (err) => {
+                      logger.error("Could not save headers", err, fileUrl);
+                    });
+
+                    controller.on("downloaded", () => {
+                      logger.info("File downloaded", fileUrl);
+                    });
+
+                    controller.on("request-error", (err) => {
+                      logger.error(err, null, fileUrl);
+                    });
+
+                    controller.on("move-file-error", (err) => {
+                      logger.error(err, null, fileUrl);
+                    });
+
+                    // Make request to download file passing request header
+                    controller.downloadFile(field);
+                  });
+
+                }
+              });
+            }
           });
-          
+
         } else {
           // Check if the file is downloading.
           fileSystem.isDownloading(fileUrl, (downloading) => {

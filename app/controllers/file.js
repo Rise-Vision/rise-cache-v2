@@ -145,6 +145,7 @@ FileController.prototype.deleteFileFromDownload = function() {
 FileController.prototype.saveHeaders = function(headers) {
   this.header.set("key", this.fileName);
   this.header.set("headers", headers);
+  this.header.set("latest", true);
 
   this.header.save((err, newHeader) => {
     if (err) return this.emit("headers-error", err);
@@ -155,7 +156,7 @@ FileController.prototype.saveHeaders = function(headers) {
 FileController.prototype.getHeaders = function(cb) {
   this.header.findByKey(this.fileName, (err, newHeader) => {
     if (err) return cb(err);
-    cb(null, newHeader.data.headers);
+    cb(null, newHeader.data);
   });
 };
 
@@ -200,16 +201,17 @@ FileController.prototype.isStale = function(updateDuration, cb) {
 };
 
 FileController.prototype.getUpdateHeaderField = function(cb) {
-  this.getHeaders((err, headers) => {
+  this.getHeaders((err, data) => {
     if (err) return cb(err);
 
+    let headers = data.headers;
     let header = {};
 
     // prioritize using etag
-    if (headers.hasOwnProperty("etag") && headers.etag !== "") {
+    if (headers && headers.hasOwnProperty("etag") && headers.etag !== "") {
       header["If-None-Match"] = headers.etag;
     }
-    else if (headers.hasOwnProperty("last-modified")) {
+    else if (headers && headers.hasOwnProperty("last-modified")) {
       header["If-Modified-Since"] = headers["last-modified"];
     }
 
