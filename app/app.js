@@ -50,7 +50,7 @@ const AppFactory = function() {
       const rssDB = new Database(config.rssDBPath);
       const financialDB = new Database(config.financialDBPath);
       const cleanupJob = new CleanupJob(config, headerDB.db, metadataDB.db, logger);
-      const gcsListener = new GcsListener(displayId, machineId, gcsMessagingUrl, metadataDB.db, logger);
+      const gcsListener = new GcsListener(displayId, machineId, gcsMessagingUrl, metadataDB.db, headerDB.db, logger);
 
       server = require("./server")(config, logger);
       server.app.use(cors());

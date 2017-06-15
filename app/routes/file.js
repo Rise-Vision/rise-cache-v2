@@ -10,6 +10,8 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
     const fileUrl = req.query.url;
 
     if (fileUrl) {
+      logger.info("Creating controller with url: " + fileUrl);
+
       const header = new Data({}, headerDB),
         controller = new FileController(fileUrl, header, riseDisplayNetworkII);
 
@@ -21,6 +23,8 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
       // Check if the file is cached.
       fileSystem.isCached(fileUrl, (cached) => {
         if (cached) {
+          logger.info("File is cached: " + fileUrl);
+
           // Get file from disk and stream to client.
           controller.getHeaders((err, resp) => {
             let headers = resp.headers;
@@ -28,19 +32,20 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
             if (err) {
               logger.error(err, null, fileUrl);
             }
-            else {
-              if (!headers) {
-                logger.error("No headers available", null, fileUrl);
-              }
+            else if (!headers) {
+              logger.error("No headers available", null, fileUrl);
             }
 
+            logger.info("Sending file from cache");
             getFromCache(req, res, controller, fileUrl, headers);
 
             if (!resp.latest) {
+              logger.info("File is not on latest version: " + fileUrl);
 
               // Check if the file is downloading.
-              fileSystem.isDownloading(fileUrl, (downloading) => {
+              fileSystem.isDownloading(fileUrl, (downloading) => {                
                 if (!downloading) {
+                  logger.info("File is not downloading: " + fileUrl);
 
                   // get the appropriate header field for request
                   controller.getUpdateHeaderField((err, field) => {
@@ -63,6 +68,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
                     });
 
                     // Make request to download file passing request header
+                    logger.info("File download started: " + fileUrl);
                     controller.downloadFile(field);
                   });
 
@@ -72,6 +78,8 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
           });
 
         } else {
+          logger.info("File is not cached: " + fileUrl);
+
           // Check if the file is downloading.
           fileSystem.isDownloading(fileUrl, (downloading) => {
             if (downloading) {

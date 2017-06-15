@@ -5,9 +5,10 @@ const Messaging = require("./messaging");
 const Data = require("../models/data");
 const fileSystem = require("../helpers/file-system");
 
-const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metadataDB, logger) {
+const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metadataDB, headerDB, logger) {
   const messaging = new Messaging(displayId, machineId, gcsMessagingUrl, logger);
   const metadata = new Data({}, metadataDB);
+  const header = new Data({}, headerDB);
   const registeredPaths = {};
   const self = this;
 
@@ -22,15 +23,12 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
     });
 
     messaging.on("gcs", function(message) {
-      if(message.msg == "gcs") {
+      if(message.msg === "gcs") {
+        logger.info("Received update for: " + message.resource);
         self.invalidateResourceMetadata(registeredPaths[message.resource]);
 
         if(["uploaded", "deleted", "permissionsUpdated"].indexOf(message.eventType) >= 0) {
-          fileSystem.deleteFromCache(message.selfLink + "?alt=media", (err)=>{
-            if(err) {
-              logger.error("Error deleting file from cache", err);
-            }
-          });
+          self.invalidateResource(message.selfLink);
         }
       }
     });
@@ -74,12 +72,28 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
     });
   };
 
-  /* Reset "latest" field for the given document */
+  /* Reset "latest" field for the given metadata document */
   this.invalidateResourceMetadata = function(path) {
     metadata.set("key", path);
     metadata.update({ "latest": false }, (err, numAffected) => {
       if (err) {
         logger.error("Error updating metadata", err);
+      }
+    });
+  };
+
+  /* Reset "latest" field for the given header document */
+  this.invalidateResource = function(path) {
+    let mediaPath = path.replace("https://www.googleapis.com/storage/v1/b/", "https://storage.googleapis.com/")
+                        .replace("/o/", "/");
+    let fileName = fileSystem.getFileName(mediaPath);
+    
+    logger.info("Invalidating: " + fileName + " for url: " + path + " mediaPath: " + mediaPath);
+
+    header.set("key", fileName);
+    header.update({ "latest": false }, (err, numAffected) => {
+      if (err) {
+        logger.error("Error updating header", err);
       }
     });
   };
