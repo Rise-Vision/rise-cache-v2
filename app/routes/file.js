@@ -47,7 +47,12 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
                 if (downloading) {
                   sendDownloadingResponse(res, fileUrl);
                 } else {
-                  downloadFile(res, controller, fileUrl);
+                  // get the appropriate header field for request
+                  controller.getUpdateHeaderField((err, updateHeaderField) => {
+                    if (err) { logger.error(err, null, fileUrl); }
+
+                    downloadFile(res, controller, fileUrl, updateHeaderField);
+                  });
                 }
               });
             }
@@ -87,7 +92,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
     }
   }
 
-  function downloadFile(res, controller, fileUrl) {
+  function downloadFile(res, controller, fileUrl, updateHeaderField) {
     // Check if there's enough disk space.
     fileSystem.getAvailableSpace(logger, (availableSpace) => {
       // Download the file.
@@ -122,7 +127,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
           logger.error(err, null, fileUrl);
         });
 
-        controller.downloadFile();
+        controller.downloadFile(updateHeaderField);
       } else {
         logger.error("Insufficient disk space");
         sendResponse(res, 507, "Insufficient disk space");

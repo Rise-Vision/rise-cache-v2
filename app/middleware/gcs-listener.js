@@ -13,7 +13,8 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
   const self = this;
 
   this.start = function() {
-    self.invalidateMetadata();
+    self.invalidateAllMetadata();
+    self.invalidateAllHeaders();
 
     messaging.onEvent("connected", function() {
       // If the connection was lost, register again with server
@@ -25,10 +26,10 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
     messaging.on("gcs", function(message) {
       if(message.msg === "gcs") {
         logger.info("Received update for: " + message.resource);
-        self.invalidateResourceMetadata(registeredPaths[message.resource]);
+        self.invalidateMetadata(registeredPaths[message.resource]);
 
         if(["uploaded", "deleted", "permissionsUpdated"].indexOf(message.eventType) >= 0) {
-          self.invalidateResource(message.selfLink);
+          self.invalidateHeader(message.selfLink);
         }
       }
     });
@@ -64,26 +65,35 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
   };
 
   // Reset "latest" field for all metadata documents
-  this.invalidateMetadata = function(path) {
+  this.invalidateAllMetadata = function(path) {
     metadata.updateBy({}, { "latest": false }, (err, numAffected) => {
       if (err) {
-        logger.error("Error removing metadata", err);
+        logger.error("Error invalidating all existing metadata", err);
       }
     });
   };
 
   /* Reset "latest" field for the given metadata document */
-  this.invalidateResourceMetadata = function(path) {
+  this.invalidateMetadata = function(path) {
     metadata.set("key", path);
     metadata.update({ "latest": false }, (err, numAffected) => {
       if (err) {
-        logger.error("Error updating metadata", err);
+        logger.error("Error invalidating metadata", err);
+      }
+    });
+  };
+
+  // Reset "latest" field for all header documents
+  this.invalidateAllHeaders = function(path) {
+    header.updateBy({}, { "latest": false }, (err, numAffected) => {
+      if (err) {
+        logger.error("Error invalidating all existing headers", err);
       }
     });
   };
 
   /* Reset "latest" field for the given header document */
-  this.invalidateResource = function(path) {
+  this.invalidateHeader = function(path) {
     let mediaPath = path.replace("https://www.googleapis.com/storage/v1/b/", "https://storage.googleapis.com/")
                         .replace("/o/", "/");
     let fileName = fileSystem.getFileName(mediaPath);
@@ -93,7 +103,7 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
     header.set("key", fileName);
     header.update({ "latest": false }, (err, numAffected) => {
       if (err) {
-        logger.error("Error updating header", err);
+        logger.error("Error invalidating header", err);
       }
     });
   };

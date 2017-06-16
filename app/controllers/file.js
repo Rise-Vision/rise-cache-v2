@@ -174,7 +174,7 @@ FileController.prototype.updateTimestamp = function() {
   this.header.set("key", this.fileName);
 
   // Update the key field to automatically trigger a timestamp update.
-  this.header.update({ "key": this.fileName }, (err, numAffected) => {
+  this.header.update({ "latest": true }, (err, numAffected) => {
     if (err) {
       return this.emit("timestamp-error", err);
     }
