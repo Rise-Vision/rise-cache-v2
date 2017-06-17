@@ -8,6 +8,7 @@ const fs = require("fs"),
   util = require("util"),
   send = require("send");
 
+const logger = require("../helpers/logger/logger")(config.debugging, null, fileSystem);
 
 const FileController = function(url, header, riseDisplayNetworkII) {
   EventEmitter.call(this);
@@ -55,17 +56,21 @@ FileController.prototype.downloadFile = function(opts) {
       .on("response", (res) => {
         this.hasDownloadError = false;
         if (res.statusCode == 200) {
+          logger.info("Got 200 for " + this.url);
           this.writeFile(res);
           this.emit("downloading");
         }
         else if (res.statusCode == 304) {
+          logger.info("Got 304 for " + this.url);
           this.updateTimestamp();
         }
         else {
+          logger.info("Got " + res.statusCode + " for " + this.url);
           this.emit("invalid-response", res.statusCode);
         }
       })
       .on("error", (err) => {
+        logger.info("Got error for " + this.url + " " + JSON.stringify(err));
         this.hasDownloadError = true;
         this.deleteFileFromDownload();
         this.emit("request-error", err);
