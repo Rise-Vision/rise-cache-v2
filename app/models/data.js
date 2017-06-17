@@ -43,7 +43,7 @@ Data.prototype.update = function(field, callback) {
 };
 
 Data.prototype.updateBy = function(criteria, field, callback) {
-  this.db.update(criteria, { $set: field }, {}, (err, numAffected) => {
+  this.db.update(criteria, { $set: field }, { multi: true }, (err, numAffected) => {
     if (err) {
       return callback(err);
     }
