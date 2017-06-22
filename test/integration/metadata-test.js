@@ -20,7 +20,8 @@ describe("/metadata endpoint", () => {
     warn: function (x){}
   };
   let gcsListener = {
-    registerPath: function(path) {}
+    registerPath: function(path) {},
+    isOnline: function() { return true; }
   };
   let server = require("../../app/server")(config, logger);
   let error = require("../../app/middleware/error")(logger);

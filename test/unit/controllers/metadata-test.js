@@ -35,7 +35,8 @@ describe("MetadataController", () => {
   };
 
   let gcsListener = {
-    registerPath: function(path) {}
+    registerPath: function(path) {},
+    isOnline: function() { return true; }
   };
 
   beforeEach(() => {

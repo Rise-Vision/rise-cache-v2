@@ -2,7 +2,8 @@
 const EventEmitter = require("events").EventEmitter,
   util = require("util"),
   request = require("request"),
-  fileSystem = require("../helpers/file-system");
+  fileSystem = require("../helpers/file-system"),
+  latestRequestByUrl = {};
 
 const MetadataController = function(url, metadata, riseDisplayNetworkII, gcsListener, logger) {
   EventEmitter.call(this);
@@ -32,7 +33,7 @@ MetadataController.prototype.getMetadata = function() {
         this.emit("no-response");
         return this.emit("metadata-error", err);
       }
-      else if (cachedRes.metadata && cachedRes.latest) {
+      else if (!this.metadataNeedsRefresh(this.url, cachedRes)) {
         this.logger.info("Using cached version of", this.url);
         this.emit("response", cachedRes.metadata);
       }
@@ -53,6 +54,7 @@ MetadataController.prototype.getMetadata = function() {
               this.emit("metadata-error", err);
             }
           } else {
+            latestRequestByUrl[this.url] = new Date();
             this.saveMetadata(body);
             this.emit("response", body);
           }
@@ -80,6 +82,18 @@ MetadataController.prototype.getCachedMetadata = function(cb) {
     if (err) return cb(err);
     cb(null, metadata.data);
   });
+};
+
+// Added to handle offline Messaging Service (downgrade to polling)
+MetadataController.prototype.metadataNeedsRefresh = function(url, cachedRes) {
+  let latestCheck = latestRequestByUrl[url];
+
+  if(this.gcsListener.isOnline()) {
+    return !cachedRes.metadata || !cachedRes.latest;
+  }
+  else {
+    return !latestCheck || (Date.now() - latestCheck.getTime()) > 5 * 60 * 1000;
+  }
 };
 
 module.exports = MetadataController;

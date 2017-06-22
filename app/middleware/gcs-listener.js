@@ -11,16 +11,27 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
   const header = new Data({}, headerDB);
   const registeredPaths = {};
   const self = this;
+  let online = false;
+
+  this.isOnline = function() {
+    return online;
+  };
 
   this.start = function() {
     self.invalidateAllMetadata();
     self.invalidateAllHeaders();
 
     messaging.onEvent("connected", function() {
+      online = true;
+
       // If the connection was lost, register again with server
       Object.keys(registeredPaths).forEach(function(path) {
         self.sendRegistrationMessage(path);
       });
+    });
+
+    messaging.onEvent("disconnected", function() {
+      online = false;
     });
 
     messaging.on("gcs", function(message) {

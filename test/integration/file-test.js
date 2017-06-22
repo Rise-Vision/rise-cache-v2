@@ -37,6 +37,10 @@ describe("/files endpoint", () => {
       }
     }
   };
+  let gcsListener = {
+    registerPath: function(path) {},
+    isOnline: function() { return true; }
+  };
 
   before(() => {
     server = require("../../app/server")(config, logger);
@@ -44,7 +48,7 @@ describe("/files endpoint", () => {
 
     headerDB = new Database(config.headersDBPath);
 
-    require("../../app/routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, logger);
+    require("../../app/routes/file")(server.app, headerDB.db, riseDisplayNetworkII, config, gcsListener, logger);
 
     mock({
       [config.headersDBPath]: "",

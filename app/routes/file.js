@@ -2,9 +2,10 @@
 
 const fileSystem = require("../helpers/file-system"),
   FileController = require("../controllers/file"),
-  Data = require("../models/data");
+  Data = require("../models/data"),
+  latestRequestByUrl = {};
 
-const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) {
+const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, gcsListener, logger) {
 
   app.get("/files", (req, res, next) => {
     const fileUrl = req.query.url;
@@ -39,8 +40,13 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
             logger.info("Sending file from cache");
             getFromCache(req, res, controller, fileUrl, headers);
 
-            if (!resp.latest) {
-              logger.info("File is not on latest version: " + fileUrl);
+            if (!resp.latest || !gcsListener.isOnline()) {
+              if(gcsListener.isOnline()) {
+                logger.info("File is not on latest version: " + fileUrl);
+              }
+              else {
+                logger.info("File may require polling: " + fileUrl);
+              }
 
               // Check if the file is downloading.
               fileSystem.isDownloading(fileUrl, (downloading) => {
@@ -51,7 +57,12 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
                   controller.getUpdateHeaderField((err, updateHeaderField) => {
                     if (err) { logger.error(err, null, fileUrl); }
 
-                    downloadFile(res, controller, fileUrl, updateHeaderField);
+                    if(urlNeedsVersionCheck(fileUrl)) {
+                      downloadFile(res, controller, fileUrl, updateHeaderField);
+                    }
+                    else {
+                      logger.info("File does not need to be checked: " + fileUrl);
+                    }
                   });
                 }
               });
@@ -76,6 +87,18 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
       next(new Error("Missing url parameter"));
     }
   });
+
+  // Added to handle offline Messaging Service (downgrade to polling)
+  function urlNeedsVersionCheck(fileUrl) {
+    let lastCheck = latestRequestByUrl[fileUrl];
+
+    if(gcsListener.isOnline() || !lastCheck) {
+      return true;
+    }
+    else {
+      return (Date.now() - lastCheck.getTime()) > 20 * 60 * 1000;
+    }
+  }
 
   function getFromCache(req, res, controller, fileUrl, headers) {
     controller.streamFile(req, res, headers);
@@ -104,6 +127,11 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
 
         controller.on("downloaded", () => {
           logger.info("File downloaded", fileUrl);
+          latestRequestByUrl[fileUrl] = new Date();
+        });
+
+        controller.on("timestamp-updated", () => {
+          latestRequestByUrl[fileUrl] = new Date();
         });
 
         controller.on("downloading", () => {
