@@ -92,6 +92,7 @@ MetadataController.prototype.metadataNeedsRefresh = function(url, cachedRes) {
     return !cachedRes.metadata || !cachedRes.latest;
   }
   else {
+    this.logger.info("Metadata may require polling: " + url);
     return !latestCheck || (Date.now() - latestCheck.getTime()) > 5 * 60 * 1000;
   }
 };
