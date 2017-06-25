@@ -12,6 +12,8 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
   const registeredPaths = {};
   const self = this;
   let online = false;
+  let offlineTimer = null;
+  let lastMessageTime = null;
 
   this.isOnline = function() {
     return online;
@@ -24,6 +26,10 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
     messaging.onEvent("connected", function() {
       online = true;
 
+      if(offlineTimer) {
+        clearTimeout(offlineTimer);
+      }
+
       // If the connection was lost, register again with server
       Object.keys(registeredPaths).forEach(function(path) {
         self.sendRegistrationMessage(path);
@@ -31,17 +37,27 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
     });
 
     messaging.onEvent("disconnected", function() {
-      online = false;
+      setTimeout(function() {
+        online = false;
+      }, 30 * 1000);
     });
 
-    messaging.on("gcs", function(message) {
-      if(message.msg === "gcs") {
-        logger.info("Received update for: " + message.resource);
-        self.invalidateMetadata(registeredPaths[message.resource]);
+    messaging.on("last-message-time", function(message) {
+      logger.info("Received last message time: " + message.lastMessageTime + " for: " + message.displayId);
+      if(lastMessageTime === null || lastMessageTime !== message.lastMessageTime) {
+        self.invalidateAllMetadata();
+        self.invalidateAllHeaders();
+      }
 
-        if(["uploaded", "deleted", "permissionsUpdated"].indexOf(message.eventType) >= 0) {
-          self.invalidateHeader(message.selfLink);
-        }
+      lastMessageTime = message.lastMessageTime;
+    });
+
+    messaging.on("gcs-update", function(message) {
+      logger.info("Received update for: " + message.resource);
+      self.invalidateMetadata(registeredPaths[message.resource]);
+
+      if(["uploaded", "deleted", "permissionsUpdated"].indexOf(message.eventType) >= 0) {
+        self.invalidateHeader(message.selfLink);
       }
     });
 
@@ -68,8 +84,8 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
     let path = registeredPath.replace(companyId + "/", "");
 
     messaging.write({
-      msg: "registerPath",
-      id: displayId,
+      msg: "register-path",
+      displayId: displayId,
       companyId: companyId,
       path: path
     });
