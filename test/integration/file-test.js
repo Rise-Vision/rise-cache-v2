@@ -587,7 +587,7 @@ describe("/files endpoint", () => {
       request.get("http://localhost:9494/files")
         .query({ url: "http://example.com/logo.png" })
         .end((err, res) => {
-          expect(spy.callCount).to.equal(1);
+          expect(spy.called);
 
           logger.error.restore();
           done();
