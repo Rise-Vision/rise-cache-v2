@@ -57,7 +57,7 @@ const MessagingFactory = function(displayId, machineId, messagingUrl, logger) {
     });
 
     connection.on("error", (error)=>{
-      logger.info("messaging error", error.stack);
+      logger.error("messaging error", error.stack);
     });
   };
 

@@ -1,12 +1,10 @@
 "use strict";
 
 const { URL } = require("url");
-const Messaging = require("./messaging");
 const Data = require("../models/data");
 const fileSystem = require("../helpers/file-system");
 
-const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metadataDB, headerDB, logger) {
-  const messaging = new Messaging(displayId, machineId, gcsMessagingUrl, logger);
+const GcsListenerFactory = function(displayId, messaging, metadataDB, headerDB, logger) {
   const metadata = new Data({}, metadataDB);
   const header = new Data({}, headerDB);
   const registeredPaths = {};
@@ -53,11 +51,17 @@ const GcsListenerFactory = function(displayId, machineId, gcsMessagingUrl, metad
     });
 
     messaging.on("gcs-update", function(message) {
-      logger.info("Received update for: " + message.resource);
-      self.invalidateMetadata(registeredPaths[message.resource]);
+      if(message.resource && registeredPaths[message.resource]) {
+        logger.info("Received update for: " + message.resource);
+        self.invalidateMetadata(registeredPaths[message.resource]);
+        lastMessageTime = message.ts;
 
-      if(["uploaded", "deleted", "permissionsUpdated"].indexOf(message.eventType) >= 0) {
-        self.invalidateHeader(message.selfLink);
+        if(["uploaded", "deleted", "permissionsUpdated"].indexOf(message.eventType) >= 0) {
+          self.invalidateHeader(message.selfLink);
+        }
+      }
+      else {
+        logger.error("Invalid gcs-update message: " + JSON.stringify(message));
       }
     });
 

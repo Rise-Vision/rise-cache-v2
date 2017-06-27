@@ -7,6 +7,7 @@ const config = require("../config/config"),
   PropertiesReader = require("properties-reader"),
   CleanupJob = require("./jobs/cleanup"),
   fileSystem = require("./helpers/file-system"),
+  Messaging = require("./middleware/messaging"),
   GcsListener = require("./middleware/gcs-listener");
 
 
@@ -50,7 +51,8 @@ const AppFactory = function() {
       const rssDB = new Database(config.rssDBPath);
       const financialDB = new Database(config.financialDBPath);
       const cleanupJob = new CleanupJob(config, headerDB.db, metadataDB.db, logger);
-      const gcsListener = new GcsListener(displayId, machineId, gcsMessagingUrl, metadataDB.db, headerDB.db, logger);
+      const messaging = new Messaging(displayId, machineId, gcsMessagingUrl, logger);
+      const gcsListener = new GcsListener(displayId, messaging, metadataDB.db, headerDB.db, logger);
 
       server = require("./server")(config, logger);
       server.app.use(cors());

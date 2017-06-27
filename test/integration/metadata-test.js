@@ -19,9 +19,10 @@ describe("/metadata endpoint", () => {
     error:function (x){},
     warn: function (x){}
   };
+  let gcsOnline = true;
   let gcsListener = {
     registerPath: function(path) {},
-    isOnline: function() { return true; }
+    isOnline: function() { return gcsOnline; }
   };
   let server = require("../../app/server")(config, logger);
   let error = require("../../app/middleware/error")(logger);
@@ -52,10 +53,28 @@ describe("/metadata endpoint", () => {
   describe("get metadata", () => {
 
     afterEach(() => {
+      gcsOnline = true;
       nock.cleanAll();
     });
 
     it("should return 200 with metadata", (done) => {
+      nock("https://storage-dot-rvaserver2.appspot.com")
+        .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
+        .reply(200, metadataResponse);
+
+      request.get("http://localhost:9494/metadata")
+        .query({ url: "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(res.body).to.deep.equal(metadataResponse);
+
+          done();
+        });
+    });
+
+    it("should return 200 with metadata even if GCS is offline", (done) => {
+      gcsOnline = false;
+
       nock("https://storage-dot-rvaserver2.appspot.com")
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(200, metadataResponse);

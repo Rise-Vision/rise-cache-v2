@@ -9,17 +9,7 @@ const chai = require("chai"),
 
 describe("MetadataController", () => {
   let metadataController,
-    metadata = {
-      save: function () {
-        return;
-      },
-      set: function () {
-
-      },
-      findByKey: function (key,cb) {
-        cb(null, {data: {}});
-      }
-    };
+    metadata;
 
   let riseDisplayNetworkII = {
     get: function (property) {
@@ -40,6 +30,17 @@ describe("MetadataController", () => {
   };
 
   beforeEach(() => {
+    metadata = {
+      save: function () {
+        return;
+      },
+      set: function () {
+
+      },
+      findByKey: function (key,cb) {
+        cb(null, {data: {}});
+      }
+    };
     metadataController = new MetadataController("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F", metadata, riseDisplayNetworkII, gcsListener, logger);
   });
 
@@ -83,15 +84,49 @@ describe("MetadataController", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(200, metadataResponse);
 
-      metadataController.getMetadata();
-
       metadataController.on("response", (data) => {
         expect(true).to.be.true;
         done();
       });
+
+      metadataController.getMetadata();
     });
 
-    it("should log error if metadata server responds with an error", (done) => {
+    it("should emit 'response' event using cached data", (done) => {
+      const newMetadata = {data: {key: "test", metadata: {etag: "etag"}, latest: true}};
+
+      metadata.findByKey = function (key, cb) {
+        cb(null, newMetadata);
+      };
+
+      metadataController.on("response", (data) => {
+        expect(data.etag).to.equal("etag");
+        done();
+      });
+
+      metadataController.getMetadata();
+    });
+
+    it("should emit 'response' event, ignoring stale cache data", (done) => {
+      const newMetadata = {data: {key: "test", metadata: {etag: "etag"}, latest: false}};
+
+      nock("https://storage-dot-rvaserver2.appspot.com")
+        .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
+        .reply(200, metadataResponse);
+
+      metadata.findByKey = function (key, cb) {
+        cb(null, newMetadata);
+      };
+
+      metadataController.on("response", (data) => {
+        expect(data.etag).to.not.equal("etag");
+        done();
+      });
+
+      metadataController.getMetadata();
+    });
+
+    it("should log error if metadata server responds with an error and there was nothing cached", (done) => {
       let spy = sinon.spy(logger, "error");
 
       metadataController.on("no-response", () => {
@@ -103,17 +138,31 @@ describe("MetadataController", () => {
       metadataController.getMetadata();
     });
 
+    it("should emit 'response' event if metadata server responds with an error but data was cached", (done) => {
+      const newMetadata = {data: {key: "test", metadata: {etag: "etag"}, latest: true}};
+      metadata.findByKey = function (key, cb) {
+        cb(null, newMetadata);
+      };
+
+      metadataController.on("response", (data) => {
+        expect(true).to.be.true;
+        done();
+      });
+
+      metadataController.getMetadata();
+    });
+
     it("should emit 'no-response' event if metadata server responds with an error", (done) => {
-      metadataController.getMetadata();
-
       metadataController.on("no-response", () => {
         expect(true).to.be.true;
 
         done();
       });
+
+      metadataController.getMetadata();
     });
 
-    xit("should emit 'no-response' event if there is an error when getting metadata from DB", (done) => {
+    it("should emit 'no-response' event if there is an error when getting metadata from DB", (done) => {
 
       let errorMessage = "Error getting metadata from DB";
 
@@ -121,30 +170,30 @@ describe("MetadataController", () => {
         cb(new Error(errorMessage));
       };
 
-      metadataController.getMetadata();
-
       metadataController.on("no-response", () => {
         expect(true).to.be.true;
 
         done();
       });
+
+      metadataController.getMetadata();
     });
 
-    xit("should emit metadata-error if there is an error when getting metadata from DB", (done) => {
+    it("should emit metadata-error if there is an error when getting metadata from DB", (done) => {
 
       let errorMessage = "Error getting metadata from DB";
 
       metadata.findByKey = function (key,cb) {
         cb(new Error(errorMessage));
       };
-
-      metadataController.getMetadata();
 
       metadataController.on("metadata-error", (err) => {
         expect(err.message).to.equal(errorMessage);
 
         done();
       });
+
+      metadataController.getMetadata();
     });
 
   });
