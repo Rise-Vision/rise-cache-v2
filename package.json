@@ -1,6 +1,6 @@
 {
   "name": "rise-cache-v2",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "description": "Rise Cache for Rise Player",
   "main": "rise-cache.js",
   "scripts": {
