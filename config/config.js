@@ -41,5 +41,6 @@ module.exports = {
   os: getOS(),
   bqProjectName: "client-side-events",
   bqDataset: "Rise_Cache_V2",
-  httpsOptions: httpsOptions
+  httpsOptions: httpsOptions,
+  bodyParserLimit: 1000000 // Default limit is 100KB, changing it to 1MB
 };
