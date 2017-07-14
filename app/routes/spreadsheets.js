@@ -1,7 +1,8 @@
 "use strict";
 
+const config = require("../../config/config");
 const bodyParser = require("body-parser");
-const jsonParser = bodyParser.json();
+const jsonParser = bodyParser.json({limit: config.bodyParserLimit});
 const Data = require("../models/data");
 const DataController = require("../controllers/data");
 
