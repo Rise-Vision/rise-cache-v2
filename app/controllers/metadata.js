@@ -24,9 +24,9 @@ MetadataController.prototype.getMetadata = function() {
       method: "GET",
       url: this.url,
       json: true,
-      proxy: (this.riseDisplayNetworkII) ? this.riseDisplayNetworkII.get("activeproxy"): null
+      proxy: (this.riseDisplayNetworkII) ? this.riseDisplayNetworkII.get("activeproxy") || this.riseDisplayNetworkII.get("rcosproxy") : null
     };
-
+    
     request(requestOptions, (err, res, body) => {
       if (err) {
         this.logger.error(err, null, this.url);
