@@ -9,11 +9,16 @@ const fs = require("fs"),
   FileController = require("../../../app/controllers/file"),
   expect = chai.expect,
   httpMocks = require('node-mocks-http'),
-  EventEmitter = require("events").EventEmitter;
+  EventEmitter = require("events").EventEmitter,
+  fileSystem = require("../../../app/helpers/file-system");
 
 global.DOWNLOAD_TOTAL_SIZE = 0;
 
+fileSystem.createDir(config.cachePath);
+
 describe("FileController", () => {
+
+
   let fileController,
     header = {
       save: function () {
