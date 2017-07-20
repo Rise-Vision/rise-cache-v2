@@ -193,7 +193,7 @@ describe("getAccessTime", () => {
     });
 
     fileSystem.getAccessTime(config.cachePath + "/" + "cdf42c077fe6037681ae3c003550c2c5", (accessTime) => {
-      expect(accessTime).to.equal(now);
+      expect(accessTime.toDateString()).to.equal(now.toDateString());
 
       mock.restore();
       done();
