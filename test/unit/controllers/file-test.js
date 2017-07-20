@@ -71,7 +71,9 @@ describe("FileController", () => {
 
       nock("http://abc123.com")
         .get("/logo.png")
-        .replyWithFile(200, "/data/logo.png");
+        .replyWithFile(200, "/data/logo.png", {
+        'Content-length': 10
+      });
 
       fileController.downloadFile();
 
