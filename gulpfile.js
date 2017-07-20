@@ -21,10 +21,7 @@ gulp.task("test-integration", ["lint"], () =>
       .pipe(mocha({reporter: "spec"}))
 );
 
-gulp.task("test", ["test-unit", "test-integration"], () =>
-    gulp.src("test/integration/**/*-test.js", {read: false})
-      .pipe(mocha({reporter: "spec"}))
-);
+gulp.task("test", ["test-unit", "test-integration"]);
 
 
 gulp.task("default", ["test"]);

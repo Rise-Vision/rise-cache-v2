@@ -8,7 +8,13 @@ const fs = require("fs"),
   config = require("../../../config/config"),
   expect = chai.expect;
 
-describe("fileExists", () => {
+global.DOWNLOAD_TOTAL_SIZE = 0;
+
+let logger = {
+  error: function (detail, errorDetail) {}
+};
+
+  describe("fileExists", () => {
 
   after(function () {
     mock.restore();
@@ -361,4 +367,95 @@ describe("cleanupLogFile", () => {
 
   });
 
+});
+
+describe("available space", () => {
+  let oneGB = 1024*1024*1024,
+      fiveHundredTwelveMB = 512*1024*1024,
+      threeHundredMB = 300*1024*1024;
+
+  it("should return available space true when passing no fileSize and there is space in disk", (done) => {
+    fileSystem.getAvailableSpace = (logger, cb) =>{
+      cb(oneGB); // 1GB
+    }
+    fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
+      expect(isThereAvailableSpace).to.be.true;
+      done();
+    });
+  });
+
+  it("should return available space true when passing no fileSize and there is space in disk even though a file is being downloaded", (done) => {
+
+    fileSystem.addToDownloadTotalSize(threeHundredMB); // 500MB
+    fileSystem.getAvailableSpace = (logger, cb) =>{
+      cb(oneGB); // 1GB
+    }
+    fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
+      expect(isThereAvailableSpace).to.be.true;
+
+      fileSystem.removeFromDownloadTotalSize(threeHundredMB); // 500MB
+      done();
+    });
+  });
+
+  it("should return available space false when passing no fileSize and there is no space in disk", (done) => {
+
+    fileSystem.getAvailableSpace = (logger, cb) =>{
+      cb(fiveHundredTwelveMB); // 512MB
+    }
+    fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
+      expect(isThereAvailableSpace).to.be.false;
+      done();
+    });
+  });
+
+  it("should return available space false when passing no fileSize and there is no space in disk when downloading a file", (done) => {
+
+    fileSystem.addToDownloadTotalSize(fiveHundredTwelveMB); // 512MB
+    fileSystem.getAvailableSpace = (logger, cb) =>{
+      cb(oneGB); // 1GB
+    }
+    fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
+      expect(isThereAvailableSpace).to.be.false;
+      fileSystem.removeFromDownloadTotalSize(fiveHundredTwelveMB); // 512MB
+      done();
+    });
+  });
+
+  it("should return available space false when passing fileSize and there is no space in disk", (done) => {
+
+    fileSystem.getAvailableSpace = (logger, cb) =>{
+      cb(oneGB); // 1GB
+    }
+    fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
+      expect(isThereAvailableSpace).to.be.false;
+      done();
+    }, fiveHundredTwelveMB);
+  });
+
+  it("should return available space true when passing fileSize and there is space in disk", (done) => {
+
+    fileSystem.getAvailableSpace = (logger, cb) =>{
+      cb(oneGB); // 1GB
+    }
+    fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
+      expect(isThereAvailableSpace).to.be.true;
+      done();
+    }, threeHundredMB);
+  });
+
+  it("should return available space false when passing fileSize and there is space in disk but it is downloading", (done) => {
+
+    fileSystem.addToDownloadTotalSize(threeHundredMB);
+
+    fileSystem.getAvailableSpace = (logger, cb) =>{
+      cb(oneGB); // 1GB
+    }
+    fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
+      expect(isThereAvailableSpace).to.be.false;
+
+      fileSystem.removeFromDownloadTotalSize(threeHundredMB);
+      done();
+    }, fiveHundredTwelveMB);
+  });
 });
