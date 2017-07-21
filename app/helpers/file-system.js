@@ -1,3 +1,4 @@
+/*global DOWNLOAD_TOTAL_SIZE:true*/
 "use strict";
 
 const fs = require("fs-extra"),
@@ -96,7 +97,32 @@ module.exports = {
       cb(space);
     }).catch((err) => {
       logger.error(err);
+      cb(false);
     });
+  },
+
+  isThereAvailableSpace: function(logger, cb, fileSize=0) {
+    this.getAvailableSpace(logger, function(spaceOnDisk) {
+      if(spaceOnDisk) {
+        let spaceLeft = spaceOnDisk - DOWNLOAD_TOTAL_SIZE - config.diskThreshold - fileSize;
+
+        if (spaceLeft > 0) {
+          cb(true);
+        } else {
+          cb(false);
+        }
+      } else {
+        cb(false);
+      }
+    });
+  },
+
+  addToDownloadTotalSize: function(size=0) {
+    DOWNLOAD_TOTAL_SIZE += size;
+  },
+
+  removeFromDownloadTotalSize: function(size=0) {
+    DOWNLOAD_TOTAL_SIZE -= size;
   },
 
   isCached: function(url, cb) {

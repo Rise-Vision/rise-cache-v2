@@ -9,9 +9,16 @@ const fs = require("fs"),
   FileController = require("../../../app/controllers/file"),
   expect = chai.expect,
   httpMocks = require('node-mocks-http'),
-  EventEmitter = require("events").EventEmitter;
+  EventEmitter = require("events").EventEmitter,
+  fileSystem = require("../../../app/helpers/file-system");
+
+global.DOWNLOAD_TOTAL_SIZE = 0;
+
+fileSystem.createDir(config.cachePath);
 
 describe("FileController", () => {
+
+
   let fileController,
     header = {
       save: function () {
@@ -30,13 +37,17 @@ describe("FileController", () => {
     }
   };
 
+  let logger = {
+    error: function (detail, errorDetail) {}
+  };
+
   after(() => {
     nock.cleanAll();
     mock.restore();
   });
 
   beforeEach(() => {
-    fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
+    fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII, logger);
   });
 
   describe("downloadFile", () => {
@@ -65,7 +76,9 @@ describe("FileController", () => {
 
       nock("http://abc123.com")
         .get("/logo.png")
-        .replyWithFile(200, "/data/logo.png");
+        .replyWithFile(200, "/data/logo.png", {
+        'Content-length': 10
+      });
 
       fileController.downloadFile();
 
@@ -82,7 +95,7 @@ describe("FileController", () => {
     });
 
     it("should save downloaded file without RiseDisplayNetworkII.ini file", (done) => {
-      let controller = new FileController("http://abc123.com/logo.png", header, null);
+      let controller = new FileController("http://abc123.com/logo.png", header, null, logger);
 
       nock("http://abc123.com")
         .get("/logo.png")
@@ -210,6 +223,22 @@ describe("FileController", () => {
             done();
           });
         }, 1000)
+      });
+    });
+
+    it("should emit insufficient-disk-space if there is no available space for downloading the file", (done) => {
+
+      nock("http://abc123.com")
+        .get("/logo.png")
+        .replyWithFile(200, "/data/logo.png", {
+          'Content-length': 10000000000000000
+        });
+
+      fileController.downloadFile();
+
+      fileController.on("insufficient-disk-space", (fileSize) => {
+        expect(fileSize).to.be.equal(10000000000000000);
+        done();
       });
     });
 

@@ -15,6 +15,8 @@ const AppFactory = function() {
 
   const start = function() {
 
+    global.DOWNLOAD_TOTAL_SIZE = 0;
+
     fileSystem.fileExists(config.riseDisplayNetworkIIPath, (exists) => {
 
       let riseDisplayNetworkII = null;

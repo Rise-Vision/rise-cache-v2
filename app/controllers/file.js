@@ -9,7 +9,7 @@ const fs = require("fs"),
   send = require("send");
 
 
-const FileController = function(url, header, riseDisplayNetworkII) {
+const FileController = function(url, header, riseDisplayNetworkII, logger) {
   EventEmitter.call(this);
 
   this.url = url;
@@ -18,6 +18,7 @@ const FileController = function(url, header, riseDisplayNetworkII) {
   this.pathInCache = fileSystem.getPathInCache(this.url);
   this.pathInDownload = fileSystem.getPathInDownload(this.url);
   this.riseDisplayNetworkII = riseDisplayNetworkII;
+  this.logger = logger;
   this.hasDownloadError = false;
 };
 
@@ -57,8 +58,20 @@ FileController.prototype.downloadFile = function(opts) {
       .on("response", (res) => {
         this.hasDownloadError = false;
         if (res.statusCode == 200) {
-          this.writeFile(res);
-          this.emit("downloading");
+
+          let fileSize = res.headers["content-length"];
+          let self = this;
+          fileSystem.isThereAvailableSpace(this.logger, function(isThereAvailableSpace) {
+            if(isThereAvailableSpace) {
+
+              fileSystem.addToDownloadTotalSize(fileSize);
+              self.writeFile(res);
+              self.emit("downloading");
+
+            } else {
+              self.emit("insufficient-disk-space", fileSize);
+            }
+          }, fileSize);
         }
         else if (res.statusCode == 304) {
           this.updateTimestamp();
@@ -115,6 +128,7 @@ FileController.prototype.writeFile = function(res) {
       if (!this.hasDownloadError) {
         this.saveHeaders(res.headers);
         this.moveFileFromDownloadToCache();
+        fileSystem.removeFromDownloadTotalSize(res.headers["content-length"]);
         this.emit("downloaded");
       }
     });

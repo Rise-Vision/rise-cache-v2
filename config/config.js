@@ -34,7 +34,7 @@ module.exports = {
   financialDBPath: path.join(riseCachePath, "database", "financial.db"),
   riseDisplayNetworkIIPath: path.join(rvplayerPath,"RiseDisplayNetworkII.ini"),
   logFilePath: path.join(riseCachePath,"risecache.log"),
-  diskThreshold: 500 * 1024 * 1024,  // 500 MB
+  diskThreshold: 512 * 1024 * 1024,  // 512 MB half GB
   fileUpdateDuration: 1200000, // 20 minutes,
   requestTimeout: 120000, // 2 minutes
   debugging: process.argv.slice(1).join(" ").indexOf("debug") > -1,

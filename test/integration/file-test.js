@@ -11,6 +11,8 @@ const fs = require('fs'),
   httpProxy = require("http-proxy"),
   cert = config.httpsOptions.cert;
 
+global.DOWNLOAD_TOTAL_SIZE = 0;
+
 let request = require("superagent");
 request = request.agent({ca: cert});
 

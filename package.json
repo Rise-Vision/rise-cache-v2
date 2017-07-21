@@ -1,6 +1,6 @@
 {
   "name": "rise-cache-v2",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Rise Cache for Rise Player",
   "main": "rise-cache.js",
   "scripts": {
@@ -37,10 +37,11 @@
     "gulp-spawn-mocha": "^3.1.0",
     "http-proxy": "^1.14.0",
     "mocha": "^3.0.2",
-    "mock-fs": "^4.3.0",
+    "mock-fs": "^4.4.1",
     "nock": "^8.0.0",
-    "node-mocks-http": "https://github.com/Rise-Vision/node-mocks-http.git",
+    "node-mocks-http": "git+https://github.com/Rise-Vision/node-mocks-http.git",
     "publish": "^0.6.0",
+    "run-sequence": "^2.0.0",
     "sinon": "^1.17.5",
     "superagent": "^3.5.2"
   }

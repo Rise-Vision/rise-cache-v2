@@ -11,7 +11,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
 
     if (fileUrl) {
       const header = new Data({}, headerDB),
-        controller = new FileController(fileUrl, header, riseDisplayNetworkII);
+        controller = new FileController(fileUrl, header, riseDisplayNetworkII, logger);
 
       controller.on("file-error", (err) => {
         res.statusCode = 500;
@@ -86,9 +86,9 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
               sendDownloadingResponse(res, fileUrl);
             } else {
               // Check if there's enough disk space.
-              fileSystem.getAvailableSpace(logger, (availableSpace) => {
-                // Download the file.
-                if (availableSpace > config.diskThreshold) {
+              fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
+                if (isThereAvailableSpace) {
+                  // Download the file.
 
                   controller.on("headers-error", (err) => {
                     logger.error("Could not save headers", err, fileUrl);
@@ -119,9 +119,14 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
                     logger.error(err, null, fileUrl);
                   });
 
+                  controller.on("insufficient-disk-space", (fileSize) => {
+                    logger.error("Insufficient disk space", fileSize, fileUrl);
+                    sendResponse(res, 507, "Insufficient disk space");
+                  });
+
                   controller.downloadFile();
                 } else {
-                  logger.error("Insufficient disk space");
+                  logger.error("Insufficient disk space", null, fileUrl);
                   sendResponse(res, 507, "Insufficient disk space");
                 }
               });
