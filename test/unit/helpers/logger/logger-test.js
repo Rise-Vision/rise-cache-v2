@@ -7,44 +7,45 @@ const chai = require("chai"),
 
 describe("Logger", () => {
   let logger, clock;
-  let externalLogger = {
-    log: function (event, event_details, error_details, date) {}
-  };
   let fileSystem = {
     appendToLog: function (datetime, message) {},
     getFileName: function (url) {return "";}
   };
   let debugging = true;
   let dateString = "2016/09/20 00:00:00";
+  let displayId = "displayIdTest";
+  let version = "1.0.0";
+  let os = "win32";
 
-  let externalLoggerLogSpy, fileSystemAppendToLogSpy, consoleInfoSpy, consoleErrorSpy, consoleWarnSpy;
+  let fileSystemAppendToLogSpy, consoleInfoSpy, consoleErrorSpy, consoleWarnSpy, processSendStub;
 
   before( function () {
     let date = new Date("09/20/2016");
     clock = sinon.useFakeTimers(date.getTime());
   });
 
-  describe("Logger debugging and external logger", () => {
+  describe("Debugging and log to player", () => {
 
     before( function () {
       debugging = true;
-      logger = require("../../../../app/helpers/logger/logger")(debugging, externalLogger, fileSystem);
+      logger = require("../../../../app/helpers/logger/logger")(debugging, fileSystem, displayId, version, os);
+      process.send = function(){};
     });
 
     beforeEach(function () {
-      externalLoggerLogSpy = sinon.spy(externalLogger, "log");
       fileSystemAppendToLogSpy = sinon.spy(fileSystem, "appendToLog");
       consoleInfoSpy = sinon.spy(console, "info");
       consoleErrorSpy = sinon.spy(console, "error");
       consoleWarnSpy = sinon.spy(console, "warn");
+      processSendStub = sinon.stub(process, "send");
     });
 
     afterEach(function () {
-      externalLoggerLogSpy.restore();
       fileSystemAppendToLogSpy.restore();
       consoleInfoSpy.restore();
       consoleErrorSpy.restore();
       consoleWarnSpy.restore();
+      processSendStub.restore();
     });
 
     it("should log an info event with no file details", () => {
@@ -54,7 +55,16 @@ describe("Logger", () => {
 
       expect(consoleInfoSpy.calledWith(dateString + " - " + message)).to.be.true;
 
-      expect(externalLoggerLogSpy.calledWith("info", detail)).to.be.true;
+      expect(processSendStub.calledWith( {
+        event: "info",
+        event_details: detail,
+        error_details: "",
+        display_id: displayId,
+        cache_version: version,
+        os: os,
+        file_name: "",
+        file_url: ""
+      } )).to.be.true;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
@@ -70,7 +80,16 @@ describe("Logger", () => {
 
       expect(consoleInfoSpy.calledWith(dateString + " - " + message)).to.be.true;
 
-      expect(externalLoggerLogSpy.calledWith("info", detail, url, name)).to.be.true;
+      expect(processSendStub.calledWith( {
+        event: "info",
+        event_details: detail,
+        error_details: "",
+        display_id: displayId,
+        cache_version: version,
+        os: os,
+        file_name: name,
+        file_url: url
+      } )).to.be.true;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
@@ -84,7 +103,16 @@ describe("Logger", () => {
 
       expect(consoleErrorSpy.calledWith(dateString + " - " + message)).to.be.true;
 
-      expect(externalLoggerLogSpy.calledWith("error", detail, undefined, undefined, errorDetails)).to.be.true;
+      expect(processSendStub.calledWith( {
+        event: "error",
+        event_details: detail,
+        error_details: errorDetails,
+        display_id: displayId,
+        cache_version: version,
+        os: os,
+        file_name: "",
+        file_url: ""
+      } )).to.be.true;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
@@ -101,7 +129,16 @@ describe("Logger", () => {
 
       expect(consoleErrorSpy.calledWith(dateString + " - " + message)).to.be.true;
 
-      expect(externalLoggerLogSpy.calledWith("error", detail, url, name, errorDetails)).to.be.true;
+      expect(processSendStub.calledWith( {
+        event: "error",
+        event_details: detail,
+        error_details: errorDetails,
+        display_id: displayId,
+        cache_version: version,
+        os: os,
+        file_name: name,
+        file_url: url
+      } )).to.be.true;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
@@ -114,7 +151,16 @@ describe("Logger", () => {
 
       expect(consoleWarnSpy.calledWith(dateString + " - " + message)).to.be.true;
 
-      expect(externalLoggerLogSpy.calledWith("warning", detail)).to.be.true;
+      expect(processSendStub.calledWith({
+        event: "warning",
+        event_details: detail,
+        error_details: "",
+        display_id: displayId,
+        cache_version: version,
+        os: os,
+        file_name: "",
+        file_url: ""
+      } )).to.be.true;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
@@ -130,34 +176,44 @@ describe("Logger", () => {
 
       expect(consoleWarnSpy.calledWith(dateString + " - " + message)).to.be.true;
 
-      expect(externalLoggerLogSpy.calledWith("warning", detail, url, name)).to.be.true;
+      expect(processSendStub.calledWith({
+        event: "warning",
+        event_details: detail,
+        error_details: "",
+        display_id: displayId,
+        cache_version: version,
+        os: os,
+        file_name: name,
+        file_url: url
+      } )).to.be.true;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
     });
   });
 
-  describe("Logger no debugging", () => {
+  describe("No debugging", () => {
 
     before( function () {
       debugging = false;
-      logger = require("../../../../app/helpers/logger/logger")(debugging, externalLogger, fileSystem);
+      logger = require("../../../../app/helpers/logger/logger")(debugging, fileSystem, displayId, version, os);
+      process.send = function(){};
     });
 
     beforeEach(function () {
-      externalLoggerLogSpy = sinon.spy(externalLogger, "log");
       fileSystemAppendToLogSpy = sinon.spy(fileSystem, "appendToLog");
       consoleInfoSpy = sinon.spy(console, "info");
       consoleErrorSpy = sinon.spy(console, "error");
       consoleWarnSpy = sinon.spy(console, "warn");
+      processSendStub = sinon.stub(process, "send");
     });
 
     afterEach(function () {
-      externalLoggerLogSpy.restore();
       fileSystemAppendToLogSpy.restore();
       consoleInfoSpy.restore();
       consoleErrorSpy.restore();
       consoleWarnSpy.restore();
+      processSendStub.restore();
     });
 
     it("should log an info event", () => {
@@ -167,7 +223,16 @@ describe("Logger", () => {
 
       expect(consoleInfoSpy.calledWith(dateString + " - " + message)).to.be.false;
 
-      expect(externalLoggerLogSpy.calledWith("info", detail)).to.be.true;
+      expect(processSendStub.calledWith( {
+        event: "info",
+        event_details: detail,
+        error_details: "",
+        display_id: displayId,
+        cache_version: version,
+        os: os,
+        file_name: "",
+        file_url: ""
+      } )).to.be.true;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
@@ -181,7 +246,16 @@ describe("Logger", () => {
 
       expect(consoleErrorSpy.calledWith(dateString + " - " + message)).to.be.false;
 
-      expect(externalLoggerLogSpy.calledWith("error", detail, undefined, undefined, errorDetails)).to.be.true;
+      expect(processSendStub.calledWith( {
+        event: "error",
+        event_details: detail,
+        error_details: errorDetails,
+        display_id: displayId,
+        cache_version: version,
+        os: os,
+        file_name: "",
+        file_url: ""
+      } )).to.be.true;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
@@ -194,24 +268,31 @@ describe("Logger", () => {
 
       expect(consoleWarnSpy.calledWith(dateString + " - " + message)).to.be.false;
 
-      expect(externalLoggerLogSpy.calledWith("warning", detail)).to.be.true;
+      expect(processSendStub.calledWith({
+        event: "warning",
+        event_details: detail,
+        error_details: "",
+        display_id: displayId,
+        cache_version: version,
+        os: os,
+        file_name: "",
+        file_url: ""
+      } )).to.be.true;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
     });
   });
 
-
-  describe("Logger no external logger", () => {
+  describe("No debugging and no log to player", () => {
 
     before( function () {
       debugging = false;
-      let nullExternalLogging = null;
-      logger = require("../../../../app/helpers/logger/logger")(debugging, nullExternalLogging, fileSystem);
+      process.send = undefined;
+      logger = require("../../../../app/helpers/logger/logger")(debugging, fileSystem, displayId, version, os);
     });
 
     beforeEach(function () {
-      externalLoggerLogSpy = sinon.spy(externalLogger, "log");
       fileSystemAppendToLogSpy = sinon.spy(fileSystem, "appendToLog");
       consoleInfoSpy = sinon.spy(console, "info");
       consoleErrorSpy = sinon.spy(console, "error");
@@ -219,7 +300,6 @@ describe("Logger", () => {
     });
 
     afterEach(function () {
-      externalLoggerLogSpy.restore();
       fileSystemAppendToLogSpy.restore();
       consoleInfoSpy.restore();
       consoleErrorSpy.restore();
@@ -233,8 +313,6 @@ describe("Logger", () => {
 
       expect(consoleInfoSpy.calledWith(dateString + " - " + message)).to.be.false;
 
-      expect(externalLoggerLogSpy.calledWith("info", detail)).to.be.false;
-
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
     });
@@ -247,8 +325,6 @@ describe("Logger", () => {
 
       expect(consoleErrorSpy.calledWith(dateString + " - " + message)).to.be.false;
 
-      expect(externalLoggerLogSpy.calledWith("error", detail, undefined, undefined, errorDetails)).to.be.false;
-
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
     });
@@ -259,8 +335,6 @@ describe("Logger", () => {
       logger.warn(detail);
 
       expect(consoleWarnSpy.calledWith(dateString + " - " + message)).to.be.false;
-
-      expect(externalLoggerLogSpy.calledWith("warning", detail)).to.be.false;
 
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
