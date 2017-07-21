@@ -1,6 +1,6 @@
 "use strict";
 
-const Logger = function (debugging, externalLogger, fileSystem) {
+const Logger = function (debugging, fileSystem, displayId, cacheVersion, os) {
 
   const padLeft = function (number) {
     return (String(number).length === 1 ? "0" : "") + number;
@@ -22,13 +22,32 @@ const Logger = function (debugging, externalLogger, fileSystem) {
     return (fileUrl) ? `${type}: ${detail} ${fileUrl} ${fileName}` : `${type}: ${detail}`;
   };
 
+  const logToPlayer = function(eventName, eventDetails, fileUrl = "", fileName = fileSystem.getFileName(fileUrl), errorDetails) {
+    // process.send will be available if IPC channel established from Player
+    if (!process.send) {return;}
+    if (!eventName) {return;}
+
+    let data = {
+      event: eventName,
+      event_details: eventDetails || "",
+      error_details: errorDetails  || "",
+      display_id: displayId || "no-displayId",
+      cache_version: cacheVersion || "no-risecache",
+      os: os,
+      file_name: fileName,
+      file_url: fileUrl
+    };
+
+    process.send(data);
+  };
+
   const error = function (detail, errorDetail, fileUrl, fileName) {
     let logDatetime = getLogDatetime();
     let message = getMessage("ERROR", `${detail} ${errorDetail}`, fileUrl, fileName);
     if (debugging) console.error(`${logDatetime} - ${message}`);
 
     fileSystem.appendToLog(logDatetime, message);
-    if (externalLogger) {externalLogger.log("error", detail, fileUrl, fileName, errorDetail, null, logDatetime);}
+    logToPlayer("error", detail, fileUrl, fileName, errorDetail);
   };
 
   const info = function (detail, fileUrl, fileName) {
@@ -37,7 +56,7 @@ const Logger = function (debugging, externalLogger, fileSystem) {
     if (debugging) console.info(`${logDatetime} - ${message}`);
 
     fileSystem.appendToLog(logDatetime, message);
-    if (externalLogger) {externalLogger.log("info", detail, fileUrl, fileName, null, logDatetime);}
+    logToPlayer("info", detail, fileUrl, fileName);
   };
 
   const warn = function (detail, fileUrl, fileName) {
@@ -46,7 +65,7 @@ const Logger = function (debugging, externalLogger, fileSystem) {
     if (debugging) console.warn(`${logDatetime} - ${message}`);
 
     fileSystem.appendToLog(logDatetime, message);
-    if (externalLogger) {externalLogger.log("warning", detail, fileUrl, fileName, null, logDatetime);}
+    logToPlayer("warning", detail, fileUrl, fileName);
   };
 
   return {
