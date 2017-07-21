@@ -11,7 +11,8 @@ const fs = require("fs"),
 global.DOWNLOAD_TOTAL_SIZE = 0;
 
 let logger = {
-  error: function (detail, errorDetail) {}
+  error: function (detail, errorDetail) {},
+  info: function (detail, errorDetail) {}
 };
 
   describe("fileExists", () => {
