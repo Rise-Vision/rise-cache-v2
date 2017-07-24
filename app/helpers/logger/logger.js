@@ -42,6 +42,9 @@ const Logger = function (debugging, fileSystem, displayId, cacheVersion, os) {
   };
 
   const error = function (detail, errorDetail, fileUrl, fileName) {
+    if (typeof detail === "object") { detail = JSON.stringify(detail); }
+    if (typeof errorDetail === "object") { errorDetail = JSON.stringify(errorDetail); }
+
     let logDatetime = getLogDatetime();
     let message = getMessage("ERROR", `${detail} ${errorDetail}`, fileUrl, fileName);
     if (debugging) console.error(`${logDatetime} - ${message}`);
@@ -51,6 +54,8 @@ const Logger = function (debugging, fileSystem, displayId, cacheVersion, os) {
   };
 
   const info = function (detail, fileUrl, fileName) {
+    if (typeof detail === "object") { detail = JSON.stringify(detail); }
+
     let logDatetime = getLogDatetime();
     let message = getMessage("INFO", detail, fileUrl, fileName);
     if (debugging) console.info(`${logDatetime} - ${message}`);
@@ -60,6 +65,8 @@ const Logger = function (debugging, fileSystem, displayId, cacheVersion, os) {
   };
 
   const warn = function (detail, fileUrl, fileName) {
+    if (typeof detail === "object") { detail = JSON.stringify(detail); }
+
     let logDatetime = getLogDatetime();
     let message = getMessage("WARNING", detail, fileUrl, fileName);
     if (debugging) console.warn(`${logDatetime} - ${message}`);

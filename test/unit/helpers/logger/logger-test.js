@@ -190,6 +190,29 @@ describe("Logger", () => {
       expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
 
     });
+
+    it("should handle data type Object for event_details and error_details fields", () => {
+      let detail = JSON.stringify({ message: "test error" }),
+        errorDetails = JSON.stringify({ message: "exception 1" }),
+        message = "ERROR: " + detail + " " + errorDetails;
+
+      logger.error(detail, errorDetails);
+
+      expect(consoleErrorSpy.calledWith(dateString + " - " + message)).to.be.true;
+
+      expect(processSendStub.calledWith( {
+        event: "error",
+        event_details: detail,
+        error_details: errorDetails,
+        display_id: displayId,
+        cache_version: version,
+        os: os,
+        file_name: "",
+        file_url: ""
+      } )).to.be.true;
+
+      expect(fileSystemAppendToLogSpy.calledWith(dateString, message)).to.be.true;
+    });
   });
 
   describe("No debugging", () => {
