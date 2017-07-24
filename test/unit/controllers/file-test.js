@@ -77,7 +77,7 @@ describe("FileController", () => {
       nock("http://abc123.com")
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png", {
-        'Content-length': 10
+        'Content-length': "10"
       });
 
       fileController.downloadFile();
@@ -231,13 +231,13 @@ describe("FileController", () => {
       nock("http://abc123.com")
         .get("/logo.png")
         .replyWithFile(200, "/data/logo.png", {
-          'Content-length': 10000000000000000
+          'Content-length': "10000000000000000"
         });
 
       fileController.downloadFile();
 
       fileController.on("insufficient-disk-space", (fileSize) => {
-        expect(fileSize).to.be.equal(10000000000000000);
+        expect(fileSize).to.be.equal("10000000000000000");
         done();
       });
     });

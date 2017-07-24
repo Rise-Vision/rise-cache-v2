@@ -105,10 +105,10 @@ module.exports = {
     this.getAvailableSpace(logger, function(spaceOnDisk) {
       if(spaceOnDisk) {
         let spaceLeft = spaceOnDisk - DOWNLOAD_TOTAL_SIZE - config.diskThreshold - fileSize;
-
         if (spaceLeft > 0) {
           cb(true);
         } else {
+          logger.info(`spaceOnDisk: ${spaceOnDisk}, DOWNLOAD_TOTAL_SIZE: ${DOWNLOAD_TOTAL_SIZE}, diskThreshold: ${config.diskThreshold}, fileSize: ${fileSize}`);
           cb(false);
         }
       } else {
@@ -118,11 +118,11 @@ module.exports = {
   },
 
   addToDownloadTotalSize: function(size=0) {
-    DOWNLOAD_TOTAL_SIZE += size;
+    DOWNLOAD_TOTAL_SIZE += parseInt(size);
   },
 
   removeFromDownloadTotalSize: function(size=0) {
-    DOWNLOAD_TOTAL_SIZE -= size;
+    DOWNLOAD_TOTAL_SIZE -= parseInt(size);
   },
 
   isCached: function(url, cb) {
