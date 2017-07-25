@@ -3,8 +3,8 @@
 const ErrorMiddleware = function(logger) {
 
   const handleError = (err, req, res, next) => {
-    logger.error("Middleware Error", err);
     const status = (res.statusCode && res.statusCode !== 200) ? res.statusCode : 500;
+    logger.error("Middleware Error", `Status code: ${status} ${err}`, req.url);
     res.setHeader("Content-Type", "application/json");
     res.removeHeader("ETag");
     res.removeHeader("Last-Modified");
