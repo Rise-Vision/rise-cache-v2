@@ -52,4 +52,26 @@ Data.prototype.delete = function (key, callback) {
   });
 };
 
+Data.prototype.deleteOlderThanDate = function (date, callback) {
+  this.db.find({}, (err, docs) => {
+    if (err) {
+      return callback(err);
+    }
+
+    if (docs.length > 0) {
+      docs.forEach((item)=>{
+        let updatedAtDate = new Date(item.updatedAt);
+        if (updatedAtDate.getTime() < date) {
+          this.delete(item.key, (err, numRemoved) => {
+            if (err) {
+              return callback(err);
+            }
+            callback(null, numRemoved, item.key);
+          });
+        }
+      });
+    }
+  });
+};
+
 module.exports = Data;
