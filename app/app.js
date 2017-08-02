@@ -54,7 +54,9 @@ const AppFactory = function() {
 
       fileSystem.fileExists(config.cachePath, (exists) => {
         if (exists) {
-          cleanupJob.run();
+          cleanupJob.run(()=>{
+
+          });
         }
       });
 
