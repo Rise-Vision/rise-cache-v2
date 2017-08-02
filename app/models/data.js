@@ -1,8 +1,9 @@
 "use strict";
 
-const Data = function (data, db) {
+const Data = function (data, db, logger) {
   this.data = data;
   this.db = db;
+  this.logger = logger;
 };
 
 Data.prototype.set = function(name, value) {
@@ -49,6 +50,42 @@ Data.prototype.delete = function (key, callback) {
     }
 
     callback(null, numRemoved);
+  });
+};
+
+Data.prototype.deleteOlderThanDate = function (date, callback) {
+  this.db.find({}, (err, docs) => {
+    if (err) {
+      return callback(err);
+    }
+
+    if (docs.length > 0) {
+      let countItems = docs.length-1;
+      docs.forEach((item)=> {
+        let updatedAtDate = new Date(item.updatedAt);
+        if (updatedAtDate.getTime() < date) {
+          this.delete(item.key, (err) => {
+            if (err) {
+              this.logger.error("Data NOT deleted", err);
+            }
+            this.logger.info("Data deleted", item.key);
+            if (!countItems) {
+              callback(null);
+            } else {
+              countItems--;
+            }
+          });
+        } else {
+          if (!countItems) {
+            callback(null);
+          } else {
+            countItems--;
+          }
+        }
+      });
+    } else {
+      callback(null);
+    }
   });
 };
 

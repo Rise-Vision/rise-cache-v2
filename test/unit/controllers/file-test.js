@@ -38,7 +38,8 @@ describe("FileController", () => {
   };
 
   let logger = {
-    error: function (detail, errorDetail) {}
+    error: function (detail, errorDetail) {},
+    info: function (detail, errorDetail) {}
   };
 
   after(() => {
