@@ -50,41 +50,43 @@ FileController.prototype.downloadFile = function(opts) {
 
     options.timeout = config.requestTimeout;
 
+
     if (opts) {
       Object.assign(options.headers, opts);
     }
+    fileSystem.getAvailableSpace(this.logger, (spaceInDisk)=>{
 
-    request.get(options)
-      .on("response", (res) => {
-        this.hasDownloadError = false;
-        if (res.statusCode == 200) {
+      request.get(options)
+        .on("response", (res) => {
+          this.hasDownloadError = false;
+          if (res.statusCode == 200) {
+            let fileSize = res.headers["content-length"];
+            let self = this;
+            fileSystem.isThereAvailableSpace(this.logger, function(isThereAvailableSpace) {
+              if(isThereAvailableSpace) {
 
-          let fileSize = res.headers["content-length"];
-          let self = this;
-          fileSystem.isThereAvailableSpace(this.logger, function(isThereAvailableSpace) {
-            if(isThereAvailableSpace) {
+                fileSystem.addToDownloadTotalSize(fileSize);
+                self.writeFile(res);
+                self.emit("downloading");
 
-              fileSystem.addToDownloadTotalSize(fileSize);
-              self.writeFile(res);
-              self.emit("downloading");
-
-            } else {
-              self.emit("insufficient-disk-space", fileSize);
-            }
-          }, fileSize);
-        }
-        else if (res.statusCode == 304) {
-          this.updateTimestamp();
-        }
-        else {
-          this.emit("invalid-response", res.statusCode);
-        }
-      })
-      .on("error", (err) => {
-        this.hasDownloadError = true;
-        this.deleteFileFromDownload();
-        this.emit("request-error", err);
-      });
+              } else {
+                self.emit("insufficient-disk-space", fileSize);
+              }
+            }, spaceInDisk, fileSize);
+          }
+          else if (res.statusCode == 304) {
+            this.updateTimestamp();
+          }
+          else {
+            this.emit("invalid-response", res.statusCode);
+          }
+        })
+        .on("error", (err) => {
+          this.hasDownloadError = true;
+          this.deleteFileFromDownload();
+          this.emit("request-error", err);
+        });
+    });
   }
 };
 

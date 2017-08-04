@@ -101,20 +101,18 @@ module.exports = {
     });
   },
 
-  isThereAvailableSpace: function(logger, cb, fileSize=0) {
-    this.getAvailableSpace(logger, function(spaceOnDisk) {
-      if(spaceOnDisk) {
-        let spaceLeft = spaceOnDisk - DOWNLOAD_TOTAL_SIZE - config.diskThreshold - fileSize;
-        if (spaceLeft > 0) {
-          cb(true);
-        } else {
-          logger.info(`spaceOnDisk: ${spaceOnDisk}, DOWNLOAD_TOTAL_SIZE: ${DOWNLOAD_TOTAL_SIZE}, diskThreshold: ${config.diskThreshold}, fileSize: ${fileSize}`);
-          cb(false);
-        }
+  isThereAvailableSpace: function(logger, cb, spaceOnDisk, fileSize=0) {
+    if(spaceOnDisk) {
+      let spaceLeft = spaceOnDisk - DOWNLOAD_TOTAL_SIZE - config.diskThreshold - fileSize;
+      if (spaceLeft > 0) {
+        cb(true);
       } else {
+        logger.info(`spaceOnDisk: ${spaceOnDisk}, DOWNLOAD_TOTAL_SIZE: ${DOWNLOAD_TOTAL_SIZE}, diskThreshold: ${config.diskThreshold}, fileSize: ${fileSize}`);
         cb(false);
       }
-    });
+    } else {
+      cb(false);
+    }
   },
 
   addToDownloadTotalSize: function(size=0) {
