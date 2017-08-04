@@ -376,87 +376,68 @@ describe("available space", () => {
       threeHundredMB = 300*1024*1024;
 
   it("should return available space true when passing no fileSize and there is space in disk", (done) => {
-    fileSystem.getAvailableSpace = (logger, cb) =>{
-      cb(oneGB); // 1GB
-    }
     fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
       expect(isThereAvailableSpace).to.be.true;
       done();
-    });
+    }, oneGB);
   });
 
   it("should return available space true when passing no fileSize and there is space in disk even though a file is being downloaded", (done) => {
 
     fileSystem.addToDownloadTotalSize(threeHundredMB); // 500MB
-    fileSystem.getAvailableSpace = (logger, cb) =>{
-      cb(oneGB); // 1GB
-    }
+
     fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
       expect(isThereAvailableSpace).to.be.true;
 
       fileSystem.removeFromDownloadTotalSize(threeHundredMB); // 500MB
       done();
-    });
+    }, oneGB);
   });
 
   it("should return available space false when passing no fileSize and there is no space in disk", (done) => {
 
-    fileSystem.getAvailableSpace = (logger, cb) =>{
-      cb(fiveHundredTwelveMB); // 512MB
-    }
     fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
       expect(isThereAvailableSpace).to.be.false;
       done();
-    });
+    },fiveHundredTwelveMB);
   });
 
   it("should return available space false when passing no fileSize and there is no space in disk when downloading a file", (done) => {
 
     fileSystem.addToDownloadTotalSize(fiveHundredTwelveMB); // 512MB
-    fileSystem.getAvailableSpace = (logger, cb) =>{
-      cb(oneGB); // 1GB
-    }
+
     fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
       expect(isThereAvailableSpace).to.be.false;
       fileSystem.removeFromDownloadTotalSize(fiveHundredTwelveMB); // 512MB
       done();
-    });
+    },oneGB);
   });
 
   it("should return available space false when passing fileSize and there is no space in disk", (done) => {
 
-    fileSystem.getAvailableSpace = (logger, cb) =>{
-      cb(oneGB); // 1GB
-    }
     fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
       expect(isThereAvailableSpace).to.be.false;
       done();
-    }, fiveHundredTwelveMB);
+    }, oneGB, fiveHundredTwelveMB);
   });
 
   it("should return available space true when passing fileSize and there is space in disk", (done) => {
 
-    fileSystem.getAvailableSpace = (logger, cb) =>{
-      cb(oneGB); // 1GB
-    }
     fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
       expect(isThereAvailableSpace).to.be.true;
       done();
-    }, threeHundredMB);
+    }, oneGB, threeHundredMB);
   });
 
   it("should return available space false when passing fileSize and there is space in disk but it is downloading", (done) => {
 
     fileSystem.addToDownloadTotalSize(threeHundredMB);
 
-    fileSystem.getAvailableSpace = (logger, cb) =>{
-      cb(oneGB); // 1GB
-    }
     fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
       expect(isThereAvailableSpace).to.be.false;
 
       fileSystem.removeFromDownloadTotalSize(threeHundredMB);
       done();
-    }, fiveHundredTwelveMB);
+    }, oneGB, fiveHundredTwelveMB);
   });
 });
