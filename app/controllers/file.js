@@ -61,16 +61,15 @@ FileController.prototype.downloadFile = function(opts) {
           this.hasDownloadError = false;
           if (res.statusCode == 200) {
             let fileSize = res.headers["content-length"];
-            let self = this;
-            fileSystem.isThereAvailableSpace(this.logger, function(isThereAvailableSpace) {
+            fileSystem.isThereAvailableSpace(this.logger, (isThereAvailableSpace) => {
               if(isThereAvailableSpace) {
 
                 fileSystem.addToDownloadTotalSize(fileSize);
-                self.writeFile(res);
-                self.emit("downloading");
+                this.writeFile(res);
+                this.emit("downloading");
 
               } else {
-                self.emit("insufficient-disk-space", fileSize);
+                this.emit("insufficient-disk-space", fileSize);
               }
             }, spaceInDisk, fileSize);
           }
