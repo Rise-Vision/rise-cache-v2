@@ -9,6 +9,7 @@ const fs = require('fs'),
   fileSystem = require("../../app/helpers/file-system"),
   Database = require("../../app/database"),
   httpProxy = require("http-proxy"),
+  hashFiles = require('hash-files'),
   cert = config.httpsOptions.cert;
 
 global.DOWNLOAD_TOTAL_SIZE = 0;
@@ -39,6 +40,8 @@ describe("/files endpoint", () => {
       }
     }
   };
+
+  let fileHash = "";
 
   before(() => {
     server = require("../../app/server")(config, logger);
@@ -76,7 +79,7 @@ describe("/files endpoint", () => {
 
   describe("download file", () => {
 
-    beforeEach(() => {
+    beforeEach((done) => {
       // Mock the file system.
       mock({
         [config.downloadPath]: {},
@@ -84,6 +87,12 @@ describe("/files endpoint", () => {
         [config.headersDBPath]: "",
         "../data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
+
+      hashFiles({files:["../data/logo.png"]},function(error, hash) {
+        fileHash = hash;
+        done();
+      });
+
     });
 
     it("should return 202 with message while the file is downloading", (done) => {
@@ -97,7 +106,10 @@ describe("/files endpoint", () => {
           expect(res.status).to.equal(202);
           expect(res.body).to.deep.equal({ status: 202, message: "File is downloading" });
 
-          done();
+          hashFiles({files:[config.cachePath + "/cdf42c077fe6037681ae3c003550c2c5"]},function(error, hash) {
+            expect(hash).to.equal(fileHash);
+            done();
+          });
         });
     });
 
