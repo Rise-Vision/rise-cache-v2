@@ -150,9 +150,13 @@ module.exports = {
   },
 
   cleanupLogFile: function(logger) {
-    fs.truncate(config.logFilePath, 0, (err) => {
-      if (err) {
-        logger.error(err);
+    this.fileExists(config.logFilePath, (exists) => {
+      if ( exists ) {
+        fs.truncate(config.logFilePath, 0, (err) => {
+          if (err) {
+            logger.error(err);
+          }
+        });
       }
     });
   },
