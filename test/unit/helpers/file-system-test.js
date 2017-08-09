@@ -351,6 +351,18 @@ describe("cleanupLogFile", () => {
 
   });
 
+  it("should not log error if file does not exist", (done) => {
+    let spy = sinon.spy(logger, "error");
+
+    fileSystem.cleanupLogFile(logger);
+
+    setTimeout(function() {
+      expect(spy.callCount).to.equal(0);
+      logger.error.restore();
+      done();
+    }, 200);
+  });
+
   it("should log an error if the log could not be cleaned up", (done) => {
     let spy = sinon.spy(logger, "error");
 
