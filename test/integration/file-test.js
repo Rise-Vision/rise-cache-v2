@@ -13,6 +13,7 @@ const fs = require('fs'),
   cert = config.httpsOptions.cert;
 
 global.DOWNLOAD_TOTAL_SIZE = 0;
+global.PROCESSING_LIST = [];
 
 let request = require("superagent");
 request = request.agent({ca: cert});

@@ -13,6 +13,7 @@ const fs = require("fs"),
   fileSystem = require("../../../app/helpers/file-system");
 
 global.DOWNLOAD_TOTAL_SIZE = 0;
+global.PROCESSING_LIST = [];
 
 fileSystem.createDir(config.cachePath);
 
@@ -70,6 +71,50 @@ describe("FileController", () => {
 
     after(() => {
       nock.cleanAll();
+    });
+
+    it("should add encrypted file name to global processing list before making request", () => {
+      let spaceStub = sinon.stub(fileSystem, "getAvailableSpace");
+
+      fileController.downloadFile();
+
+      expect(global.PROCESSING_LIST.length).to.equal(1);
+      expect(spaceStub.calledOnce).to.be.true;
+
+      spaceStub.restore();
+      global.PROCESSING_LIST = [];
+    });
+
+    it("should not make request if encrypted file name exists in global processing list", () => {
+      let spaceStub = sinon.stub(fileSystem, "getAvailableSpace");
+
+      global.PROCESSING_LIST = [fileSystem.getFileName("http://abc123.com/logo.png")];
+
+      fileController.downloadFile();
+
+      expect(global.PROCESSING_LIST.length).to.equal(1);
+      expect(spaceStub.calledOnce).to.be.false;
+
+      spaceStub.restore();
+      global.PROCESSING_LIST = [];
+    });
+
+    it("should remove encrypted file name from processing list when response is OK to save file", (done) => {
+      let removeSpy = sinon.spy(fileSystem, "removeFromProcessingList");
+
+      nock("http://abc123.com")
+        .get("/logo.png")
+        .replyWithFile(200, "/data/logo.png", {
+          'Content-length': "10"
+        });
+
+      fileController.downloadFile();
+
+      setTimeout(()=> {
+        expect(removeSpy.calledOnce).to.be.true;
+        removeSpy.restore();
+        done();
+      }, 1000);
     });
 
     it("should save downloaded file to disk with encrypted file name", (done) => {
@@ -151,6 +196,30 @@ describe("FileController", () => {
 
     });
 
+    it("should remove encrypted file name from processing list when response is 304", (done) => {
+      let header = {
+        update: function (field, cb) {
+          cb(null, 1);
+        },
+        set: function () {}
+      },
+        removeSpy = sinon.spy(fileSystem,"removeFromProcessingList");
+
+      fileController = new FileController("http://abc123.com/logo.png", header, riseDisplayNetworkII);
+
+      nock("http://abc123.com")
+        .get("/logo.png")
+        .replyWithFile(304, "/data/logo.png");
+
+      fileController.downloadFile();
+
+      setTimeout(()=> {
+        expect(removeSpy.calledOnce).to.be.true;
+        removeSpy.restore();
+        done();
+      }, 1000);
+    });
+
     it("should emit 'request-error' event if file server responds with an error", (done) => {
       fileController.downloadFile();
 
@@ -159,6 +228,18 @@ describe("FileController", () => {
 
         done();
       });
+    });
+
+    it("should remove encrypted file name from processing list if server responds with error", (done) => {
+      let removeSpy = sinon.spy(fileSystem,"removeFromProcessingList");
+
+      fileController.downloadFile();
+
+      setTimeout(()=> {
+        expect(removeSpy.calledOnce).to.be.true;
+        removeSpy.restore();
+        done();
+      }, 1000)
     });
 
     it("should not emit 'request-error' event if connection delay timeout under 2 minutes", (done) => {
@@ -241,6 +322,24 @@ describe("FileController", () => {
         expect(fileSize).to.be.equal("10000000000000000");
         done();
       });
+    });
+
+    it("should remove encrypted file name from processing list when there is no available space", (done) => {
+      let removeSpy = sinon.spy(fileSystem,"removeFromProcessingList");
+
+      nock("http://abc123.com")
+        .get("/logo.png")
+        .replyWithFile(200, "/data/logo.png", {
+          'Content-length': "10000000000000000"
+        });
+
+      fileController.downloadFile();
+
+      setTimeout(()=> {
+        expect(removeSpy.calledOnce).to.be.true;
+        removeSpy.restore();
+        done();
+      }, 1000);
     });
 
   });
