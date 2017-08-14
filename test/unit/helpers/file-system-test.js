@@ -9,6 +9,7 @@ const fs = require("fs"),
   expect = chai.expect;
 
 global.DOWNLOAD_TOTAL_SIZE = 0;
+global.PROCESSING_LIST = [];
 
 let logger = {
   error: function (detail, errorDetail) {},
@@ -452,4 +453,53 @@ describe("available space", () => {
       done();
     }, oneGB, fiveHundredTwelveMB);
   });
+});
+
+describe("isProcessing", () => {
+
+  it("should return true if file has name is found in global processing list", () => {
+    global.PROCESSING_LIST = ["abc123", "def456"];
+
+    expect(fileSystem.isProcessing("abc123")).to.be.true;
+  });
+
+  it("should return false if file hash name is not found in global processing list", () => {
+    global.PROCESSING_LIST = ["def456"];
+
+    expect(fileSystem.isProcessing("abc123")).to.be.false;
+  });
+
+});
+
+describe("addToProcessingList", () => {
+
+  it("should add file hash name to global processing list", () => {
+    global.PROCESSING_LIST = ["abc123", "def456"];
+
+    fileSystem.addToProcessingList("ghi789");
+
+    expect(global.PROCESSING_LIST[2]).to.equal("ghi789");
+  });
+
+  it("should not add file hash name to global processing list if already exists", () => {
+    global.PROCESSING_LIST = ["abc123", "def456", "ghi789"];
+
+    fileSystem.addToProcessingList("def456");
+
+    expect(global.PROCESSING_LIST.length).to.equal(3);
+  });
+
+});
+
+describe("removeFromProcessingList", () => {
+
+  it("should remove file hash name from global processing list", () => {
+    global.PROCESSING_LIST = ["abc123", "def456"];
+
+    fileSystem.removeFromProcessingList("abc123");
+
+    expect(global.PROCESSING_LIST.length).to.equal(1);
+    expect(global.PROCESSING_LIST[0]).to.equal("def456");
+  });
+
 });
