@@ -136,21 +136,15 @@ module.exports = {
   },
 
   isProcessing: function(fileName) {
-    return global.PROCESSING_LIST.indexOf(fileName) !== -1;
+    return global.PROCESSING_LIST.has(fileName);
   },
 
   addToProcessingList: function(fileName) {
-    let index = global.PROCESSING_LIST.indexOf(fileName);
-    if (index === -1) {
-      global.PROCESSING_LIST.push(fileName);
-    }
+    global.PROCESSING_LIST.add(fileName);
   },
 
   removeFromProcessingList: function(fileName) {
-    let index = global.PROCESSING_LIST.indexOf(fileName);
-    if (index !== -1) {
-      global.PROCESSING_LIST.splice(index, 1);
-    }
+    global.PROCESSING_LIST.delete(fileName);
   },
 
   /* Check if a file has not been accessed within the past 7 days. */

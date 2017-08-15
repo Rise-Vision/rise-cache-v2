@@ -13,7 +13,7 @@ const fs = require("fs"),
   fileSystem = require("../../../app/helpers/file-system");
 
 global.DOWNLOAD_TOTAL_SIZE = 0;
-global.PROCESSING_LIST = [];
+global.PROCESSING_LIST = new Set();
 
 fileSystem.createDir(config.cachePath);
 
@@ -78,25 +78,25 @@ describe("FileController", () => {
 
       fileController.downloadFile();
 
-      expect(global.PROCESSING_LIST.length).to.equal(1);
+      expect(global.PROCESSING_LIST.size).to.equal(1);
       expect(spaceStub.calledOnce).to.be.true;
 
       spaceStub.restore();
-      global.PROCESSING_LIST = [];
+      global.PROCESSING_LIST.clear();
     });
 
     it("should not make request if encrypted file name exists in global processing list", () => {
       let spaceStub = sinon.stub(fileSystem, "getAvailableSpace");
 
-      global.PROCESSING_LIST = [fileSystem.getFileName("http://abc123.com/logo.png")];
+      global.PROCESSING_LIST = new Set([fileSystem.getFileName("http://abc123.com/logo.png")]);
 
       fileController.downloadFile();
 
-      expect(global.PROCESSING_LIST.length).to.equal(1);
+      expect(global.PROCESSING_LIST.size).to.equal(1);
       expect(spaceStub.calledOnce).to.be.false;
 
       spaceStub.restore();
-      global.PROCESSING_LIST = [];
+      global.PROCESSING_LIST.clear();
     });
 
     it("should remove encrypted file name from processing list when response is OK to save file", (done) => {
