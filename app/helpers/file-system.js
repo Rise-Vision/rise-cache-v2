@@ -135,6 +135,18 @@ module.exports = {
     });
   },
 
+  isProcessing: function(fileName) {
+    return global.PROCESSING_LIST.has(fileName);
+  },
+
+  addToProcessingList: function(fileName) {
+    global.PROCESSING_LIST.add(fileName);
+  },
+
+  removeFromProcessingList: function(fileName) {
+    global.PROCESSING_LIST.delete(fileName);
+  },
+
   /* Check if a file has not been accessed within the past 7 days. */
   isUnused: function(path, cb) {
     this.getAccessTime(path, (accessTime) => {

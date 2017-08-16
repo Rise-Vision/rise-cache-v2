@@ -31,6 +31,12 @@ FileController.prototype.downloadFile = function(opts) {
 
   if (this.url) {
 
+    if ( fileSystem.isProcessing( this.fileName ) ) {
+      return this.emit("downloading");
+    }
+
+    fileSystem.addToProcessingList(this.fileName);
+
     options.url = this.url;
 
     if (displayId) {
@@ -79,10 +85,13 @@ FileController.prototype.downloadFile = function(opts) {
           else {
             this.emit("invalid-response", res.statusCode);
           }
+
+          fileSystem.removeFromProcessingList(this.fileName);
         })
         .on("error", (err) => {
           this.hasDownloadError = true;
           this.deleteFileFromDownload();
+          fileSystem.removeFromProcessingList(this.fileName);
           this.emit("request-error", err);
         });
     });
