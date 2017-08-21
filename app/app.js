@@ -73,6 +73,7 @@ const AppFactory = function() {
       require("./routes/spreadsheets")(server.app, spreadsheetDB.db, logger);
       require("./routes/rss")(server.app, rssDB.db, logger);
       require("./routes/financial")(server.app, financialDB.db, logger);
+      require("./routes/financials")(server.app, riseDisplayNetworkII, logger);
 
       error = require("./middleware/error")(logger);
       server.app.use(error.handleError);
