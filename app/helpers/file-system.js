@@ -52,6 +52,8 @@ module.exports = {
     const STORAGE_API_HOST = "storage-dot-rvaserver2.appspot.com";
     const STORAGE_GOOGLEAPIS_HOST = "storage.googleapis.com";
     const GOOGLEAPIS_HOST = "www.googleapis.com";
+    const FINANCIAL_HOST_PROD = "contentfinancial2.appspot.com";
+    const FINANCIAL_HOST_TEST = "contentfinancial2-test.appspot.com";
 
     let token = url;
     let parsedUrlObj = URL.parse(url);
@@ -67,6 +69,10 @@ module.exports = {
     } else if (parsedUrlObj.host == GOOGLEAPIS_HOST) {
       let positionOfSlashBeforeFileName = parsedUrlObj.path.indexOf("/o/", 1);
       token = parsedUrlObj.path.substring(positionOfSlashBeforeFileName + 3);
+    } else if (parsedUrlObj.host == FINANCIAL_HOST_PROD || parsedUrlObj.host == FINANCIAL_HOST_TEST) {
+      let queryStringObj = querystring.parse(parsedUrlObj.query);
+      delete queryStringObj["_"];
+      token = JSON.stringify(queryStringObj);
     }
 
     return crypto.createHash("md5").update(unescape(token)).digest("hex");

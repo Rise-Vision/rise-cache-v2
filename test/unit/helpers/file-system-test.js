@@ -147,6 +147,14 @@ describe("getFileName", () => {
     expect(fileSystem.getFileName("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013&folder=rodrigo%2F")).to.equal("e60886d7eab5d0affdbf2207d2a4a2f2");
   });
 
+  it("should return an encoded file name given a financial production server url", () => {
+    expect(fileSystem.getFileName("https://contentfinancial2.appspot.com/data?id=preview&code=.AV.O&tqx=out%3Ajson%3BresponseHandler%3AcmlzZWZpbm&tq=select%20instrument%2Cname%2ClastPrice%2CnetChange&callback=cmlzZWZpbm&_=0fafc8432f9f4e919a1aaa9e47785175")).to.equal("cba6ed829709ed54b1079ae215a8658d");
+  });
+
+  it("should return an encoded file name given a financial test server url", () => {
+    expect(fileSystem.getFileName("https://contentfinancial2-test.appspot.com/data?id=preview&code=.AV.O&tqx=out%3Ajson%3BresponseHandler%3AcmlzZWZpbm&tq=select%20instrument%2Cname%2ClastPrice%2CnetChange&callback=cmlzZWZpbm&_=0fafc8432f9f4e919a1aaa9e47785175")).to.equal("cba6ed829709ed54b1079ae215a8658d");
+  });
+
   it("should return same encoded file name given an url for getting the file metadata or for getting the file", () => {
     let forFile = fileSystem.getFileName("https://storage.googleapis.com/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/rodrigo/test.jpg");
     let forMetadata = fileSystem.getFileName("https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013&file=rodrigo%2Ftest.jpg");
