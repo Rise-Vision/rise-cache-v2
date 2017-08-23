@@ -86,9 +86,10 @@ FinancialsController.prototype.saveData = function(body, fileSize) {
       this.emit("file-error", err);
     } else {
       this.moveFileFromDownloadToCache();
-      fileSystem.removeFromDownloadTotalSize(fileSize);
       this.emit("saved");
     }
+
+    fileSystem.removeFromDownloadTotalSize(fileSize);
   });
 };
 
