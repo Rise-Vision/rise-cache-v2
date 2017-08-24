@@ -7,9 +7,10 @@ const fileSystem = require("../helpers/file-system"),
 const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) {
 
   app.get("/files", (req, res, next) => {
-    const fileUrl = req.query.url;
 
-    if (fileUrl) {
+    if (req.query.url) {
+      const fileUrl = encodeURI(req.query.url);
+
       const header = new Data({}, headerDB),
         controller = new FileController(fileUrl, header, riseDisplayNetworkII, logger);
 
