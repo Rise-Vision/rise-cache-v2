@@ -43,6 +43,7 @@ describe("/files endpoint", () => {
   };
 
   let fileHash = "";
+  let file2Hash = "";
 
   before(() => {
     server = require("../../app/server")(config, logger);
@@ -86,14 +87,18 @@ describe("/files endpoint", () => {
         [config.downloadPath]: {},
         [config.cachePath]: {},
         [config.headersDBPath]: "",
-        "../data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9])
+        "../data/logo.png": new Buffer([8, 6, 7, 5, 3, 0, 9]),
+        "../data/logo2.png": new Buffer([8, 6, 7, 5, 3, 1, 9])
       });
 
       hashFiles({files:["../data/logo.png"]},function(error, hash) {
         fileHash = hash;
-        done();
-      });
 
+        hashFiles({files:["../data/logo2.png"]},function(error, hash) {
+          file2Hash = hash;
+          done();
+        });
+      });
     });
 
     it("should return 202 with message while the file is downloading", (done) => {
@@ -109,6 +114,24 @@ describe("/files endpoint", () => {
 
           hashFiles({files:[config.cachePath + "/cdf42c077fe6037681ae3c003550c2c5"]},function(error, hash) {
             expect(hash).to.equal(fileHash);
+            done();
+          });
+        });
+    });
+
+    it("should return 202 with message while the file is downloading and contains special characters on the name", (done) => {
+      nock("http://example.com")
+        .get("/st%C3%A5le/logo2.png")
+        .replyWithFile(200, "../data/logo2.png", headers);
+
+      request.get("http://localhost:9494/files")
+        .query({ url: "http://example.com/ståle/logo2.png" })
+        .end((err, res) => {
+          expect(res.status).to.equal(202);
+          expect(res.body).to.deep.equal({ status: 202, message: "File is downloading" });
+
+          hashFiles({files:[config.cachePath + "/c4c5c073b10e66792f5359640aee836e"]},function(error, hash) {
+            expect(hash).to.equal(file2Hash);
             done();
           });
         });
