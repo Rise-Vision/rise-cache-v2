@@ -2,14 +2,17 @@
 
 const fileSystem = require("../helpers/file-system"),
   FileController = require("../controllers/file"),
-  Data = require("../models/data");
+  Data = require("../models/data"),
+  URL = require("url");
 
 const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) {
 
   app.get("/files", (req, res, next) => {
 
     if (req.query.url) {
-      const fileUrl = encodeURI(req.query.url);
+      // Parse the URL for encoding again only the path for the file
+      let fileUrl = URL.parse(req.query.url);
+      fileUrl = `${fileUrl.protocol}//${fileUrl.host}/${encodeURIComponent(fileUrl.path.substring(1) + ((fileUrl.hash)? fileUrl.hash : ""))}`;
 
       const header = new Data({}, headerDB),
         controller = new FileController(fileUrl, header, riseDisplayNetworkII, logger);

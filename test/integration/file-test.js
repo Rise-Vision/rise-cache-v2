@@ -121,7 +121,7 @@ describe("/files endpoint", () => {
 
     it("should return 202 with message while the file is downloading and contains special characters on the name", (done) => {
       nock("http://example.com")
-        .get("/st%C3%A5le/logo2.png")
+        .get("/st%C3%A5le%2Flogo2.png")
         .replyWithFile(200, "../data/logo2.png", headers);
 
       request.get("http://localhost:9494/files")
@@ -131,6 +131,42 @@ describe("/files endpoint", () => {
           expect(res.body).to.deep.equal({ status: 202, message: "File is downloading" });
 
           hashFiles({files:[config.cachePath + "/c4c5c073b10e66792f5359640aee836e"]},function(error, hash) {
+            expect(hash).to.equal(file2Hash);
+            done();
+          });
+        });
+    });
+
+    it("should return 202 with message while the file is downloading and contains special characters and hash", (done) => {
+      nock("http://example.com")
+        .get("/st%C3%A5le%2Flo%23go2.png")
+        .replyWithFile(200, "../data/logo2.png", headers);
+
+      request.get("http://localhost:9494/files")
+        .query({ url: "http://example.com/ståle/lo#go2.png" })
+        .end((err, res) => {
+          expect(res.status).to.equal(202);
+          expect(res.body).to.deep.equal({ status: 202, message: "File is downloading" });
+
+          hashFiles({files:[config.cachePath + "/3eff66c76fd38d7d9dde1d15dbc4e0b4"]},function(error, hash) {
+            expect(hash).to.equal(file2Hash);
+            done();
+          });
+        });
+    });
+
+    it("should return 202 with message while the file is downloading and contains special characters and with a query", (done) => {
+      nock("http://example.com")
+        .get("/st%C3%A5le%2F%3Furl%3Dlogo2.png")
+        .replyWithFile(200, "../data/logo2.png", headers);
+
+      request.get("http://localhost:9494/files")
+        .query({ url: "http://example.com/ståle/?url=logo2.png" })
+        .end((err, res) => {
+          expect(res.status).to.equal(202);
+          expect(res.body).to.deep.equal({ status: 202, message: "File is downloading" });
+
+          hashFiles({files:[config.cachePath + "/1e215e163a3f63c78b443327d84486d0"]},function(error, hash) {
             expect(hash).to.equal(file2Hash);
             done();
           });
