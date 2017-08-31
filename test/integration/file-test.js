@@ -173,6 +173,24 @@ describe("/files endpoint", () => {
         });
     });
 
+    it("should return 202 with message while the file is downloading and contains special characters and with a query including an encoded space", (done) => {
+      nock("http://example.com")
+        .get("/st%C3%A5le%2F%3Furl%3Dlogo2%20b.png")
+        .replyWithFile(200, "../data/logo2.png", headers);
+
+      request.get("http://localhost:9494/files")
+        .query({ url: "http://example.com/ståle/?url=logo2%20b.png" })
+        .end((err, res) => {
+          expect(res.status).to.equal(202);
+          expect(res.body).to.deep.equal({ status: 202, message: "File is downloading" });
+
+          hashFiles({files:[config.cachePath + "/1e215e163a3f63c78b443327d84486d0"]},function(error, hash) {
+            expect(hash).to.equal(file2Hash);
+            done();
+          });
+        });
+    });
+
     it("should return error if url parameter is missing", (done) => {
       request.get("http://localhost:9494/files")
         .end((err, res) => {
