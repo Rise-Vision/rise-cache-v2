@@ -12,7 +12,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
     if (req.query.url) {
       // Parse the URL for encoding again only the path for the file
       let fileUrl = URL.parse(req.query.url);
-      fileUrl = `${fileUrl.protocol}//${fileUrl.host}/${encodeURIComponent(fileUrl.path.substring(1) + ((fileUrl.hash)? fileUrl.hash : ""))}`;
+      fileUrl = `${fileUrl.protocol}//${fileUrl.host}/${encodeURIComponent(decodeURIComponent(fileUrl.path.substring(1)) + ((fileUrl.hash)? fileUrl.hash : ""))}`;
 
       const header = new Data({}, headerDB),
         controller = new FileController(fileUrl, header, riseDisplayNetworkII, logger);
