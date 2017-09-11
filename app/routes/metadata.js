@@ -1,7 +1,8 @@
 "use strict";
 
 const MetadataController = require("../controllers/metadata"),
-  Data = require("../models/data");
+  Data = require("../models/data"),
+  urlParser = require("../helpers/url-parser");
 
 const MetadataRoute = function(app, metadataDB, riseDisplayNetworkII, logger) {
 

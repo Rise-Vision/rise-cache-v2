@@ -56,8 +56,7 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(200, metadataResponse);
 
-      request.get("http://localhost:9494/metadata")
-        .query({ url: "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
+      request.get("http://localhost:9494/metadata?url=https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(res.body).to.deep.equal(metadataResponse);
@@ -82,8 +81,7 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(404);
 
-      request.get("http://localhost:9494/metadata")
-        .query({ url: "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
+      request.get("http://localhost:9494/metadata?url=https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(res.body).to.deep.equal(metadataResponse);
@@ -104,8 +102,7 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(404);
 
-      request.get("http://localhost:9494/metadata")
-        .query({ url: "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
+      request.get("http://localhost:9494/metadata?url=https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .end((err, res) => {
           expect(res.status).to.equal(502);
           expect(res.body).to.deep.equal({
@@ -142,8 +139,7 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(200, metadataResponse);
 
-      request.get("http://localhost:9494/metadata")
-        .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
+      request.get("http://localhost:9494/metadata?url=http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(res.body).to.deep.equal(metadataResponse);
@@ -158,8 +154,7 @@ describe("/metadata endpoint", () => {
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(404);
 
-      request.get("http://localhost:9494/metadata")
-        .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
+      request.get("http://localhost:9494/metadata?url=http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(res.body).to.deep.equal(metadataResponse);
@@ -176,12 +171,11 @@ describe("/metadata endpoint", () => {
 
       metadataDB.db.loadDatabase();
 
-      nock("http://storage-dot-rvaserver2.appspot.com")
+      nock("http://storage-dot-rvaserver2.appspot.com?")
         .get("/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .reply(404);
 
-      request.get("http://localhost:9494/metadata")
-        .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
+      request.get("http://localhost:9494/metadata?url=http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
         .end((err, res) => {
           expect(res.status).to.equal(502);
           expect(res.body).to.deep.equal({
@@ -205,8 +199,7 @@ describe("/metadata endpoint", () => {
 
       it("should not get metadata if proxy server can't be reached", (done) => {
 
-        request.get("http://localhost:9494/metadata")
-          .query({ url: "http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F" })
+        request.get("http://localhost:9494/metadata?url=http://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=30007b45-3df0-4c7b-9f7f-7d8ce6443013%26folder=Images%2Fsdsu%2F")
           .end((err, res) => {
             expect(res.status).to.equal(502);
             expect(res.body).to.deep.equal({

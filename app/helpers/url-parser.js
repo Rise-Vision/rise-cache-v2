@@ -6,4 +6,4 @@ module.exports = {
     const index = url.indexOf(URL_PARAM_STRING);
     return url.substring(index+URL_PARAM_STRING.length);
   }
-}
+};
