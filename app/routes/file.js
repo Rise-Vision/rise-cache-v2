@@ -3,16 +3,16 @@
 const fileSystem = require("../helpers/file-system"),
   FileController = require("../controllers/file"),
   Data = require("../models/data"),
-  URL = require("url");
+  urlParser = require("../helpers/url-parser");
 
 const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) {
 
   app.get("/files", (req, res, next) => {
 
     if (req.query.url) {
-      // Parse the URL for encoding again only the path for the file
-      let fileUrl = URL.parse(req.query.url);
-      fileUrl = `${fileUrl.protocol}//${fileUrl.host}/${encodeURIComponent(decodeURIComponent(fileUrl.path.substring(1)) + ((fileUrl.hash)? fileUrl.hash : ""))}`;
+      // Get the raw URL for keeping the encoding
+      // e.g. req.url = /files?url=https://storage.googleapis.com/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/St%C3%A5ende%20annonser/20664067_328469167623764_3829134819125509256_n.jpg
+      const fileUrl = urlParser.parse(req.url);
 
       const header = new Data({}, headerDB),
         controller = new FileController(fileUrl, header, riseDisplayNetworkII, logger);
