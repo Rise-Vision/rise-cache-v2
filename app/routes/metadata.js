@@ -1,15 +1,17 @@
 "use strict";
 
 const MetadataController = require("../controllers/metadata"),
-  Data = require("../models/data");
+  Data = require("../models/data"),
+  urlParser = require("../helpers/url-parser");
 
 const MetadataRoute = function(app, metadataDB, riseDisplayNetworkII, logger) {
 
   app.get("/metadata", (req, res, next) => {
 
-    const fileUrl = req.query.url;
+    if (req.query.url) {
 
-    if (fileUrl) {
+      const fileUrl = urlParser.parse(req.url);
+
       const metadata = new Data({}, metadataDB),
         controller = new MetadataController(fileUrl, metadata, riseDisplayNetworkII, logger);
 
