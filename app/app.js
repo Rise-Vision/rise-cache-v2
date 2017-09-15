@@ -33,6 +33,13 @@ const AppFactory = function() {
         logger.error("Uncaught exception", err.message);
       });
 
+      process.on( "message", ( msg ) => {
+        if ( msg && typeof msg === "string" && msg === "quit" ) {
+          logger.info("Rise Cache is terminating");
+          process.exit();
+        }
+      });
+
       if (!exists) {
         logger.warn("RiseDisplayNetworkIIPath.ini file not found");
       }
