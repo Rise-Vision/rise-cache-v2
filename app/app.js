@@ -35,7 +35,7 @@ const AppFactory = function() {
 
       process.on( "message", ( msg ) => {
         if ( msg && typeof msg === "string" && msg === "quit" ) {
-          logger.info("Rise Cache is terminating");
+          logger.info("Quit process message received. Rise Cache will terminate.");
           process.exit();
         }
       });
