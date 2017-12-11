@@ -1,6 +1,6 @@
 machine:
   node:
-    version: stable
+    version: 8.9.1
 deployment:
   npm:
     branch: master
