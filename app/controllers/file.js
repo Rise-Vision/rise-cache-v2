@@ -67,17 +67,18 @@ FileController.prototype.downloadFile = function(opts) {
           this.hasDownloadError = false;
           if (res.statusCode == 200) {
             let fileSize = res.headers["content-length"];
-            fileSystem.isThereAvailableSpace(this.logger, (isThereAvailableSpace) => {
-              if(isThereAvailableSpace) {
-
-                fileSystem.addToDownloadTotalSize(fileSize);
-                this.writeFile(res);
-                this.emit("downloading");
-
-              } else {
-                this.emit("insufficient-disk-space", fileSize);
-              }
-            }, spaceInDisk, fileSize);
+            if (!spaceInDisk) {
+              // proceed as normal with writing file
+              this.initiateWriteFile(res, fileSize);
+            } else {
+              fileSystem.isThereAvailableSpace(this.logger, (isThereAvailableSpace) => {
+                if (isThereAvailableSpace) {
+                  this.initiateWriteFile(res, fileSize);
+                } else {
+                  this.emit("insufficient-disk-space", fileSize);
+                }
+              }, spaceInDisk, fileSize);
+            }
           }
           else if (res.statusCode == 304) {
             this.updateTimestamp();
@@ -127,6 +128,12 @@ FileController.prototype.streamFile = function(req, res, headers) {
     }
   })
   .pipe(res);
+};
+
+FileController.prototype.initiateWriteFile = function(res, fileSize) {
+  fileSystem.addToDownloadTotalSize(fileSize);
+  this.writeFile(res);
+  this.emit("downloading");
 };
 
 /* Write a file to disk. */
