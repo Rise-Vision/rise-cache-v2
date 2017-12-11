@@ -108,15 +108,11 @@ module.exports = {
   },
 
   isThereAvailableSpace: function(logger, cb, spaceOnDisk, fileSize=0) {
-    if(spaceOnDisk) {
-      let spaceLeft = spaceOnDisk - DOWNLOAD_TOTAL_SIZE - config.diskThreshold - fileSize;
-      if (spaceLeft > 0) {
-        cb(true);
-      } else {
-        logger.info(`spaceOnDisk: ${spaceOnDisk}, DOWNLOAD_TOTAL_SIZE: ${DOWNLOAD_TOTAL_SIZE}, diskThreshold: ${config.diskThreshold}, fileSize: ${fileSize}`);
-        cb(false);
-      }
+    let spaceLeft = spaceOnDisk - DOWNLOAD_TOTAL_SIZE - config.diskThreshold - fileSize;
+    if (spaceLeft > 0) {
+      cb(true);
     } else {
+      logger.info(`spaceOnDisk: ${spaceOnDisk}, DOWNLOAD_TOTAL_SIZE: ${DOWNLOAD_TOTAL_SIZE}, diskThreshold: ${config.diskThreshold}, fileSize: ${fileSize}`);
       cb(false);
     }
   },

@@ -90,51 +90,21 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
               sendDownloadingResponse(res, fileUrl);
             } else {
               fileSystem.getAvailableSpace(logger, (spaceInDisk)=>{
-                // Check if there's enough disk space.
-                fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
-                  if (isThereAvailableSpace) {
-                    // Download the file.
-
-                    controller.on("headers-error", (err) => {
-                      logger.error("Could not save headers", err, fileUrl);
-                    });
-
-                    controller.on("downloaded", () => {
-                      logger.info("File downloaded", fileUrl);
-                    });
-
-                    controller.on("downloading", () => {
-                      sendDownloadingResponse(res, fileUrl);
-                    });
-
-                    controller.on("invalid-response", (statusCode) => {
-                      sendInvalidResponseResponse(res, fileUrl, statusCode);
-                    });
-
-                    controller.on("request-error", (err) => {
-                      logger.error(err, null, fileUrl);
-                      sendResponse(res, 504, "File's host server could not be reached", fileUrl);
-                    });
-
-                    controller.on("move-file-error", (err) => {
-                      logger.error(err, null, fileUrl);
-                    });
-
-                    controller.on("delete-file-error", (err) => {
-                      logger.error(err, null, fileUrl);
-                    });
-
-                    controller.on("insufficient-disk-space", (fileSize) => {
-                      logger.error("Insufficient disk space", fileSize, fileUrl);
+                if (spaceInDisk === false) {
+                  // proceed as normal with downloading file
+                  downloadFile(res, controller, fileUrl);
+                } else {
+                  // Check if there's enough disk space.
+                  fileSystem.isThereAvailableSpace(logger, (isThereAvailableSpace) => {
+                    if (isThereAvailableSpace) {
+                      // Download the file.
+                      downloadFile(res, controller, fileUrl);
+                    } else {
+                      logger.error("Insufficient disk space", null, fileUrl);
                       sendResponse(res, 507, "Insufficient disk space");
-                    });
-
-                    controller.downloadFile();
-                  } else {
-                    logger.error("Insufficient disk space", null, fileUrl);
-                    sendResponse(res, 507, "Insufficient disk space");
-                  }
-                }, spaceInDisk);
+                    }
+                  }, spaceInDisk);
+                }
               });
             }
           });
@@ -145,6 +115,44 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
       next(new Error("Missing url parameter"));
     }
   });
+
+  function downloadFile(res, controller, fileUrl) {
+    controller.on("headers-error", (err) => {
+      logger.error("Could not save headers", err, fileUrl);
+    });
+
+    controller.on("downloaded", () => {
+      logger.info("File downloaded", fileUrl);
+    });
+
+    controller.on("downloading", () => {
+      sendDownloadingResponse(res, fileUrl);
+    });
+
+    controller.on("invalid-response", (statusCode) => {
+      sendInvalidResponseResponse(res, fileUrl, statusCode);
+    });
+
+    controller.on("request-error", (err) => {
+      logger.error(err, null, fileUrl);
+      sendResponse(res, 504, "File's host server could not be reached", fileUrl);
+    });
+
+    controller.on("move-file-error", (err) => {
+      logger.error(err, null, fileUrl);
+    });
+
+    controller.on("delete-file-error", (err) => {
+      logger.error(err, null, fileUrl);
+    });
+
+    controller.on("insufficient-disk-space", (fileSize) => {
+      logger.error("Insufficient disk space", fileSize, fileUrl);
+      sendResponse(res, 507, "Insufficient disk space");
+    });
+
+    controller.downloadFile();
+  }
 
   function getFromCache(req, res, controller, fileUrl, headers) {
     controller.streamFile(req, res, headers);

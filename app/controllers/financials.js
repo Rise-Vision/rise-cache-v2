@@ -59,24 +59,31 @@ FinancialsController.prototype.getData = function(opts) {
         } else {
           let fileSize = res.headers["content-length"];
 
-          fileSystem.isThereAvailableSpace(this.logger, (isThereAvailableSpace) => {
-            if(isThereAvailableSpace) {
-              fileSystem.addToDownloadTotalSize(fileSize);
-              this.saveData(body, fileSize);
-            } else {
-              this.logger.error("Insufficient disk space", fileSize, this.url);
-            }
+          if (spaceInDisk === false) {
+            // proceed as normal with saving data
+            this.initiateSaveData(body, fileSize);
+          } else {
+            fileSystem.isThereAvailableSpace(this.logger, (isThereAvailableSpace) => {
+              if (isThereAvailableSpace) {
+                this.initiateSaveData(body, fileSize);
+              } else {
+                this.logger.error("Insufficient disk space", fileSize, this.url);
+              }
 
-            this.emit("data", body);
+              this.emit("data", body);
 
-          }, spaceInDisk, fileSize);
-
+            }, spaceInDisk, fileSize);
+          }
         }
-
       });
     });
 
   }
+};
+
+FinancialsController.prototype.initiateSaveData = function(body, fileSize) {
+  fileSystem.addToDownloadTotalSize(fileSize);
+  this.saveData(body, fileSize);
 };
 
 FinancialsController.prototype.saveData = function(body, fileSize) {
