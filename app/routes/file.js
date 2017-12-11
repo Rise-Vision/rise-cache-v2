@@ -90,7 +90,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
               sendDownloadingResponse(res, fileUrl);
             } else {
               fileSystem.getAvailableSpace(logger, (spaceInDisk)=>{
-                if (!spaceInDisk) {
+                if (spaceInDisk === false) {
                   // proceed as normal with downloading file
                   downloadFile(res, controller, fileUrl);
                 } else {

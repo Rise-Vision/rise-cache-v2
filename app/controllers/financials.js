@@ -59,7 +59,7 @@ FinancialsController.prototype.getData = function(opts) {
         } else {
           let fileSize = res.headers["content-length"];
 
-          if (!spaceInDisk) {
+          if (spaceInDisk === false) {
             // proceed as normal with saving data
             this.initiateSaveData(body, fileSize);
           } else {

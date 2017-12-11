@@ -67,7 +67,7 @@ FileController.prototype.downloadFile = function(opts) {
           this.hasDownloadError = false;
           if (res.statusCode == 200) {
             let fileSize = res.headers["content-length"];
-            if (!spaceInDisk) {
+            if (spaceInDisk === false) {
               // proceed as normal with writing file
               this.initiateWriteFile(res, fileSize);
             } else {
