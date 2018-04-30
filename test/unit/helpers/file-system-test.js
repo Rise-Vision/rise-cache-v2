@@ -10,6 +10,7 @@ const fs = require("fs"),
 
 global.DOWNLOAD_TOTAL_SIZE = 0;
 global.PROCESSING_LIST = new Set();
+global.UNAVAILABLE_SPACE_LIST = new Set();
 
 let logger = {
   error: function (detail, errorDetail) {},
@@ -507,6 +508,42 @@ describe("removeFromProcessingList", () => {
     fileSystem.removeFromProcessingList("abc123");
 
     expect(global.PROCESSING_LIST.size).to.equal(1);
+  });
+
+});
+
+describe("hasNoAvailableSpace", () => {
+
+  it("should return true if file hash name is found in global unavailable space list", () => {
+    global.UNAVAILABLE_SPACE_LIST = new Set(["abc123", "def456"]);
+
+    expect(fileSystem.hasNoAvailableSpace("abc123")).to.be.true;
+  });
+
+  it("should return false if file hash name is not found in global unavailable space list", () => {
+    global.UNAVAILABLE_SPACE_LIST = new Set(["def456"]);
+
+    expect(fileSystem.hasNoAvailableSpace("abc123")).to.be.false;
+  });
+
+});
+
+describe("addToUnavailableSpaceList", () => {
+
+  it("should add file hash name to global unavailable space  list", () => {
+    global.UNAVAILABLE_SPACE_LIST = new Set(["abc123", "def456"]);
+
+    fileSystem.addToUnavailableSpaceList("ghi789");
+
+    expect(global.UNAVAILABLE_SPACE_LIST.has("ghi789")).to.be.true;
+  });
+
+  it("should not add file hash name to global unavailable space  list if already exists", () => {
+    global.UNAVAILABLE_SPACE_LIST = new Set(["abc123", "def456", "ghi789"]);
+
+    fileSystem.addToUnavailableSpaceList("def456");
+
+    expect(global.UNAVAILABLE_SPACE_LIST.size).to.equal(3);
   });
 
 });

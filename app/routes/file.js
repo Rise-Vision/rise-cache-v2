@@ -13,6 +13,12 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
       // Get the raw URL for keeping the encoding
       // e.g. req.url = /files?url=https://storage.googleapis.com/risemedialibrary-30007b45-3df0-4c7b-9f7f-7d8ce6443013/St%C3%A5ende%20annonser/20664067_328469167623764_3829134819125509256_n.jpg
       const fileUrl = urlParser.parse(req.url);
+      const fileName = fileSystem.getFileName(fileUrl);
+
+      // Check if the file is in the unavailable space list
+      if (fileSystem.hasNoAvailableSpace(fileName)) {
+        return sendInsufficientSpaceResponse(res, fileUrl, null);
+      }
 
       const header = new Data({}, headerDB),
         controller = new FileController(fileUrl, header, riseDisplayNetworkII, logger);
@@ -74,6 +80,10 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
                       logger.error(err, null, fileUrl);
                     });
 
+                    controller.on("insufficient-disk-space", (fileSize) => {
+                      logger.error("Insufficient disk space", fileSize, fileUrl);
+                    });
+
                     // Make request to download file passing request header
                     controller.downloadFile(field);
                   });
@@ -100,8 +110,8 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
                       // Download the file.
                       downloadFile(res, controller, fileUrl);
                     } else {
-                      logger.error("Insufficient disk space", null, fileUrl);
-                      sendResponse(res, 507, "Insufficient disk space");
+                      fileSystem.addToUnavailableSpaceList(fileName);
+                      sendInsufficientSpaceResponse(res, fileUrl, null);
                     }
                   }, spaceInDisk);
                 }
@@ -147,8 +157,7 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
     });
 
     controller.on("insufficient-disk-space", (fileSize) => {
-      logger.error("Insufficient disk space", fileSize, fileUrl);
-      sendResponse(res, 507, "Insufficient disk space");
+      sendInsufficientSpaceResponse(res, fileUrl, fileSize);
     });
 
     controller.downloadFile();
@@ -167,6 +176,11 @@ const FileRoute = function(app, headerDB, riseDisplayNetworkII, config, logger) 
     } else {
       sendResponse(res, 502, "File's host server returned an invalid response with status code: " + statusCode, fileUrl);
     }
+  }
+
+  function sendInsufficientSpaceResponse(res, fileUrl, fileSize) {
+    sendResponse(res, 507, "Insufficient disk space");
+    logger.error("Insufficient disk space", fileSize, fileUrl);
   }
 
   function sendDownloadingResponse(res, fileUrl) {

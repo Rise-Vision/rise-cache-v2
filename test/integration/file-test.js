@@ -14,6 +14,7 @@ const fs = require('fs'),
 
 global.DOWNLOAD_TOTAL_SIZE = 0;
 global.PROCESSING_LIST = new Set();
+global.UNAVAILABLE_SPACE_LIST = new Set();
 
 let request = require("superagent");
 request = request.agent({ca: cert});
@@ -319,6 +320,10 @@ describe("/files endpoint", () => {
         availableSpace = 600000000;
       });
 
+      afterEach(() => {
+        global.UNAVAILABLE_SPACE_LIST.clear();
+      });
+
       it("should log error when there is insufficient disk space", (done) => {
         let spy = sinon.spy(logger, "error");
 
@@ -336,6 +341,29 @@ describe("/files endpoint", () => {
           .end((err, res) => {
             expect(res.statusCode).to.equal(507);
             expect(res.body).to.deep.equal({ status: 507, message: "Insufficient disk space" });
+
+            done();
+          });
+      });
+
+      it("should add hash file name to unavailable space list", (done) => {
+        request.get("http://localhost:9494/files?url=http://example.com/logo.png")
+          .end((err, res) => {
+            expect(fileSystem.hasNoAvailableSpace(fileSystem.getFileName("http://example.com/logo.png"))).to.be.true;
+
+            done();
+          });
+      });
+
+      it("should not make request if encrypted file name exists in global unavailable space list", (done) => {
+        let spy = sinon.spy(fileSystem, "isCached");
+
+        global.UNAVAILABLE_SPACE_LIST = new Set([fileSystem.getFileName("http://example.com/logo.png")]);
+
+        request.get("http://localhost:9494/files?url=http://example.com/logo.png")
+          .end((err, res) => {
+            expect(spy.callCount).to.equal(0);
+            fileSystem.isCached.restore();
 
             done();
           });

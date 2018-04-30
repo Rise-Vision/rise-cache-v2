@@ -149,6 +149,14 @@ module.exports = {
     global.PROCESSING_LIST.delete(fileName);
   },
 
+  hasNoAvailableSpace: function(fileName) {
+    return global.UNAVAILABLE_SPACE_LIST.has(fileName);
+  },
+
+  addToUnavailableSpaceList: function(fileName) {
+    global.UNAVAILABLE_SPACE_LIST.add(fileName);
+  },
+
   /* Check if a file has not been accessed within the past 7 days. */
   isUnused: function(path, cb) {
     this.getAccessTime(path, (accessTime) => {
