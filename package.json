@@ -1,6 +1,6 @@
 {
   "name": "rise-cache-v2",
-  "version": "1.7.6",
+  "version": "1.7.7",
   "description": "Rise Cache for Rise Player",
   "main": "rise-cache.js",
   "scripts": {
@@ -21,7 +21,7 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "cors": "~2.7.1",
-    "diskusage": "^0.1.5",
+    "diskusage": "^0.2.4",
     "express": "^4.14.0",
     "fs-extra": "^0.30.0",
     "nedb": "^1.8.0",
