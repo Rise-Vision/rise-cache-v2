@@ -17,6 +17,7 @@ const AppFactory = function() {
 
     global.DOWNLOAD_TOTAL_SIZE = 0;
     global.PROCESSING_LIST = new Set();
+    global.UNAVAILABLE_SPACE_LIST = new Set();
 
     fileSystem.fileExists(config.riseDisplayNetworkIIPath, (exists) => {
 

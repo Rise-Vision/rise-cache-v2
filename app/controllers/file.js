@@ -75,6 +75,7 @@ FileController.prototype.downloadFile = function(opts) {
                 if (isThereAvailableSpace) {
                   this.initiateWriteFile(res, fileSize);
                 } else {
+                  fileSystem.addToUnavailableSpaceList(this.fileName);
                   this.emit("insufficient-disk-space", fileSize);
                 }
               }, spaceInDisk, fileSize);
