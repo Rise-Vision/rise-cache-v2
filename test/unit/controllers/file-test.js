@@ -14,6 +14,7 @@ const fs = require("fs"),
 
 global.DOWNLOAD_TOTAL_SIZE = 0;
 global.PROCESSING_LIST = new Set();
+global.UNAVAILABLE_SPACE_LIST = new Set();
 
 fileSystem.createDir(config.cachePath);
 
@@ -320,6 +321,9 @@ describe("FileController", () => {
 
       fileController.on("insufficient-disk-space", (fileSize) => {
         expect(fileSize).to.be.equal("10000000000000000");
+        expect(global.UNAVAILABLE_SPACE_LIST.size).to.equal(1);
+
+        global.UNAVAILABLE_SPACE_LIST.clear();
         done();
       });
     });
