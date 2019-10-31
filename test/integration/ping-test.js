@@ -104,16 +104,10 @@ describe("Ping", function () {
   });
 
   it("should cleanup download folder on app start up", function (done) {
-
-    let items = [];
-    fs.walk(config.downloadPath)
-      .on('data', function (item) {
-        items.push(item.path)
-      })
-      .on('end', function () {
-        expect(items).to.deep.equal([config.downloadPath]);
-        done();
-      });
+    fs.readdir(config.downloadPath, function (err, items) {
+      expect(items.length).to.equal(0);
+      done();
+    });
   });
 
 });
