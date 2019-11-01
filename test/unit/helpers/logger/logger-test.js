@@ -2,6 +2,7 @@
 
 const chai = require("chai"),
   expect = chai.expect,
+  loggerFn = require("../../../../app/helpers/logger/logger"),
   sinon = require("sinon");
 
 
@@ -28,7 +29,7 @@ describe("Logger", () => {
 
     before( function () {
       debugging = true;
-      logger = require("../../../../app/helpers/logger/logger")(debugging, fileSystem, displayId, version, os);
+      logger = loggerFn(debugging, fileSystem, displayId, version, os);
       process.send = function(){};
     });
 
@@ -219,7 +220,7 @@ describe("Logger", () => {
 
     before( function () {
       debugging = false;
-      logger = require("../../../../app/helpers/logger/logger")(debugging, fileSystem, displayId, version, os);
+      logger = loggerFn(debugging, fileSystem, displayId, version, os);
       process.send = function(){};
     });
 
@@ -312,7 +313,7 @@ describe("Logger", () => {
     before( function () {
       debugging = false;
       process.send = undefined;
-      logger = require("../../../../app/helpers/logger/logger")(debugging, fileSystem, displayId, version, os);
+      logger = loggerFn(debugging, fileSystem, displayId, version, os);
     });
 
     beforeEach(function () {
