@@ -211,7 +211,6 @@ describe("/files endpoint", () => {
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
               expect(err).to.not.be.null;
-              expect(err.errno).to.equal(34);
               expect(err.code).to.equal("ENOENT");
               expect(stats).to.be.undefined;
 
@@ -244,7 +243,6 @@ describe("/files endpoint", () => {
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
               expect(err).to.not.be.null;
-              expect(err.errno).to.equal(34);
               expect(err.code).to.equal("ENOENT");
               expect(stats).to.be.undefined;
 
@@ -278,7 +276,6 @@ describe("/files endpoint", () => {
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
               expect(err).to.not.be.null;
-              expect(err.errno).to.equal(34);
               expect(err.code).to.equal("ENOENT");
               expect(stats).to.be.undefined;
 
@@ -433,7 +430,6 @@ describe("/files endpoint", () => {
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
               expect(err).to.not.be.null;
-              expect(err.errno).to.equal(34);
               expect(err.code).to.equal("ENOENT");
               expect(stats).to.be.undefined;
 
@@ -468,7 +464,6 @@ describe("/files endpoint", () => {
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
               expect(err).to.not.be.null;
-              expect(err.errno).to.equal(34);
               expect(err.code).to.equal("ENOENT");
               expect(stats).to.be.undefined;
 
@@ -501,7 +496,6 @@ describe("/files endpoint", () => {
           .end((err, res) => {
             const stats = fs.stat(config.downloadPath + "/cdf42c077fe6037681ae3c003550c2c5", (err, stats) => {
               expect(err).to.not.be.null;
-              expect(err.errno).to.equal(34);
               expect(err.code).to.equal("ENOENT");
               expect(stats).to.be.undefined;
 
