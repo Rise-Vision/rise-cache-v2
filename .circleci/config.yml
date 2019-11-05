@@ -33,10 +33,3 @@ workflows:
   test_and_publish:
     jobs:
       - "test"
-      - "publish_to_npm":
-          requires:
-            - test
-          filters:
-            branches:
-              only:
-                - master

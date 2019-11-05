@@ -41,6 +41,8 @@ const AppFactory = function() {
         }
       });
 
+      process.on("SIGPIPE", () => logger.info("SIGPIPE received"));
+
       if (!exists) {
         logger.warn("RiseDisplayNetworkIIPath.ini file not found");
       }
