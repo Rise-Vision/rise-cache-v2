@@ -1,6 +1,6 @@
 {
   "name": "rise-cache-v2",
-  "version": "1.7.10",
+  "version": "1.7.11",
   "description": "Rise Cache for Rise Player",
   "main": "rise-cache.js",
   "scripts": {
@@ -19,14 +19,14 @@
   },
   "homepage": "https://github.com/Rise-Vision/rise-cache-v2#readme",
   "dependencies": {
-    "body-parser": "^1.19.0",
+    "body-parser": "^1.15.2",
     "cors": "~2.7.1",
-    "diskusage": "^0.2.6",
-    "express": "^4.17.1",
-    "fs-extra": "^8.1.0",
+    "diskusage": "^0.2.4",
+    "express": "^4.14.0",
+    "fs-extra": "^0.30.0",
     "nedb": "^1.8.0",
     "properties-reader": "0.0.15",
-    "request": "^2.88.0",
+    "request": "^2.74.0",
     "rise-common-electron": "git://github.com/Rise-Vision/rise-common-electron.git#v2.2.10",
     "send": "^0.14.1"
   },
@@ -36,15 +36,15 @@
     "gulp-eslint": "^3.0.1",
     "gulp-spawn-mocha": "^3.1.0",
     "hash-files": "^1.1.1",
-    "http-proxy": "^1.18.0",
+    "http-proxy": "^1.14.0",
     "mocha": "^3.0.2",
-    "mock-fs": "^4.10.2",
+    "mock-fs": "^4.4.1",
     "nock": "^8.0.0",
     "node-mocks-http": "git+https://github.com/Rise-Vision/node-mocks-http.git",
     "publish": "^0.6.0",
     "run-sequence": "^2.0.0",
     "sinon": "^1.17.5",
-    "superagent": "^3.8.3"
+    "superagent": "^3.5.2"
   },
   "engines": {
     "node": ">=10"
