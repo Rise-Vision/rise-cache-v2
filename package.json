@@ -1,6 +1,6 @@
 {
   "name": "rise-cache-v2",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Rise Cache for Rise Player",
   "main": "rise-cache.js",
   "scripts": {
@@ -27,7 +27,7 @@
     "nedb": "^1.8.0",
     "properties-reader": "0.0.15",
     "request": "^2.88.0",
-    "rise-common-electron": "git://github.com/Rise-Vision/rise-common-electron.git#v2.2.10",
+    "rise-common-electron": "git+https://github.com/Rise-Vision/rise-common-electron.git#v2.3.1",
     "send": "^0.14.1"
   },
   "devDependencies": {
