@@ -25,7 +25,7 @@
     "express": "^4.17.1",
     "fs-extra": "^8.1.0",
     "nedb": "^1.8.0",
-    "properties-reader": "0.0.15",
+    "properties-reader": "2.2.0",
     "request": "^2.88.0",
     "rise-common-electron": "git+https://github.com/Rise-Vision/rise-common-electron.git#v2.3.1",
     "send": "^0.14.1"
